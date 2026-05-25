@@ -1,5 +1,5 @@
 ################################################################
-Yapay Zeka, Makine Öğrenmesi ve Veri Bilimi documentation
+Yapay Zeka, Makine Öğrenmesi ve Veri Bilimi
 ################################################################
 
 .. rst-class:: lead
