@@ -1,0 +1,693 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="tr" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1. Giriş &mdash; Yapay Zeka, Makine Öğrenmesi ve Veri Bilimi 1.0.0 belgelendirmesi</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=5df53226" />
+
+  
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=b6527007"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/translations.js?v=b0f24d8d"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Dizin" href="genindex.html" />
+    <link rel="search" title="Ara" href="search.html" />
+    <link rel="prev" title="Yapay Zeka, Makine Öğrenmesi ve Veri Bilimi documentation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Yapay Zeka, Makine Öğrenmesi ve Veri Bilimi
+              <img src="_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Belgeleri arayın" aria-label="Belgeleri arayın" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">1. Giriş</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#zeka-nedir">1.1. Zeka Nedir?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#yapay-zeka-calismalarinin-kisa-tarihi">1.2. Yapay Zeka Çalışmalarının Kısa Tarihi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#yapay-zekanin-alt-alanlari">1.3. Yapay Zekanın Alt Alanları</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ogrenme-nedir">1.4. Öğrenme Nedir?</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#klasik-kosullanma-classical-conditioning">1.4.1. Klasik Koşullanma (Classical Conditioning)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#edimsel-kosullanma-operant-conditioning">1.4.2. Edimsel Koşullanma (Operant Conditioning)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sosyal-bilissel-ogrenme-social-cognitive-learning">1.4.3. Sosyal Bilişsel Öğrenme (Social Cognitive Learning)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bilissel-ogrenme-cognitive-learning">1.4.4. Bilişsel Öğrenme (Cognitive Learning)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#makine-ogrenmesi-nedir">1.5. Makine Öğrenmesi Nedir?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#yapay-zeka-makine-ogrenmesi-ve-veri-biliminin-diger-disiplinlerle-ilgisi">1.6. Yapay Zeka, Makine Öğrenmesi ve Veri Biliminin Diğer Disiplinlerle İlgisi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#makine-ogrenmesi-ve-veri-bilimi-uygulamalarinda-kullanilan-programlama-dilleri">1.7. Makine Öğrenmesi ve Veri Bilimi Uygulamalarında Kullanılan Programlama Dilleri</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#veri-bilimi-nedir">1.8. Veri Bilimi Nedir?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#python-kodlarinin-yazim-stili-hakkinda-aciklama">1.9. Python Kodlarının Yazım Stili Hakkında Açıklama</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bolum-ozeti-ve-anahtar-cumleler">1.10. Bölüm Özeti ve Anahtar Cümleler</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Yapay Zeka, Makine Öğrenmesi ve Veri Bilimi</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">1. Giriş</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/introduction.rst.txt" rel="nofollow"> Sayfa kaynağını görüntüle</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="giris">
+<h1>1. Giriş<a class="headerlink" href="#giris" title="Link to this heading"></a></h1>
+<p>Bu bölümde yapay zeka, makine öğrenmesi ve veri bilimi konularına bir giriş yapılmaktadır.</p>
+<hr class="docutils" />
+<section id="zeka-nedir">
+<h2>1.1. Zeka Nedir?<a class="headerlink" href="#zeka-nedir" title="Link to this heading"></a></h2>
+<p>Zeka kapsamı, işlevleri ve yol açtığı sonuçları bakımından karmaşık bir olgudur. Zekanın ne olduğu
+konusunda psikologlar ve bilişsel nörobilimciler arasında tam bir fikir birliği bulunmamaktadır.
+Çeşitli kuramcılar ve araştırmacılar tarafından zekanın çeşitli tanımları yapılmıştır. Bu
+kuramcıların ve araştırmacıların bazıları yaptıkları tanımdan hareketle zekayı ölçmek için çeşitli
+araçlar da geliştirmeye çalışmışlardır.</p>
+<p>Charles Spearman zekayı <em>“g”</em> ve <em>“s”</em> biçiminde iki yeteneğin birleşimi olarak tanımlamıştır.
+Spearman’a göre <em>“g faktörü”</em> akıl yürütme ve problem çözmeyle ilgili olan genel zekayı belirtir.
+<em>“s faktörü”</em> ise müzik, sanat, iş yaşamı gibi özel alanlara yönelik spesifik zekayı belirtmektedir.
+İnsanlar <em>“zeka”</em> denildiğinde daha çok genel zekayı kastetmektedirler.</p>
+<p>Howard Gardner tarafından kuramsal hale getirilen <em>“çoklu zeka (multiple intelligence)”</em> zeka
+teorisinde Gardner zekayı <em>“sözel/dilbilimsel (verbal/linguistic), müzikal (musical),
+mantıksal/matematiksel (logical/mathematical), görsel/uzamsal (visual/spatial), kinestetik
+(kinesthetic), kişilerarası (interpersonal), içsel (intrapsersonal)”</em> olmak üzere yedi türe
+ayırmıştır. Sonra bu yedi türe <em>“doğasal (naturalistic), varoluşsal (existentialist)”</em> biçiminde iki
+tür daha ekleyerek dokuza çıkarmıştır.</p>
+<p>Robert Sternberg’e göre ise <em>“analitik (analytical)”</em>, <em>“pratik (practical)”</em> ve
+<em>“yaratıcı (creative)”</em> olmak üzere üç tür zeka vardır. Analitik zeka problemi parçalara ayırma,
+analiz etme ve çözme ile ilgili yetileri içermektedir. Bu yetiler aslında zeka testlerinin ölçmeye
+çalıştığı yetilerdir. Pratik zeka yaşamı sürdürmek için gerekli olan pratik becerilerle ilgilidir.
+Yaratıcı zeka ise yeni yöntemler bulmak, problemleri farklı biçimlerde çözebilmek, yenilikler
+yapabilmekle ilgili yetilerdir.</p>
+<p>Catell-Horn-Carroll (CHC) Teorisi diye isimlendirilen çok katmanlı zeka teorisi üzerinde en çok
+durulan zeka teorisidir. (Raymond Catell aslında Spearman’ın, John Horn ise Catell’in öğrencisidir.)
+Catell zekayı <em>“kristalize zeka (crystalized intelligence)”</em> ve <em>“akıcı zeka (fluid intelligence)”</em>
+biçiminde ikiye ayırmıştır. Kristalize zeka öğrenilmiş ve oturmuş bilgi ve becerilerle ilgili iken
+akıcı zeka problem çözme ve yeni durumlara uyum sağlama becerileriyle ilgilidir. John Horn ise
+Catell’in bu iki tür zekasını genişleterek ona görsel işitsel yetileri, belleğe erişimle ilgili
+yetileri, tepki zamanlarına ilişkin yetileri, niceliksel işlemlere yönelik yetileri ve okuma yazma
+becerilerini de eklemiştir. Nihayet John Carroll zeka ile ilgili 460 yeteneği faktör analizine sokarak
+üç katmanlı bir zeka teorisi oluşturmuştur. CHC teorisi Stanford Binet ve Wechsler zeka testlerinin
+ileri sürümlerinin benimsediği zeka anlayışıdır.</p>
+<p>Bu bilgilerin eşliğinde kuramsal farklılıklara değinmeden yine de zekanın genel bir tanımı şöyle
+yapılabilir: Zeka yeni durumlara uyum sağlamak ve problem çözmek için deneyimlerden öğrenme, bilgi
+edinme ve kaynakları etkin bir biçimde kullanma becerisidir.</p>
+<p>Yapay zeka ise -ismi üzerinde- insan zekası ile ilgili bilişsel süreçlerin makineler tarafından
+sağlanmasına yönelik süreçleri belirtmektedir. Yapay zeka terimi ilk kez 1955 yılında John McCarthy
+tarafından kullanılmıştır. Doğal zekada olduğu gibi yapay zekanın da farklı kişiler tarafından pek
+çok tanımı yapılmaktadır. Ancak bu terim genel olarak insana özgü nitelikler olduğu varsayılan akıl
+yürütme, anlam çıkartma, genelleme ve geçmiş deneyimlerden öğrenme gibi yüksek zihinsel süreçlerin
+makineler tarafından gerçekleştirilmesi biçiminde tanımlanabilir. Yapay zekanın diğer bazı tanımları
+şunlardır:</p>
+<ul class="simple">
+<li><p>Yapay zeka insan zekasına ilişkin <em>“öğrenme”</em>, <em>“akıl yürütme”</em>, <em>“kendini düzeltme”</em> gibi
+süreçlerin makineler tarafından simüle edilmesidir.</p></li>
+<li><p>Yapay zeka zeki makineler yaratma amacında olan bilgisayar bilimlerinin bir alt alanıdır.</p></li>
+<li><p>Yapay Zeka bilgisayarların insanlar gibi davranmasını sağlamayı hedefleyen bilgisayar
+bilimlerinin bir alt dalıdır.</p></li>
+</ul>
+<p>Yapay zekanın simüle etmeye çalıştığı bilişsel süreçlerin bazılarının şunlar olduğuna dikkat ediniz:</p>
+<ul class="simple">
+<li><p>Bir şeyin nasıl yapılacağını bilme (knowledge)</p></li>
+<li><p>Akıl yürütme (reasoning)</p></li>
+<li><p>Problem çözme (problem solving)</p></li>
+<li><p>Algılama (perception)</p></li>
+<li><p>Öğrenme (learning)</p></li>
+<li><p>Planlama (planning)</p></li>
+<li><p>Doğal dili anlama ve konuşma</p></li>
+<li><p>Uzmanlık gerektiren alanlarda karar verme</p></li>
+</ul>
+</section>
+<section id="yapay-zeka-calismalarinin-kisa-tarihi">
+<h2>1.2. Yapay Zeka Çalışmalarının Kısa Tarihi<a class="headerlink" href="#yapay-zeka-calismalarinin-kisa-tarihi" title="Link to this heading"></a></h2>
+<p>Yapay zeka ile ilgili düşünceler ve görüşler çok eskiye kadar götürülebilir. Ancak modern yapay zeka
+çalışmalarının 1950’li yıllarda başladığı söylenebilir. Şüphesiz yapay zeka alanındaki gelişmeleri
+de aslında başka alanlardaki gelişmeler tetiklemiştir. Örneğin bugün kullandığımız elektronik
+bilgisayarlar olmasaydı yapay zeka bugünkü durumuna gelemeyecekti. İşte aslında pek çok bilimsel ve
+teknolojik gelişmeler belli bir noktaya gelmiş ve yapay zeka dediğimiz bu alan 1950’lerde ortaya
+çıkmaya başlamıştır. Yapay zeka çalışmalarının ortaya çıkmasına yol açan önemli gelişmeler şunlar
+olmuştur:</p>
+<ul class="simple">
+<li><p><strong>Mantıktaki Gelişmeler:</strong> Bertrand Russell ve Alfred North Whitehead tarafından 1913 yılında
+yazılmış olan <em>“Principia Mathematica”</em> adlı üç cilt kitap <em>“biçimsel mantıkta (formal logic)”</em>
+devrim niteliğinde etki yapmıştır.</p></li>
+<li><p><strong>Matematikteki Gelişmeler:</strong> 1930’larda Alonzo Church <em>“Lambda Calculus”</em> denilen biçimsel
+sistemi geliştirmiş ve özyinelemeli fonksiyonel notasyonla hesaplanabilirliği araştırmış ve
+sorgulamıştır. Yine 1930’larda Kurt Gödel <em>“biçimsel sistemler (formal systems)”</em> üzerindeki
+çalışmalarıyla teorik bilgisayar bilimlerinin öncülüğünü yapmıştır.</p></li>
+<li><p><strong>Turing Makineleri:</strong> Alan Turing’in henüz elektronik bilgisayarlar gerçekleştirilmeden önce
+1930’lu yılların ortalarında (ilk kez 1936) tasarladığı teorik bilgisayar yapısı olan Turing
+Makineleri bilgisayar bilimlerinin ve yapay zeka kavramının ortaya çıkmasında etkili olmuştur.
+(Turing makinelerinin çeşitli modelleri vardır. Bugün hâlâ Turing makineleri algoritmalar
+dünyasında algoritma analizinde ve algoritmik karmaşıklıkta teorik bir karşılaştırma aracı olarak
+kullanılmaktadır.)</p></li>
+<li><p><strong>Elektronik Bilgisayarların Ortaya Çıkması:</strong> 1940’lı yıllarda ilk elektronik bilgisayarlar
+gerçekleştirilmeye başlanmıştır. Bilgisayarlar yapay zeka çalışmalarının gerçekleştirilmesinde en
+önemli araçlar durumundadır.</p></li>
+</ul>
+<p>Yapay Zeka (Artificial Intelligence) terimi ilk kez John McCarthy tarafından 1955 yılında
+uydurulmuştur. John McCarthy, Marvin Minsky, Nathan Rocheste ve Claude Shannon tarafından 1956
+yılında Dartmouth College’de bir konferans organize edilmiştir. Bu konferans yapay zeka kavramının
+ortaya çıkışı bakımından çok önemlidir ve yapay zekanın doğumu olarak kabul edilmektedir. Yapay zeka
+terimi de bu konferansta katılımcılar tarafından kabul görmüştür. John McCarthy aynı zamanda dünyanın
+ilk programlama dillerinden biri olan Lisp’i de 1958 yılında tasarlamıştır. Lisp hâlâ yapay zeka
+çalışmalarında kullanılmaktadır.</p>
+<p>Yapay zeka çalışmalarının yaz dönemleri ve kış dönemleri olmuştur. Buradaki <em>“yaz dönemleri”</em> konuya
+ilginin arttığı, finansman sıkıntısının azaldığı, çeşitli kurumların yapay zeka çalışmaları için
+fonlar ayırdığı dönemleri belirtmektedir. <em>“Kış dönemleri”</em> ise yaz dönemlerinin tersine konuya
+ilginin azaldığı, finansman sıkıntısının arttığı, kurumların yapay zeka çalışmaları için fonlarını
+geri çektiği dönemleri belirtmektedir.</p>
+<p>1956-1974 yapay zekanın altın yılları olmuştur. Bu yıllar arasında çeşitli algoritmik yöntemler
+geliştirilmiş ve pek çok uygulama üzerinde çalışılmıştır. Örneğin arama (search) yöntemleri çeşitli
+problemlere uygulanmış ve arama uzayı (search space) sezgisel (heuristic) yöntemlerle daraltılmaya
+çalışılmıştır. Yine bu yıllarda doğal dili anlamaya yönelik ilk çalışmalar gerçekleştirilmiştir. Bu
+ilk çalışmalardan elde edilen çeşitli başarılar yapay zeka alanında iyimser bir hava estirmiştir.
+Örneğin:</p>
+<ul class="simple">
+<li><p>1958 yılında Simon ve Newell <em>“10 yıl içinde dünya satranç şampiyonunun bir bilgisayar
+olacağını”</em> iddia etmişlerdir. (Halbuki bu durum 90’lı yılların ikinci yarısında gerçekleşmeye
+başlamıştır.)</p></li>
+<li><p>1970 yılında Minsky 3 yıldan 8 yıla kadar makinelerin ortalama bir insan zekasına sahip
+olabileceğini iddia etmiştir.</p></li>
+</ul>
+<p>1974-1980 yılları arasında yapay zeka alanında kış dönemine girilmiştir. Daha önce yapılan
+tahminlerin çok iyimser olduğu görülmüş, bu da biraz hayal kırıklığına yol açmıştır. Bu yıllarda
+yapay sinir ağları çalışmaları büyük ölçüde durmuştur. Yeni projeler için finansman elde edilmesi
+zorlaşmıştır.</p>
+<p>1980’li yıllarla birlikte yapay zeka çalışmalarında yine yükseliş başlamıştır. 80’li yıllarda en
+çok yükselişe geçen yapay zeka alanı <em>“uzman sistemler (expert systems)”</em> olmuştur. Japonya bu tür
+projelere önemli finansman ayırmaya başlamıştır. Ayrıca Hopfield ve Rumelhart’ın çalışmaları da
+yapay sinir ağlarına yeni bir soluk getirmiştir.</p>
+<p>1987-1993 yılları arasında yine yapay zeka çalışmaları kış dönemine girmiştir. Konuya ilgi azalmış
+ve çeşitli projeler için finans kaynakları da kendilerini geri çekmiştir.</p>
+<p>1993 yılından itibaren yapay zeka alanı yeniden canlanmaya başlamıştır. Bilgisayarların güçlenmesi,
+Internet teknolojisinin gelişmesi, mobil aygıtların gittikçe yaygınlaşması sonucunda veri analizinin
+önemi artmış ve bu da yapay zeka çalışmalarına yeni bir boyut getirmiştir. 1990’lı yılların
+ortalarından itibaren veri işlemede yeni bir dönem başlamıştır. Veri madenciliği bir alan olarak
+kendini kabul ettirmiştir. Özellikle 2011 yılından başlayarak büyük veri (big data) analizleri iyice
+yaygınlaşmış, yapay sinir ağlarının bir çeşidi olan derin öğrenme (deep learning) çalışmaları
+hızlanmış, IOT uygulamaları da yapay zekanın önemini hepten artırmıştır.</p>
+<p>2017 yılından itibaren <em>“dönüştürücülerin (transformers)”</em> ortaya atılması ve <em>“büyük dil
+modellerinin (large language models)”</em> geliştirilmesi ile birlikte yapay zeka alanında yeni bir
+döneme girilmiştir. Bu yeni dönem yaşamın her alanında devrim niteliğinde etkiler oluşturmaya
+başlamıştır. Artık insan uygarlığı yeni bir çağa adım atmıştır ve hiçbir şey artık eskisi gibi
+olmayacaktır. Bu yapay zeka devrimi ekonomiyi, üretim ilişkilerini, meslekleri, kurumları, sosyal
+yaşamı, kısacası her şeyi etkileyip dönüştürecek bir potansiyele sahip gibi görünmektedir.</p>
+</section>
+<section id="yapay-zekanin-alt-alanlari">
+<h2>1.3. Yapay Zekanın Alt Alanları<a class="headerlink" href="#yapay-zekanin-alt-alanlari" title="Link to this heading"></a></h2>
+<p>Yapay zeka aslında pek çok alt konuya ayrılabilen bir alandır. Yapay zekanın önemli alt alanları
+şunlardır:</p>
+<ul class="simple">
+<li><p>Makine Öğrenmesi</p></li>
+<li><p>Yapay Sinir Ağları ve Derin Öğrenme</p></li>
+<li><p>Robotik Sistemlerin Tasarımı ve Gerçekleştirilmesi</p></li>
+<li><p>Bulanık Sistemler (Fuzzy Logic Systems)</p></li>
+<li><p>Evrimsel Yöntemler (Genetic Algoritmalar, Differential Evolution, Neuroevolution vs.)</p></li>
+<li><p>Üst Sezgisel (Meta Heuristic) Yöntemler (Karınca Kolonisi, Particle Swarm Optimization)</p></li>
+<li><p>Olasılıksal (Probabilistic) Yöntemler (Bayesian Network, Hidden Markov Model, Kalman Filter vs.)</p></li>
+<li><p>Uzman Sistemler (Expert Systems)</p></li>
+</ul>
+<p>Yapay zekanın yukarıdaki uygulama alanlarından bazıları zaman içerisinde bazı kesimler tarafından
+artık yapay zekanın bir konusu olarak görülmemeye başlanmıştır. Örneğin OCR işlemleri eskiden her
+kesim tarafından bir yapay zeka faaliyeti olarak görülürdü. Ancak zamanla OCR işlemleri o kadar
+bilindik ve rutin bir hale geldi ki artık bu işlemler geniş bir kesim tarafından bir yapay zeka
+faaliyeti olarak ele alınmıyor. Benzer biçimde satrançta bir büyük ustayı yenecek bir programın
+yazılması eskiden bir yapay zeka faaliyeti olarak görülüyorken artık bu faaliyet de bazı kesimler
+tarafından bir yapay zeka faaliyeti olarak ele alınmamaktadır. İşte zaman içerisinde yapay zeka
+olarak görülen bir süreci makineler algoritmik olarak başardıkça onun yapay zeka alanından
+çıkartılması gibi bir durum oluşmaya başlamıştır. Eskiden yapay zeka faaliyeti olarak adlandırılan
+bazı faaliyetlerin yapay zeka kapsamından çıkarılmasına <em>“Yapay Zeka Etkisi (AI Effect)”</em>
+denilmektedir. Günümüzde de yapay zeka faaliyeti olarak ele aldığımız bazı faaliyetlerin zamanla
+yapay zeka faaliyeti olmaktan çıkabileceğine de dikkatinizi çekmek istiyoruz.</p>
+</section>
+<section id="ogrenme-nedir">
+<h2>1.4. Öğrenme Nedir?<a class="headerlink" href="#ogrenme-nedir" title="Link to this heading"></a></h2>
+<p>Şimdi de makine öğrenmesinin ne anlama geldiği üzerinde duracağız. Ancak makine öğrenmesinin ne
+olduğundan önce öğrenmenin ne olduğunu ele almak gerekir. Psikolojide öğrenme davranışta göreli
+biçimde kalıcı değişiklikler oluşturan süreçler biçiminde tanımlanmaktadır. Bu tanımdaki
+<em>“davranış (behavior)”</em> klasik davranışçılara göre <em>“gözlemlenebilen devinimleri”</em> kapsamaktadır.
+Ancak daha sonra radikal davranışçılar bu davranış tanımını zihinsel süreçleri de kapsayacak biçimde
+genişletmiştir.</p>
+<p>Psikolojide öğrenme kabaca dört bölümde ele alınmaktadır:</p>
+<ol class="arabic simple">
+<li><p>Klasik Koşullanma (Classical Conditioning)</p></li>
+<li><p>Edimsel Koşullanma (Operant Conditioning)</p></li>
+<li><p>Sosyal Bilişsel Öğrenme (Social Cognitive Learning)</p></li>
+<li><p>Bilişsel Öğrenme (Cognitive Learning)</p></li>
+</ol>
+<section id="klasik-kosullanma-classical-conditioning">
+<h3>1.4.1. Klasik Koşullanma (Classical Conditioning)<a class="headerlink" href="#klasik-kosullanma-classical-conditioning" title="Link to this heading"></a></h3>
+<p>Organizmada doğal bir tepki oluşturan uyaranlara <em>“koşulsuz uyaranlar (unconditioned stimuli)”</em>,
+koşulsuz uyaranlara karşı organizmanın verdiği tepkilere de <em>“koşulsuz tepkiler (unconditioned
+responses)”</em> denilmektedir. Örneğin gök gürültüsü koşulsuz uyarana, gök gürültüsüne karşı verilen
+tepki de koşulsuz tepkiye örnek verilebilir. İşte klasik koşullanmada başlangıçta organizmada bir
+tepkiye yol açmayan <em>“nötr bir uyaran (neutral stimulus)”</em> koşulsuz bir uyaranla (unconditioned
+stimulus) zamansal bakımdan eşleştirildiğinde artık bu nötr uyaran organizmada koşulsuz uyaranın
+oluşturduğu tepkiye benzer bir tepki oluşturmaya başlamaktadır. Nötr uyaranın zamanla koşulsuz
+uyaranla benzer tepkilere yol açması durumunda artık bu nötr uyarana <em>“koşullu uyaran (conditioned
+stimulus)”</em>, organizmanın da bu koşullu uyarana verdiği tepkiye <em>“koşullu tepki (conditioned
+response)”</em> denilmektedir. Bu süreci şekilsel olarak aşağıdaki gibi ifade edebiliriz:</p>
+<div class="graphviz"><object data="_images/graphviz-d9829a994baacb8161f36e4be29f4f95788e2c84.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph klasik_kosullanma {
+    rankdir=TB;
+    node [shape=box, style=&quot;rounded,filled&quot;, fontname=&quot;Arial&quot;, fontsize=11];
+    edge [fontname=&quot;Arial&quot;, fontsize=10];
+
+    subgraph cluster_dogal {
+        label=&quot;Doğal Durum&quot;;
+        style=filled; fillcolor=&quot;#FFF9C4&quot;;
+        KU  [label=&quot;Koşulsuz Uyaran&quot;, fillcolor=&quot;#B3E5FC&quot;];
+        KT  [label=&quot;Koşulsuz Tepki&quot;,  fillcolor=&quot;#B3E5FC&quot;];
+        KU -&gt; KT;
+    }
+
+    subgraph cluster_surec {
+        label=&quot;Klasik Koşullanma Süreci  (Tekrarlanır...)&quot;;
+        style=filled; fillcolor=&quot;#FFF9C4&quot;;
+        NU  [label=&quot;Nötr Uyaran&quot;,     fillcolor=&quot;#FFE082&quot;];
+        KU2 [label=&quot;Koşulsuz Uyaran&quot;, fillcolor=&quot;#B3E5FC&quot;];
+        NU -&gt; KU2 [label=&quot;Eşleştirme&quot;];
+    }
+
+    subgraph cluster_sonuc {
+        label=&quot;Öğrenilmiş Yeni Durum&quot;;
+        style=filled; fillcolor=&quot;#C8E6C9&quot;;
+        KoU [label=&quot;Koşullu Uyaran\n(Eski Nötr Uyaran)&quot;, fillcolor=&quot;#A5D6A7&quot;];
+        KoT [label=&quot;Koşullu Tepki&quot;,                        fillcolor=&quot;#A5D6A7&quot;];
+        KoU -&gt; KoT;
+    }
+}</p></object></div>
+<p>Klasik koşullanma sürecinin gerçekleşmesi için önce nötr uyaranın sonra koşulsuz uyaranın zamansal
+bakımdan peş peşe uygulanması gerekmektedir. Burada iki uyaran arasındaki zaman uzarsa (örneğin
+5 saniyeden büyük olursa) organizmanın onları ilişkilendirmesi güçleşmektedir. Pek çok çalışma
+0.5 saniye civarındaki bir zaman aralığının klasik koşullanma için ideal olduğunu göstermektedir.</p>
+<p>Klasik koşullanma ilk kez Ivan Pavlov tarafından fark edilmiş ve tanımlanmıştır. Pavlov’un köpek
+deneyi klasik koşullanmaya tipik bir örnektir. Bu deneyde Pavlov köpeğe yemek gösterdiğinde
+(koşulsuz uyaran) köpek salya salgılamaktadır. Yemeği görünce köpeğin salya salgılaması doğal olan
+koşulsuz bir tepkidir. Daha sonra Pavlov köpeğe bir metronom sesinden (nötr uyaran) sonra yemeği
+göstermiş ve bu işlemi bir süre tekrarlamıştır. Bu süreç sonunda artık köpek yalnızca metronom
+sesini duyduğunda (artık nötr uyaran koşullu uyaran haline gelmiştir) salya salgılar hale gelmiştir.
+Köpeğin metronom sesini duyduğunda salya salgılaması daha önce yapmadığı koşullu bir tepkidir.</p>
+<p>Klasik koşullanma süreci pek çok hayvan üzerinde denenmiştir. Hayvanların çok büyük çoğunluğu
+klasik koşullanma ile öğrenebilmektedir. Birinci kuşak davranışçılar pek çok davranışın nedenini
+klasik koşullanmayla açıklamışlardır. Gerçekten de fobilerin çoğunda klasik koşullanmanın etkili
+olduğu görülmektedir. Özellikle olumsuz birtakım sonuçlar doğuran uyaranlar çok kısa süre içerisinde
+klasik koşullanmaya yol açabilmektedir. Örneğin karanlık bir sokakta saldırıya uğrayan bir kişi
+yeniden karanlık bir sokağa girdiğinde klasik koşullanma etkisiyle yeniden saldırıya uğrayacağı
+hissine kapılabilmektedir.</p>
+</section>
+<section id="edimsel-kosullanma-operant-conditioning">
+<h3>1.4.2. Edimsel Koşullanma (Operant Conditioning)<a class="headerlink" href="#edimsel-kosullanma-operant-conditioning" title="Link to this heading"></a></h3>
+<p>Edimsel koşullanma en önemli öğrenme yollarından biridir. Pek çok süreç edimsel koşullanma yoluyla
+öğrenilmektedir. Klasik koşullanmada önce uyaran sonra tepki gelmektedir. Halbuki edimsel
+koşullanmada önce tepki sonra uyaran gelir. Organizma bir faaliyette bulunur. Bunun sonucunda hoşa
+giden bir durum (buna ödül de denilmektedir) oluşursa bu davranış tekrarlanır ve böylece öğrenme
+gerçekleşir. Yani özetle organizmada hoşa giden sonuçlar doğuran davranışlar tekrarlanma
+eğilimindedir.</p>
+<p>Edimsel koşullanma bir süreç olarak ilk kez Edward Thorndike tarafından fark edilmiştir. Thorndike
+<em>“puzzle box”</em> ismini verdiği bir kafes düzeneği ile yaptığı deneylerden <em>“organizmada olumlu
+sonuçlar doğuran tepkilerin tekrarlanma eğiliminde olduğu”</em> sonucunu çıkarmış ve bu durumu <em>“etki
+yasası (law of effect)”</em> terimiyle ifade etmiştir. Her ne kadar edimsel koşullanmayı gerçek anlamda
+ilk kez Thorndike fark ettiyse de bunu genişleterek kuramsal bir öğrenme modeli haline getiren asıl
+kişi B.F. Skinner olmuştur. Bu konuda kullanılan terminoloji de büyük ölçüde Skinner tarafından
+oluşturulmuştur.</p>
+<p>Edimsel koşullanmada ödül oluşturan uyaranlara <em>“pekiştireç (reinforcer)”</em> denilmektedir. Davranış
+ne kadar pekiştirilirse o kadar iyi öğrenilmektedir. Pekiştireçler <em>“pozitif”</em> ve <em>“negatif”</em> olmak
+üzere ikiye ayrılmaktadır. Pozitif pekiştireçler doğrudan organizmanın hoşuna gidecek uyaranlardır.
+Negatif pekiştireçler ise organizmanın içinde bulunduğu hoş olmayan durumu ortadan kaldırarak
+dolaylı ödül oluşturan uyaranlardır. Edimsel koşullanma için bazı örnekler şöyle verilebilir:</p>
+<ul class="simple">
+<li><p>Ödevini yapan öğrenciye öğretmenin ödül vermesi ödev yapma davranışını artırmaktadır
+(pozitif pekiştireç).</p></li>
+<li><p>Maddenin bunaltıyı (anxiety) ortadan kaldırması kişiyi madde kullanımına teşvik etmektedir
+(negatif pekiştireç).</p></li>
+<li><p>Arabada emniyet kemeri bağlı değilken rahatsız edici bir ses çıkmaktadır. Bu sesi ortadan
+kaldırmak için sürücü ve yolcular emniyet kemerini bağlarlar (negatif pekiştireç).</p></li>
+</ul>
+<p>Bugün psikolojide edimsel koşullanma davranışı değiştirmede ve şekillendirmede en önemli araçlardan
+biri olarak kabul edilmektedir.</p>
+</section>
+<section id="sosyal-bilissel-ogrenme-social-cognitive-learning">
+<h3>1.4.3. Sosyal Bilişsel Öğrenme (Social Cognitive Learning)<a class="headerlink" href="#sosyal-bilissel-ogrenme-social-cognitive-learning" title="Link to this heading"></a></h3>
+<p>Sosyal bilişsel öğrenmeye <em>“taklit yoluyla öğrenme”</em> ya da <em>“model alarak öğrenme”</em> de
+denilmektedir. Biz başkalarını taklit ederek de davranışlarımızı değiştirebilmekteyiz. Sosyal
+bilişsel öğrenme büyük ölçüde Albert Bandura tarafından kuramsal hale getirilmiştir. Aslında sosyal
+bilişsel öğrenmede de bir bakıma pekiştirmeler söz konusudur. Ancak bu pekiştirmeler doğrudan değil
+<em>“dolaylı (vicarious)”</em> biçimde olmaktadır. Sosyal bilişsel öğrenmede birtakım bilişsel süreçlerin
+de devreye girdiğine dikkat ediniz. Çünkü bu süreçte kişinin başkalarının yaptığı davranışları
+izleme, izlediklerini bellekte saklama ve onlardan sonuçlar çıkartma gibi süreçler de işin içine
+karışmaktadır.</p>
+</section>
+<section id="bilissel-ogrenme-cognitive-learning">
+<h3>1.4.4. Bilişsel Öğrenme (Cognitive Learning)<a class="headerlink" href="#bilissel-ogrenme-cognitive-learning" title="Link to this heading"></a></h3>
+<p>Biliş (cognition) organizmanın bilgi işlem faaliyetlerini anlatan bir terimdir. Biliş denildiğinde
+düşünme, bellek, dikkat, bilinç, akıl yürütme gibi faaliyetler anlaşılmaktadır. Araştırmacılar hiç
+pekiştireç olmadan öğrenmenin insanlarda ve bazı hayvanlarda mümkün olduğunu göstermişlerdir. Yani
+biz klasik koşullanma, edimsel koşullanma ve sosyal öğrenme süreçleri olmadan yalnızca bilişsel
+etkinliklerle de öğrenebilmekteyiz.</p>
+<p>Halk arasında öğrenme denildiğinde genellikle sürecin davranışsal boyutu göz ardı edilmekte, yalnızca
+bilişsel tarafı değerlendirilmektedir. Halbuki her türlü öğrenmede açık ya da örtük, göreli biçimde
+kalıcı bir davranışın ortaya çıkması beklenir. Ancak <em>“davranış (behavior)”</em> sözcüğünün tanımı
+konusunda da tam bir anlaşma bulunmamaktadır. Yukarıda da belirttiğimiz gibi ilk davranışçılar
+yalnızca gözlemlenebilen süreçleri davranış olarak tanımlarken radikal davranışçılar zihinsel
+süreçleri de davranış tanımının içine katmaktadır.</p>
+</section>
+</section>
+<section id="makine-ogrenmesi-nedir">
+<h2>1.5. Makine Öğrenmesi Nedir?<a class="headerlink" href="#makine-ogrenmesi-nedir" title="Link to this heading"></a></h2>
+<p>Psikolojideki öğrenme kavramı makine öğrenmesinde de geçerlidir. Biz makinenin (makine demekle
+donanımı ve yazılımı kastediyoruz) bir biçimde davranışını arzu edilen yönde değiştirmesini isteriz.
+Yani makinenin davranışı bizim istediğimiz yönde ve istediğimiz hedefleri gerçekleştirme anlamında
+değişmelidir. İşte makine öğrenmesi kabaca geçmiş bilgilerden ve deneyimlerden faydalı birtakım
+sonuçlar (davranışlar) ortaya çıkartan algoritmalar ve yöntemler topluluğudur. Makine öğrenmesinde
+üç bileşen vardır: Deneyim, Görev ve Performans. Deneyim canlılarda olduğu gibi makine öğrenmesinde
+de en önemli öğelerdendir. Makine öğrenmesinde deneyim, verilerin işlemelere sokularak onlardan
+faydalı birtakım sonuçların çıkartılması sürecidir. Görev makinenin yapmasını istediğimiz şeydir.
+Görevler düşük bir deneyimle düşük bir performansla gerçekleştirilebilirler. Deneyim arttıkça görevin
+yerine getirilme performansı da artabilir. O halde makine öğrenmesinde bir veri grubu incelenir,
+analiz edilir, bundan sonuçlar çıkartılır, sonra hedeflenen görev yerine getirilmeye çalışılır.
+Bu görevin yerine getirilmesi de gitgide iyileştirilir.</p>
+<p>Makine öğrenmesi genel olarak üç bölümde ele alıp incelenmektedir:</p>
+<ol class="arabic simple">
+<li><p>Denetimli Öğrenme (Supervised Learning)</p></li>
+<li><p>Denetimsiz Öğrenme (Unsupervised Learning)</p></li>
+<li><p>Pekiştirmeli Öğrenme (Reinforcement Learning)</p></li>
+</ol>
+<p>Denetimli (supervised) öğrenmede makineye (yani algoritmaya) biz daha önce gerçekleşmiş olan olayları
+ve sonuçları girdi olarak veririz. Makine bu olaylarla sonuçlar arasında bağlantı kurar. Daha sonra
+biz yeni bir olayı makineye verdiğimizde onun sonucunu makineden kestirmesini isteriz. Denetimsiz
+öğrenmede biz makineye yalnızca olayları veririz. Makine bunların arasındaki benzerliklerden ve
+farklılıklardan hareketle bizim istediğimiz sonuçları çıkartmaya çalışır. Örneğin biz makineye
+resimler verip bunların elma mı armut mu olduğunu söyleyelim ve bunu çok miktarda yapalım. Sonra ona
+bir elma resmi verdiğimizde o daha önceki deneyimlerden hareketle bunun elma olduğu sonucunu
+çıkartabilecektir. İşte bu denetimli öğrenmeye bir örnektir. Şimdi biz makineye elma ve armut
+resimlerini verelim ama bunların ne olduğunu ona söylemeyelim; ondan bu resimleri ortak özelliklerine
+göre iki gruba ayırmasını isteyelim. Bu da denetimsiz öğrenmeye örnektir. Pekiştirmeli öğrenmede ise
+tıpkı edimsel koşullanmada olduğu gibi hedefe yaklaşan durumlar ödüllendirilerek makinenin öğrenmesi
+sağlanmaktadır.</p>
+</section>
+<section id="yapay-zeka-makine-ogrenmesi-ve-veri-biliminin-diger-disiplinlerle-ilgisi">
+<h2>1.6. Yapay Zeka, Makine Öğrenmesi ve Veri Biliminin Diğer Disiplinlerle İlgisi<a class="headerlink" href="#yapay-zeka-makine-ogrenmesi-ve-veri-biliminin-diger-disiplinlerle-ilgisi" title="Link to this heading"></a></h2>
+<p>Yapay zeka, makine öğrenmesi ve veri bilimi alanlarının diğer pek çok disiplinle yakın ilgisi vardır.
+Bu ilişkileri açıklamak istiyoruz.</p>
+<p><strong>Bilgisayar Bilimleri (Computer Science):</strong> Bilgi işlem ve programlama etkinlikleriyle ilgili geniş
+kapsamlı bir bilim dalıdır. Bilgisayar bilimlerindeki teknikler ve yöntemler kullanılmadan makine
+öğrenmesi uygulamaları gerçekleştirilememektedir.</p>
+<p><strong>İstatistik:</strong> İstatistik temelde iki bölüme ayrılmaktadır:</p>
+<ul class="simple">
+<li><p><em>Betimsel istatistik (descriptive statistics)</em></p></li>
+<li><p><em>Çıkarımsal istatistik (inferential statistics)</em></p></li>
+</ul>
+<p>Betimsel istatistik verilerin gruplanması, özetlenmesi, karakteristiklerinin betimlenmesi ve
+gösterilmesi ile ilgilidir. Yani betimleyici istatistik <em>“zaten var olan durumu”</em> betimlemektedir.
+Çıkarımsal istatistik ise <em>“kestirim yapmakla”</em> ilgilidir. Makine öğrenmesi ve veri bilimi
+istatistiğin kestirimsel yöntemlerini açıkça kullanmaktadır. Örneğin regresyon analizi, kümeleme
+analizi, karar ağaçları, faktör analizi gibi pek çok makine öğrenmesi yöntemi aslında istatistiğin
+bir konusu olarak ortaya çıkmıştır. Ancak bu istatistiksel yöntemler makine öğrenmesi temelinde
+genişletilmiş ve dinamik bir biçime dönüştürülmüştür.</p>
+<p><strong>Matematik:</strong> Makine öğrenmesi ve veri bilimi uygulamalarında pek çok matematiksel yöntemden de
+faydalanılmaktadır. Örneğin makine öğrenmesinde matematiğin çok değişkenli fonksiyonlar, limit,
+türev gibi konuları optimizasyon süreçlerinde sıkça kullanılmaktadır.</p>
+<p><strong>Veri Madenciliği (Data Mining):</strong> Veri madenciliği verilerin içerisinden çeşitli faydalı bilgilerin
+bulunması, onların çekilerek elde edilmesi ve bunlarla ilişkin süreçlerle ilgilenmektedir. Şüphesiz
+bu süreçler istatistiksel birtakım bilgilerin yanı sıra yazılımsal uygulamaları da bünyesinde
+barındırmaktadır. (Gerçek madenciliğin <em>“zaten var olan değerli bir madeni çıkarmakla”</em> ilgili
+olduğuna dikkat ediniz. Veri madenciliği de <em>“verinin içinde zaten var olan değerli unsurların”</em>
+açığa çıkarılması ile ilgilidir.)</p>
+<p><strong>İlgili Konudaki Özel Bilgiler (Domain Specific Knowledge):</strong> Şüphesiz her türlü algoritmik yöntem
+için bir biçimde hedeflenen konuda belli bir bilgi birikiminin var olması gerekir. Örneğin ne kadar
+iyi programlama ve istatistik bilirseniz bilin görüntüsel verilerle çalışmak için bir görüntünün
+(resmin) nasıl bir organizasyona sahip olduğunu bilmeniz gerekir. Ya da örneğin hiç muhasebe
+bilmeyen iyi bir programcının bir muhasebe programı yazabilmesini bekleyebilir miyiz?</p>
+</section>
+<section id="makine-ogrenmesi-ve-veri-bilimi-uygulamalarinda-kullanilan-programlama-dilleri">
+<h2>1.7. Makine Öğrenmesi ve Veri Bilimi Uygulamalarında Kullanılan Programlama Dilleri<a class="headerlink" href="#makine-ogrenmesi-ve-veri-bilimi-uygulamalarinda-kullanilan-programlama-dilleri" title="Link to this heading"></a></h2>
+<p>Veri bilimi (data science) ve makine öğrenmesi uygulamaları için pek çok dil kullanılabilmektedir.
+Bu bağlamda ilk akla gelen dil şüphesiz Python’dur. Ancak C++, Java, C# gibi popüler programlama
+dilleri de bu amaçla gittikçe daha fazla kullanılır hale gelmektedir. Python Programlama Dili son
+on yıldır bir atak yaparak dünyanın en popüler ilk üç dili arasına girmiştir. Python dilinin özellikle
+veri bilimi ve makine öğrenmesi konusunda popülaritesinin neden bu kadar arttığına ilişkin görüşlerimiz
+şöyledir:</p>
+<ul class="simple">
+<li><p>Son yıllarda veri işleme ve verilerden kestirim yapma gereksinimi gittikçe artmıştır ve Python dili
+de veri bilimi için iyi bir araç olarak düşünülmektedir.</p></li>
+<li><p>Veri bilimi ve makine öğrenmesi için Python dilinden kullanılabilecek pek çok kütüphane vardır.
+(Bu konudaki kütüphaneler diğer dillerden -şimdilik- daha fazladır.)</p></li>
+<li><p>Python nispeten basit bir dildir. Bu basitlik ana hatları veri analizi olan konularda uygulamacılara
+kolaylıklar sunmaktadır. Bu nedenle Python diğer disiplinlerden gelip de veri bilimi ve makine
+öğrenmesi uygulaması yapmak isteyenler için nispeten daha kolay bir araç durumundadır.</p></li>
+<li><p>Python genel amaçlı bir programlama dili olmasının yanı sıra aynı zamanda matematiksel alana da
+yakın bir programlama dilidir. Yani Python’un matematiksel alana yönelik ifade gücü (expressivity)
+popüler diğer programlama dillerinden daha yüksektir.</p></li>
+<li><p>Python dilinin çeşitli prestijli üniversitelerde <em>“programlamaya giriş (introduction to
+programming)”</em> gibi derslerde kullanılmaya başlanmış olması onun popülaritesini artırmıştır.
+Ayrıca Python özellikle 3’lü versiyonlarla birlikte dikkate değer biçimde iyileştirilmiştir.</p></li>
+<li><p>Python dilinin veri bilimi için diğer dillere göre daha erken yola çıktığı söylenebilir. Bu alanda
+algoritma geliştiren araştırmacılar algoritmalarını daha çok Python kullanarak gerçekleştirmişlerdir.</p></li>
+</ul>
+<p>Pekiyi Python dilinin veri bilimi ve makine öğrenmesi konusunda hangi dezavantajları vardır?
+Bu dezavantajları da şöyle sıralayabiliriz:</p>
+<ul class="simple">
+<li><p>Python nispeten yavaş bir dildir. Bu yavaşlık büyük ölçüde Python dilinin dinamik tür sistemine
+sahip olmasından, Python programlarının yorumlayıcı yoluyla çalıştırılmasından ve dilin seviyesinin
+yüksek olmasından kaynaklanmaktadır. Her ne kadar veri analizi ve makine öğrenmesinde kullanılan
+kütüphaneler (NumPy, Pandas, SciPy, scikit-learn, Tensorflow, Pytorch gibi) asıl olarak C ve C++
+programlama dilleri ile yazılmış olsalar da bu C ve C++ rutinlerinin Python’dan çağrılması ve
+diğer birtakım işlemler yavaşlığa yol açmaktadır.</p></li>
+<li><p>Python yüksek seviyeli bir dil olduğu için dilin olanakları ince birtakım işlemlerin yapılabilmesine
+olanak sağlamamaktadır.</p></li>
+</ul>
+<p>Pekiyi Python genel olarak yavaş bir dilse bu durum veri bilimi ve makine öğrenmesi uygulamalarında
+bir sorun oluşturmaz mı? İşte Python’un yavaşlığı ve <em>“yorumlayıcılarla çalışılan (interpretive)”</em>
+bir dil olması bazı projelerde Python’u uygun bir dil olmaktan çıkartabilmektedir. Makine öğrenmesi
+konusunda çalışmalar yapan şirket ve kurumlardan bazıları önceleri Python’u ana dil olarak kullanırken
+daha sonra bir prototip dil olarak kullanmaya başlamıştır. (Burada prototip dil olarak kullanmak
+demekle projeyi Python’da hızlı bir biçimde gerçekleştirdikten sonra ürün aşamasında onu yeniden
+C++, Java ve C# gibi dillerle kodlamayı kastediyoruz.)</p>
+</section>
+<section id="veri-bilimi-nedir">
+<h2>1.8. Veri Bilimi Nedir?<a class="headerlink" href="#veri-bilimi-nedir" title="Link to this heading"></a></h2>
+<p>Bilgisayar teknolojisinin gelişmesine paralel olarak veri toplama ve depolama olanaklarının artmasıyla
+birlikte veri analizinde yeni bir dönemin başladığı söylenebilir. Özellikle 2000’li yıllardan itibaren
+insanlık eskiden olduğundan çok daha fazla miktarda veriyle karşılaşmıştır. Bu bakımdan insanlığın
+bir veri bombardımanına maruz kaldığı söylenebilir. İşte <em>“veri bilimi (data science)”</em> 2000’li
+yılların başlarında böyle bir bağlamda kullanılmaya başlanmış bir terimdir. Veri biliminin tanımı
+konusunda tam bir fikir birliği bulunmamaktadır. Ancak veri bilimi verilerden birtakım faydalı
+bilgilerin ve iç görülerin (insights) elde edilmesine yönelik çalışmaların yapıldığı bir alan olarak
+tanımlanabilir. Veri bilimi ile uğraşan uygulamacılara <em>“veri bilimcisi (data scientist)”</em>
+denilmektedir. (Bu bağlamda veri bilimcisinin bir bilim insanı gibi ele alınmadığını vurgulamak
+istiyoruz.)</p>
+<p>Aslında veri bilimi istatistik biliminin uygulamalı ve dinamik bir alt alanı gibi de düşünülebilir.
+Bazı bilim insanlarına göre <em>“veri bilimi”</em> terimi gereksiz biçimde uydurulmuş bir terimdir ve
+aslında bu alan uygulamalı istatistikten başka bir şey değildir. Ancak ne olursa olsun son 30
+senedir verilerin işlenmesi ve bunlardan faydalı birtakım sonuçların çıkarılması için yapılan
+işlemlerin klasik istatistiksel çalışma ile örtüşmediği de açıktır. Veri bilimi terimi -bazı
+çevreler tarafından eleştiriliyor olsa da- kendini kabul ettirmiş ve yaygınlık kazanmış bir terim
+gibi görünmektedir.</p>
+<p>İstatistik ile veri bilimi arasındaki farklılıkları birkaç cümleyle şöyle özetleyebiliriz: Veri
+bilimi klasik istatistikten farklı olarak disiplinler arası bir niteliğe sahiptir. Veri bilimi
+yazılımı çok daha yoğun kullanmaktadır. Veri bilimi örneklemlerden ziyade çok daha büyük verilerle
+uğraşma eğilimindedir. İstatistiksel çalışmalar daha çok hipotezleri doğrulamaya odaklanırken veri
+bilimi daha çok faydalı hipotezler oluşturmaya odaklanmıştır.</p>
+</section>
+<section id="python-kodlarinin-yazim-stili-hakkinda-aciklama">
+<h2>1.9. Python Kodlarının Yazım Stili Hakkında Açıklama<a class="headerlink" href="#python-kodlarinin-yazim-stili-hakkinda-aciklama" title="Link to this heading"></a></h2>
+<p>Kitabımızda Python kodlarında yazım stili olarak PEP 8 (<em>“Style Guide for Python Code”</em>)
+kullanmayacağız. Örneğin hangi fonksiyonların ve sınıfların hangi modüllerin içerisinde olduğunun
+daha kolay kavranabilmesi için <code class="docutils literal notranslate"><span class="pre">import</span></code> işlemlerini dosyanın başında yapmak yerine kullanım yerine
+yakın bir yerde yapacağız. Bu nedenle kitabımızdaki ve kursumuzdaki notlarda PEP 8’e uygun olmayan
+kodlar gördüğünüzde bu kodların kasten bu biçimde düzenlendiğini düşünmelisiniz. Tabii kitabımızdaki
+kodları kolay bir biçimde PEP 8’e uygun hale getirebilirsiniz.</p>
+</section>
+<section id="bolum-ozeti-ve-anahtar-cumleler">
+<h2>1.10. Bölüm Özeti ve Anahtar Cümleler<a class="headerlink" href="#bolum-ozeti-ve-anahtar-cumleler" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Zekanın ne olduğu konusunda psikologlar ve nörobilimciler arasında tam bir fikir birliği
+bulunmamaktadır. Charles Spearman zekayı <em>“g”</em> ve <em>“s”</em> biçiminde iki yeteneğin birleşimi olarak
+tanımlamıştır. Howard Gardner tarafından kuramsal hale getirilen <em>“çoklu zeka (multiple
+intelligence)”</em> teorisinde Gardner zekayı sekiz türe ayırmıştır. Robert Sternberg’e göre ise
+<em>“analitik (analytical)”</em>, <em>“pratik (practical)”</em> ve <em>“yaratıcı (creative)”</em> olmak üzere üç tür
+zeka vardır. Catell-Horn-Carroll (CHC) Teorisi diye isimlendirilen çok katmanlı zeka teorisi
+üzerinde en çok durulan zeka teorisidir.</p></li>
+<li><p>Zekanın genel bir tanımını şöyle yapabiliriz: Zeka yeni durumlara uyum sağlamak ve problem çözmek
+için deneyimlerden öğrenme, bilgi edinme ve kaynakları etkin bir biçimde kullanma becerisidir.</p></li>
+<li><p>Yapay zeka ise insan zekası ile ilgili bilişsel süreçlerin makineler tarafından sağlanmasına
+yönelik süreçleri belirtmektedir. Yapay zeka terimi ilk kez 1955 yılında John McCarthy tarafından
+kullanılmıştır. Bu terim genel olarak insana özgü nitelikler olduğu varsayılan akıl yürütme, anlam
+çıkartma, genelleme ve geçmiş deneyimlerden öğrenme gibi yüksek zihinsel süreçlerin makineler
+tarafından gerçekleştirilmesi biçiminde tanımlanabilir.</p></li>
+<li><p>Yapay zekanın simüle etmeye çalıştığı bilişsel süreçler şunlardır:</p>
+<ul>
+<li><p>Bir şeyin nasıl yapılacağını bilme (knowledge)</p></li>
+<li><p>Akıl yürütme (reasoning)</p></li>
+<li><p>Problem çözme (problem solving)</p></li>
+<li><p>Algılama (perception)</p></li>
+<li><p>Öğrenme (learning)</p></li>
+<li><p>Planlama (planning)</p></li>
+<li><p>Doğal dili anlama ve konuşma</p></li>
+<li><p>Uzmanlık gerektiren alanlarda karar verme</p></li>
+</ul>
+</li>
+<li><p>Yapay zeka çalışmalarının yaz dönemleri ve kış dönemleri olmuştur. Buradaki <em>“yaz dönemleri”</em>
+konuya ilginin arttığı, finansman sıkıntısının azaldığı dönemleri belirtmektedir. <em>“Kış dönemleri”</em>
+ise yaz dönemlerinin tersine konuya ilginin azaldığı, finansman sıkıntısının arttığı dönemleri
+belirtmektedir.</p></li>
+<li><p>1956-1974 yapay zekanın altın yılları olmuştur. 1974-1980 yılları arasında yapay zeka alanında kış
+dönemine girilmiştir. 1980’li yıllarla birlikte yapay zeka çalışmalarında yine yükseliş başlamıştır.
+1987-1993 yılları arasında yine yapay zeka çalışmaları kış dönemine girmiştir. 1993 yılından
+itibaren yapay zeka alanı yine canlanmaya başlamıştır.</p></li>
+<li><p>Yapay zekanın önemli alt alanları şunlardır:</p>
+<ul>
+<li><p>Makine Öğrenmesi</p></li>
+<li><p>Yapay Sinir Ağları ve Derin Öğrenme</p></li>
+<li><p>Robotik Sistemlerin Tasarımı ve Gerçekleştirilmesi</p></li>
+<li><p>Bulanık Sistemler (Fuzzy Logic Systems)</p></li>
+<li><p>Evrimsel Yöntemler (Genetic Algoritmalar, Differential Evolution, Neuroevolution vs.)</p></li>
+<li><p>Üst Sezgisel (Meta Heuristic) Yöntemler (Karınca Kolonisi, Particle Swarm Optimization)</p></li>
+<li><p>Olasılıksal (Probabilistic) Yöntemler (Bayesian Network, Hidden Markov Model, Kalman Filter vs.)</p></li>
+<li><p>Uzman Sistemler (Expert Systems)</p></li>
+</ul>
+</li>
+<li><p>Zaman içerisinde yapay zeka olarak görülen bir süreci makineler algoritmik olarak başardıkça onun
+yapay zeka alanından çıkartılması gibi bir durum oluşmaya başlamıştır. Eskiden yapay zeka faaliyeti
+olarak adlandırılan bazı faaliyetlerin yapay zeka kapsamından çıkarılmasına <em>“Yapay Zeka Etkisi
+(AI Effect)”</em> denilmektedir.</p></li>
+<li><p>Psikolojide öğrenme davranışta göreli biçimde kalıcı değişiklikler oluşturan süreçler biçiminde
+tanımlanmaktadır.</p></li>
+<li><p>Organizmada doğal bir tepki oluşturan uyaranlara <em>“koşulsuz uyaranlar (unconditioned stimuli)”</em>,
+koşulsuz uyaranlara karşı organizmanın verdiği tepkilere de <em>“koşulsuz tepkiler (unconditioned
+responses)”</em> denilmektedir. Örneğin gök gürültüsü koşulsuz uyarana, gök gürültüsüne karşı verilen
+tepki de koşulsuz tepkiye örnek verilebilir. İşte klasik koşullanmada başlangıçta organizmada bir
+tepkiye yol açmayan <em>“nötr bir uyaran (neutral stimulus)”</em> koşulsuz bir uyaranla zamansal bakımdan
+eşleştirildiğinde artık bu nötr uyaran organizmada koşulsuz uyaranın oluşturduğu tepkiye benzer bir
+tepki oluşturmaya başlamaktadır. Klasik koşullanma ilk kez Ivan Pavlov tarafından fark edilmiş ve
+tanımlanmıştır.</p></li>
+<li><p>Edimsel koşullanma en önemli öğrenme yollarından biridir. Pek çok süreç edimsel koşullanma ile
+öğrenilmektedir. Edimsel koşullanmada ödül oluşturan uyaranlara <em>“pekiştireç (reinforcer)”</em>
+denilmektedir. Davranış ne kadar pekiştirilirse o kadar iyi öğrenilmektedir.</p></li>
+<li><p>Bugün psikolojide edimsel koşullanma davranışı değiştirmede ve şekillendirmede en önemli araçlardan
+biri olarak kabul edilmektedir.</p></li>
+<li><p>Sosyal bilişsel öğrenmeye <em>“taklit yoluyla öğrenme”</em> ya da <em>“model alarak öğrenme”</em> de
+denilmektedir.</p></li>
+<li><p>Sosyal bilişsel öğrenme büyük ölçüde Albert Bandura tarafından kuramsal hale getirilmiştir.
+Aslında sosyal bilişsel öğrenmede de bir bakıma pekiştirmeler söz konusudur. Ancak bu pekiştirmeler
+doğrudan değil <em>“dolaylı (vicarious)”</em> biçimde olmaktadır.</p></li>
+<li><p>Biliş (cognition) organizmanın bilgi işlem faaliyetlerini anlatan bir terimdir. Biliş denildiğinde
+düşünme, bellek, dikkat, bilinç, akıl yürütme gibi faaliyetler anlaşılmaktadır.</p></li>
+<li><p>Araştırmacılar hiç pekiştireç olmadan öğrenmenin insanlarda ve bazı hayvanlarda mümkün olduğunu
+göstermişlerdir.</p></li>
+<li><p>Makine öğrenmesi geçmiş bilgilerden ve deneyimlerden faydalı birtakım sonuçlar (davranışlar) ortaya
+çıkartan algoritmalar ve yöntemler topluluğudur.</p></li>
+<li><p>Makine öğrenmesi genel olarak üç bölümde ele alıp incelenmektedir:</p>
+<ul>
+<li><p>Denetimli Öğrenme (Supervised Learning)</p></li>
+<li><p>Denetimsiz Öğrenme (Unsupervised Learning)</p></li>
+<li><p>Pekiştirmeli Öğrenme (Reinforcement Learning)</p></li>
+</ul>
+</li>
+<li><p>Denetimli (supervised) öğrenmede makineye biz daha önce gerçekleşmiş olan olayları ve sonuçları
+girdi olarak veririz. Makine bu olaylarla sonuçlar arasında bağlantı kurar. Denetimsiz öğrenmede
+biz makineye yalnızca olayları veririz; makine bunların arasındaki benzerliklerden ve
+farklılıklardan hareketle bizim istediğimiz sonuçları çıkartmaya çalışır. Pekiştirmeli öğrenmede
+ise tıpkı edimsel koşullanmada olduğu gibi hedefe yaklaşan durumlar ödüllendirilerek makinenin
+öğrenmesi sağlanmaktadır.</p></li>
+<li><p>Yapay zeka, makine öğrenmesi ve veri bilimi alanlarının ilişkili olduğu önemli bilgi kolları ve
+disiplinler şunlardır:</p>
+<ul>
+<li><p>Bilgisayar Bilimleri (Computer Science)</p></li>
+<li><p>İstatistik</p></li>
+<li><p>Matematik</p></li>
+<li><p>Veri Madenciliği</p></li>
+<li><p>İlgili Konudaki Özel Bilgiler</p></li>
+</ul>
+</li>
+<li><p>Yapay zeka ve makine öğrenmesinde en yaygın kullanılan programlama dili Python’dur. Ancak son
+yıllarda C++, Java ve C# dillerinin de bu alanda kullanımı yaygınlaşma eğilimindedir. Python
+tasarım özellikleri ve basitliği nedeniyle bu alan için uygun bir programlama dili olarak
+değerlendirilmektedir. Ancak Python yavaş bir dildir. Bazı kurumlar Python’u bir <em>“prototip dil”</em>
+olarak da kullanmaktadır. Yani bu kurumlar geliştirmeyi hızlıca Python’da yapıp nihai ürünü C++
+gibi hızlı dilleri kullanarak gerçekleştirme yoluna gitmektedir.</p></li>
+<li><p>Veri bilimi verilerden birtakım faydalı bilgilerin ve iç görülerin (insights) elde edilmesine
+yönelik çalışmaların yapıldığı bir alan olarak tanımlanabilir.</p></li>
+<li><p>İstatistik ile veri bilimi arasındaki farklılıkları şöyle özetleyebiliriz: Veri bilimi klasik
+istatistikten farklı olarak disiplinler arası bir niteliğe sahiptir. Veri bilimi yazılımı çok
+daha yoğun kullanmaktadır. Veri bilimi örneklemlerden ziyade çok daha büyük verilerle uğraşma
+eğilimindedir. İstatistiksel çalışmalar daha çok hipotezleri doğrulamaya odaklanırken veri bilimi
+daha çok faydalı hipotezler oluşturmaya odaklanmıştır.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Yapay Zeka, Makine Öğrenmesi ve Veri Bilimi documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Önceki</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kaan Aslan.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    kullanılarak <a href="https://readthedocs.org">Read the Docs</a> tarafından sağlanmasıyla oluşturuldu.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
