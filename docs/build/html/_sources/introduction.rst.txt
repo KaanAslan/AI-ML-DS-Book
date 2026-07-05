@@ -2,16 +2,16 @@
 .. 1. Giriş
 .. ============================================================
 
-=========
-1. Giriş
-=========
+=====
+Giriş
+=====
 
 Bu bölümde yapay zeka, makine öğrenmesi ve veri bilimi konularına bir giriş yapılmaktadır.
 
 ----
 
-1.1. Zeka Nedir?
-----------------
+Zeka Nedir?
+===========
 
 Zeka kapsamı, işlevleri ve yol açtığı sonuçları bakımından karmaşık bir olgudur. Zekanın ne olduğu
 konusunda psikologlar ve bilişsel nörobilimciler arasında tam bir fikir birliği bulunmamaktadır.
@@ -79,8 +79,8 @@ Yapay zekanın simüle etmeye çalıştığı bilişsel süreçlerin bazıların
 - Uzmanlık gerektiren alanlarda karar verme
 
 
-1.2. Yapay Zeka Çalışmalarının Kısa Tarihi
--------------------------------------------
+Yapay Zeka Çalışmalarının Kısa Tarihi
+=====================================
 
 Yapay zeka ile ilgili düşünceler ve görüşler çok eskiye kadar götürülebilir. Ancak modern yapay zeka
 çalışmalarının 1950'li yıllarda başladığı söylenebilir. Şüphesiz yapay zeka alanındaki gelişmeleri
@@ -163,8 +163,8 @@ olmayacaktır. Bu yapay zeka devrimi ekonomiyi, üretim ilişkilerini, meslekler
 yaşamı, kısacası her şeyi etkileyip dönüştürecek bir potansiyele sahip gibi görünmektedir.
 
 
-1.3. Yapay Zekanın Alt Alanları
---------------------------------
+Yapay Zekanın Alt Alanları
+==========================
 
 Yapay zeka aslında pek çok alt konuya ayrılabilen bir alandır. Yapay zekanın önemli alt alanları
 şunlardır:
@@ -191,9 +191,8 @@ bazı faaliyetlerin yapay zeka kapsamından çıkarılmasına *"Yapay Zeka Etkis
 denilmektedir. Günümüzde de yapay zeka faaliyeti olarak ele aldığımız bazı faaliyetlerin zamanla
 yapay zeka faaliyeti olmaktan çıkabileceğine de dikkatinizi çekmek istiyoruz.
 
-
-1.4. Öğrenme Nedir?
---------------------
+Öğrenme Nedir?
+==============
 
 Şimdi de makine öğrenmesinin ne anlama geldiği üzerinde duracağız. Ancak makine öğrenmesinin ne
 olduğundan önce öğrenmenin ne olduğunu ele almak gerekir. Psikolojide öğrenme davranışta göreli
@@ -210,8 +209,8 @@ Psikolojide öğrenme kabaca dört bölümde ele alınmaktadır:
 4. Bilişsel Öğrenme (Cognitive Learning)
 
 
-1.4.1. Klasik Koşullanma (Classical Conditioning)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Klasik Koşullanma (Classical Conditioning)
+------------------------------------------
 
 Organizmada doğal bir tepki oluşturan uyaranlara *"koşulsuz uyaranlar (unconditioned stimuli)"*,
 koşulsuz uyaranlara karşı organizmanın verdiği tepkilere de *"koşulsuz tepkiler (unconditioned
@@ -278,8 +277,8 @@ yeniden karanlık bir sokağa girdiğinde klasik koşullanma etkisiyle yeniden s
 hissine kapılabilmektedir.
 
 
-1.4.2. Edimsel Koşullanma (Operant Conditioning)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Edimsel Koşullanma (Operant Conditioning)
+-----------------------------------------
 
 Edimsel koşullanma en önemli öğrenme yollarından biridir. Pek çok süreç edimsel koşullanma yoluyla
 öğrenilmektedir. Klasik koşullanmada önce uyaran sonra tepki gelmektedir. Halbuki edimsel
@@ -313,8 +312,8 @@ Bugün psikolojide edimsel koşullanma davranışı değiştirmede ve şekillend
 biri olarak kabul edilmektedir.
 
 
-1.4.3. Sosyal Bilişsel Öğrenme (Social Cognitive Learning)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Sosyal Bilişsel Öğrenme (Social Cognitive Learning)
+--------------------------------------------------
 
 Sosyal bilişsel öğrenmeye *"taklit yoluyla öğrenme"* ya da *"model alarak öğrenme"* de
 denilmektedir. Biz başkalarını taklit ederek de davranışlarımızı değiştirebilmekteyiz. Sosyal
@@ -326,8 +325,9 @@ izleme, izlediklerini bellekte saklama ve onlardan sonuçlar çıkartma gibi sü
 karışmaktadır.
 
 
-1.4.4. Bilişsel Öğrenme (Cognitive Learning)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Bilişsel Öğrenme (Cognitive Learning)
+-------------------------------------
+
 
 Biliş (cognition) organizmanın bilgi işlem faaliyetlerini anlatan bir terimdir. Biliş denildiğinde
 düşünme, bellek, dikkat, bilinç, akıl yürütme gibi faaliyetler anlaşılmaktadır. Araştırmacılar hiç
@@ -344,7 +344,7 @@ süreçleri de davranış tanımının içine katmaktadır.
 
 
 1.5. Makine Öğrenmesi Nedir?
-------------------------------
+============================
 
 Psikolojideki öğrenme kavramı makine öğrenmesinde de geçerlidir. Biz makinenin (makine demekle
 donanımı ve yazılımı kastediyoruz) bir biçimde davranışını arzu edilen yönde değiştirmesini isteriz.
@@ -379,8 +379,8 @@ tıpkı edimsel koşullanmada olduğu gibi hedefe yaklaşan durumlar ödüllendi
 sağlanmaktadır.
 
 
-1.6. Yapay Zeka, Makine Öğrenmesi ve Veri Biliminin Diğer Disiplinlerle İlgisi
---------------------------------------------------------------------------------
+Yapay Zeka, Makine Öğrenmesi ve Veri Biliminin Diğer Disiplinlerle İlgisi
+=========================================================================
 
 Yapay zeka, makine öğrenmesi ve veri bilimi alanlarının diğer pek çok disiplinle yakın ilgisi vardır.
 Bu ilişkileri açıklamak istiyoruz.
@@ -420,8 +420,8 @@ iyi programlama ve istatistik bilirseniz bilin görüntüsel verilerle çalışm
 bilmeyen iyi bir programcının bir muhasebe programı yazabilmesini bekleyebilir miyiz?
 
 
-1.7. Makine Öğrenmesi ve Veri Bilimi Uygulamalarında Kullanılan Programlama Dilleri
---------------------------------------------------------------------------------------
+Makine Öğrenmesi ve Veri Bilimi Uygulamalarında Kullanılan Programlama Dilleri
+==============================================================================
 
 Veri bilimi (data science) ve makine öğrenmesi uygulamaları için pek çok dil kullanılabilmektedir.
 Bu bağlamda ilk akla gelen dil şüphesiz Python'dur. Ancak C++, Java, C# gibi popüler programlama
@@ -467,8 +467,8 @@ demekle projeyi Python'da hızlı bir biçimde gerçekleştirdikten sonra ürün
 C++, Java ve C# gibi dillerle kodlamayı kastediyoruz.)
 
 
-1.8. Veri Bilimi Nedir?
-------------------------
+Veri Bilimi Nedir?
+==================
 
 Bilgisayar teknolojisinin gelişmesine paralel olarak veri toplama ve depolama olanaklarının artmasıyla
 birlikte veri analizinde yeni bir dönemin başladığı söylenebilir. Özellikle 2000'li yıllardan itibaren
@@ -495,9 +495,8 @@ yazılımı çok daha yoğun kullanmaktadır. Veri bilimi örneklemlerden ziyade
 uğraşma eğilimindedir. İstatistiksel çalışmalar daha çok hipotezleri doğrulamaya odaklanırken veri
 bilimi daha çok faydalı hipotezler oluşturmaya odaklanmıştır.
 
-
-1.9. Python Kodlarının Yazım Stili Hakkında Açıklama
------------------------------------------------------
+Python Kodlarının Yazım Stili Hakkında Açıklama
+===============================================
 
 Kitabımızda Python kodlarında yazım stili olarak PEP 8 (*"Style Guide for Python Code"*)
 kullanmayacağız. Örneğin hangi fonksiyonların ve sınıfların hangi modüllerin içerisinde olduğunun
@@ -507,8 +506,8 @@ kodlar gördüğünüzde bu kodların kasten bu biçimde düzenlendiğini düş�
 kodları kolay bir biçimde PEP 8'e uygun hale getirebilirsiniz.
 
 
-1.10. Bölüm Özeti ve Anahtar Cümleler
----------------------------------------
+Bölüm Özeti ve Anahtar Cümleler
+===============================
 
 - Zekanın ne olduğu konusunda psikologlar ve nörobilimciler arasında tam bir fikir birliği
   bulunmamaktadır. Charles Spearman zekayı *"g"* ve *"s"* biçiminde iki yeteneğin birleşimi olarak
@@ -618,3 +617,5 @@ kodları kolay bir biçimde PEP 8'e uygun hale getirebilirsiniz.
   daha yoğun kullanmaktadır. Veri bilimi örneklemlerden ziyade çok daha büyük verilerle uğraşma
   eğilimindedir. İstatistiksel çalışmalar daha çok hipotezleri doğrulamaya odaklanırken veri bilimi
   daha çok faydalı hipotezler oluşturmaya odaklanmıştır.
+
+  xxxx

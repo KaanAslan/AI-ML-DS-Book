@@ -13,5 +13,8 @@ Yapay Zeka, Makine Öğrenmesi ve Veri Bilimi
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+   :numbered:
 
-   introduction.rst
+   introduction
+   statistics_intro
+   

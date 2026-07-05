@@ -1,5 +1,5 @@
 ################################################################
-Yapay Zeka, Makine Öğrenmesi ve Veri Bilimi documentation
+Yapay Zeka, Makine Öğrenmesi ve Veri Bilimi
 ################################################################
 
 .. rst-class:: lead
@@ -13,5 +13,8 @@ Yapay Zeka, Makine Öğrenmesi ve Veri Bilimi documentation
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+   :numbered:
 
-   introduction.rst
+   introduction
+   statistics_intro
+   
