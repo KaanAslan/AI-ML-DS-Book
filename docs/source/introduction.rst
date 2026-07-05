@@ -340,8 +340,7 @@ konusunda da tam bir anlaşma bulunmamaktadır. Yukarıda da belirttiğimiz gibi
 yalnızca gözlemlenebilen süreçleri davranış olarak tanımlarken radikal davranışçılar zihinsel
 süreçleri de davranış tanımının içine katmaktadır.
 
-
-1.5. Makine Öğrenmesi Nedir?
+Makine Öğrenmesi Nedir?
 ============================
 
 Psikolojideki öğrenme kavramı makine öğrenmesinde de geçerlidir. Biz makinenin (makine demekle
@@ -375,7 +374,6 @@ resimlerini verelim ama bunların ne olduğunu ona söylemeyelim; ondan bu resim
 göre iki gruba ayırmasını isteyelim. Bu da denetimsiz öğrenmeye örnektir. Pekiştirmeli öğrenmede ise
 tıpkı edimsel koşullanmada olduğu gibi hedefe yaklaşan durumlar ödüllendirilerek makinenin öğrenmesi
 sağlanmaktadır.
-
 
 Yapay Zeka, Makine Öğrenmesi ve Veri Biliminin Diğer Disiplinlerle İlgisi
 =========================================================================
@@ -416,7 +414,6 @@ için bir biçimde hedeflenen konuda belli bir bilgi birikiminin var olması ger
 iyi programlama ve istatistik bilirseniz bilin görüntüsel verilerle çalışmak için bir görüntünün
 (resmin) nasıl bir organizasyona sahip olduğunu bilmeniz gerekir. Ya da örneğin hiç muhasebe
 bilmeyen iyi bir programcının bir muhasebe programı yazabilmesini bekleyebilir miyiz?
-
 
 Makine Öğrenmesi ve Veri Bilimi Uygulamalarında Kullanılan Programlama Dilleri
 ==============================================================================
