@@ -616,4 +616,4 @@ Bölüm Özeti ve Anahtar Cümleler
   eğilimindedir. İstatistiksel çalışmalar daha çok hipotezleri doğrulamaya odaklanırken veri bilimi
   daha çok faydalı hipotezler oluşturmaya odaklanmıştır.
 
-  xxxx
+  
