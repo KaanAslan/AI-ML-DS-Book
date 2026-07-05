@@ -311,9 +311,8 @@ dolaylı ödül oluşturan uyaranlardır. Edimsel koşullanma için bazı örnek
 Bugün psikolojide edimsel koşullanma davranışı değiştirmede ve şekillendirmede en önemli araçlardan
 biri olarak kabul edilmektedir.
 
-
 Sosyal Bilişsel Öğrenme (Social Cognitive Learning)
---------------------------------------------------
+---------------------------------------------------
 
 Sosyal bilişsel öğrenmeye *"taklit yoluyla öğrenme"* ya da *"model alarak öğrenme"* de
 denilmektedir. Biz başkalarını taklit ederek de davranışlarımızı değiştirebilmekteyiz. Sosyal
@@ -327,7 +326,6 @@ karışmaktadır.
 
 Bilişsel Öğrenme (Cognitive Learning)
 -------------------------------------
-
 
 Biliş (cognition) organizmanın bilgi işlem faaliyetlerini anlatan bir terimdir. Biliş denildiğinde
 düşünme, bellek, dikkat, bilinç, akıl yürütme gibi faaliyetler anlaşılmaktadır. Araştırmacılar hiç
