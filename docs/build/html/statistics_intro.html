@@ -68,14 +68,15 @@
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">2. Biraz İstatistik</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#istatistiksel-temel-bilgiler">2.1. İstatistiksel Temel Bilgiler</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#olcek-kavrami-ve-olcek-turleri">2.1.1. Ölçek Kavramı ve Ölçek Türleri</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#kategorik-nominal-olcekler">2.1.1.1. Kategorik (Nominal) Ölçekler</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#sirasal-ordinal-olcekler">2.1.1.2. Sırasal (Ordinal) Ölçekler</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#aralikli-interval-olcekler">2.1.1.3. Aralıklı (Interval) Ölçekler</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#oransal-ratio-olcekler">2.1.1.4. Oransal (Ratio) Ölçekler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#olcek-kavrami-ve-olcek-turleri">2.1. Ölçek Kavramı ve Ölçek Türleri</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#kategorik-nominal-olcekler">2.1.1. Kategorik (Nominal) Ölçekler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sirasal-ordinal-olcekler">2.1.2. Sırasal (Ordinal) Ölçekler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#aralikli-interval-olcekler">2.1.3. Aralıklı (Interval) Ölçekler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oransal-ratio-olcekler">2.1.4. Oransal (Ratio) Ölçekler</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#merkezi-egilim-olculeri">2.2. Merkezi Eğilim Ölçüleri</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#aritmetik-ortalama">2.2.1. Aritmetik Ortalama</a></li>
 </ul>
 </li>
 </ul>
@@ -108,8 +109,6 @@
              
   <section id="biraz-istatistik">
 <h1><span class="section-number">2. </span>Biraz İstatistik<a class="headerlink" href="#biraz-istatistik" title="Link to this heading"></a></h1>
-<section id="istatistiksel-temel-bilgiler">
-<h2><span class="section-number">2.1. </span>İstatistiksel Temel Bilgiler<a class="headerlink" href="#istatistiksel-temel-bilgiler" title="Link to this heading"></a></h2>
 <p>Yapay zeka ve özellikle de makine öğrenmesi ile ilgili çalışmalar yapacak kişilerin belli düzeyde istatistiksel
 bilgilere sahip olması gerekmektedir. Şüphesiz istatistik pek çok alt alanı olan geniş bir bilim dalıdır. Bu nedenle
 istatistiksel konulara ilişkin pek çok ayrıntı vardır. Biz bu bölümde temel bilgiler vermekle yetineceğiz. Çeşitli
@@ -119,12 +118,12 @@ konunun önemi çok daha fazla artmış ve bu bağlamda pek çok algoritmik yön
 kümeleme analizi çok değişkenli istatistiğin bir konusu olduğu halde biz bu tekniğin ayrıntılarını <em>denetimsiz öğrenme
 (unsupervised learning)</em> içerisinde ele alacağız.)</p>
 <section id="olcek-kavrami-ve-olcek-turleri">
-<h3><span class="section-number">2.1.1. </span>Ölçek Kavramı ve Ölçek Türleri<a class="headerlink" href="#olcek-kavrami-ve-olcek-turleri" title="Link to this heading"></a></h3>
+<h2><span class="section-number">2.1. </span>Ölçek Kavramı ve Ölçek Türleri<a class="headerlink" href="#olcek-kavrami-ve-olcek-turleri" title="Link to this heading"></a></h2>
 <p>İstatistikte ölçülen ya da ölçülmüş olan değerlerin sınıflarına genel olarak <em>ölçek (scale)</em> denilmektedir. Pek çok
 kişi ölçeklerin yalnızca sayısal olduğunu sanmaktadır. Halbuki ölçekler başka biçimlerde de karşımıza çıkabilmektedir.
 İstatistikte ölçekler tipik olarak dört sınıfa ayrılmaktadır:</p>
 <section id="kategorik-nominal-olcekler">
-<h4><span class="section-number">2.1.1.1. </span>Kategorik (Nominal) Ölçekler<a class="headerlink" href="#kategorik-nominal-olcekler" title="Link to this heading"></a></h4>
+<h3><span class="section-number">2.1.1. </span>Kategorik (Nominal) Ölçekler<a class="headerlink" href="#kategorik-nominal-olcekler" title="Link to this heading"></a></h3>
 <p>Bu ölçeklerde söz konusu kümenin elemanları kategorik olgulardır. Örneğin cinsiyet, renk, coğrafi bölge gibi. Bu
 ölçekteki ölçülen ya da ifade edilen değerlerin sayısal karşılıkları yoktur. Örneğin <em>kadınlarla erkekler arasında
 sigara içme miktarı arasında anlamlı bir fark olup olmadığını</em> anlamak için gerçekleştirilen bir araştırmada ölçülmesi
@@ -132,13 +131,13 @@ istenen değişkenlerden <em>cinsiyet</em> kategorik (nominal) bir ölçeğe ili
 tercihleriyle ilgili bir araştırmada renkler (siyah, beyaz, kırmızı gibi) kategorik bir ölçekle ifade edilirler.</p>
 </section>
 <section id="sirasal-ordinal-olcekler">
-<h4><span class="section-number">2.1.1.2. </span>Sırasal (Ordinal) Ölçekler<a class="headerlink" href="#sirasal-ordinal-olcekler" title="Link to this heading"></a></h4>
+<h3><span class="section-number">2.1.2. </span>Sırasal (Ordinal) Ölçekler<a class="headerlink" href="#sirasal-ordinal-olcekler" title="Link to this heading"></a></h3>
 <p>Bu ölçeklerdeki değerler de birer kategori belirtmekle birlikte bu kategoriler arasında büyüklük küçüklük ilişkisi söz
 konusudur. Örneğin eğitim durumu için kategorik değerler <em>ilköğretim</em>, <em>lise</em>, <em>üniversite</em> olabilir ve bunlar arasında
 sıra ilişkisi vardır. Bu nedenle <em>eğitim durumu</em> bir sıralı ölçek belirtmektedir.</p>
 </section>
 <section id="aralikli-interval-olcekler">
-<h4><span class="section-number">2.1.1.3. </span>Aralıklı (Interval) Ölçekler<a class="headerlink" href="#aralikli-interval-olcekler" title="Link to this heading"></a></h4>
+<h3><span class="section-number">2.1.3. </span>Aralıklı (Interval) Ölçekler<a class="headerlink" href="#aralikli-interval-olcekler" title="Link to this heading"></a></h3>
 <p>Aralıklı ölçekler sayısal bilgi içerirler. Bu tür ölçeklerde iki puan arasındaki fark aynı miktar uzaklığı ya da
 yakınlığı ifade eder. Örneğin bir testte 20 puan alan 10 puan alandan belli miktarda daha iyidir. 30 puan alan da
 20 puan alandan aynı miktar kadar daha iyidir. Bu tür ölçeklerde mutlak sıfır noktası yoktur. Başka bir deyişle bu tür
@@ -151,13 +150,65 @@ farkı 40 derece ile 30 derece arasındaki fark kadardır ancak sıfır derece �
 bir oran vardır. Ancak biz 20 derecenin 10 dereceden iki kat daha sıcağı belirttiğini söyleyemeyiz.</p>
 </section>
 <section id="oransal-ratio-olcekler">
-<h4><span class="section-number">2.1.1.4. </span>Oransal (Ratio) Ölçekler<a class="headerlink" href="#oransal-ratio-olcekler" title="Link to this heading"></a></h4>
+<h3><span class="section-number">2.1.4. </span>Oransal (Ratio) Ölçekler<a class="headerlink" href="#oransal-ratio-olcekler" title="Link to this heading"></a></h3>
 <p>Bu ölçekler de sayısal bilgi içerirler. Oransal ölçekler aralık ölçeklerin tüm özelliklerine sahiptirler. Ancak ek
 olarak oransal ölçeklerde mutlak bir sıfır noktası da vardır. Dolayısıyla puanlar arasındaki oranlar mutlak olarak
 anlamlıdır. Örneğin uzunluk, kütle gibi temel fiziksel özellikler oransal ölçek türlerindendir. Bir nesnenin
 uzunluğunun sıfır olması onun uzunluğunun olmadığı, kütlesinin sıfır olması da onun kütlesinin olmadığı anlamına
 gelmektedir. Örneğin kişinin yaşı da oransal bir ölçek belirtir.</p>
 </section>
+</section>
+<section id="merkezi-egilim-olculeri">
+<h2><span class="section-number">2.2. </span>Merkezi Eğilim Ölçüleri<a class="headerlink" href="#merkezi-egilim-olculeri" title="Link to this heading"></a></h2>
+<p>İstatistikte verilerin merkezine ilişkin bilgi veren ölçülere <em>merkezi eğilim ölçüleri (measures of central tendency)</em>
+denilmektedir. Merkezi eğilim ölçülerinin en yaygın kullanılanı <em>aritmetik ortalamadır</em>. Aritmetik ortalama (mean)
+değerlerin toplanarak değer sayısına bölünmesiyle elde edilmektedir.</p>
+<section id="aritmetik-ortalama">
+<h3><span class="section-number">2.2.1. </span>Aritmetik Ortalama<a class="headerlink" href="#aritmetik-ortalama" title="Link to this heading"></a></h3>
+<p>Aritmetik ortalama hesaplamak için çeşitli kütüphanelerde çeşitli fonksiyonlar hazır olarak bulunmaktadır. Örneğin
+Python’un standart kütüphanesindeki <code class="docutils literal notranslate"><span class="pre">statistics</span></code> modülünde bulunan <code class="docutils literal notranslate"><span class="pre">mean</span></code> fonksiyonu aritmetik ortalama
+hesaplamaktadır.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">statistics</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="go">4</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">mean</span></code> fonksiyonu herhangi bir dolaşılabilir nesneyi parametre olarak alabilmektedir.</p>
+<p>NumPy kütüphanesindeki <code class="docutils literal notranslate"><span class="pre">mean</span></code> fonksiyonu eksen (axis) temelinde (yani satırsal ve sütunsal biçimde) ortalama
+hesaplayabilmektedir. Örneğin:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="go">array([4.66666667, 5.66666667, 6.66666667])</span>
+</pre></div>
+</div>
+<p>NumPy’da <code class="docutils literal notranslate"><span class="pre">mean</span></code> fonksiyonu aynı zamanda <code class="docutils literal notranslate"><span class="pre">ndarray</span></code> sınıfının metodu biçiminde de bulunmaktadır. Örneğin:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="go">array([4.66666667, 5.66666667, 6.66666667])</span>
+</pre></div>
+</div>
+<p>Pandas kütüphanesinde <code class="docutils literal notranslate"><span class="pre">Series</span></code> ve <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> sınıflarının <code class="docutils literal notranslate"><span class="pre">mean</span></code> metotları aritmetik ortalama hesabı
+yapmaktadır. <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> sınıfının <code class="docutils literal notranslate"><span class="pre">mean</span></code> metodunda default <code class="docutils literal notranslate"><span class="pre">axis</span></code> 0 biçimindedir. Yani sütunsal ortalamalar
+elde edilmektedir. Örneğin:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span>
+<span class="go">   0  1  2</span>
+<span class="go">0  1  2  3</span>
+<span class="go">1  4  5  6</span>
+<span class="go">2  7  8  9</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="go">0    4.0</span>
+<span class="go">1    5.0</span>
+<span class="go">2    6.0</span>
+<span class="go">dtype: float64</span>
+</pre></div>
+</div>
+<p>Aritmetik ortalama aralıklı (interval) ve oransal (ratio) ölçeklere uygulanabilir. Aritmetik ortalama O(N)
+karmaşıklıkta hesaplanabilmektedir.</p>
 </section>
 </section>
 </section>
