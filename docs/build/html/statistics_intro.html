@@ -67,7 +67,19 @@
 <li class="toctree-l2"><a class="reference internal" href="introduction.html#bolum-ozeti-ve-anahtar-cumleler">1.10. Bölüm Özeti ve Anahtar Cümleler</a></li>
 </ul>
 </li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">2. Biraz İstatistik</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">2. Biraz İstatistik</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#istatistiksel-temel-bilgiler">2.1. İstatistiksel Temel Bilgiler</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#olcek-kavrami-ve-olcek-turleri">2.1.1. Ölçek Kavramı ve Ölçek Türleri</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#kategorik-nominal-olcekler">2.1.1.1. Kategorik (Nominal) Ölçekler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sirasal-ordinal-olcekler">2.1.1.2. Sırasal (Ordinal) Ölçekler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#aralikli-interval-olcekler">2.1.1.3. Aralıklı (Interval) Ölçekler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#oransal-ratio-olcekler">2.1.1.4. Oransal (Ratio) Ölçekler</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
         </div>
@@ -96,6 +108,58 @@
              
   <section id="biraz-istatistik">
 <h1><span class="section-number">2. </span>Biraz İstatistik<a class="headerlink" href="#biraz-istatistik" title="Link to this heading"></a></h1>
+<section id="istatistiksel-temel-bilgiler">
+<h2><span class="section-number">2.1. </span>İstatistiksel Temel Bilgiler<a class="headerlink" href="#istatistiksel-temel-bilgiler" title="Link to this heading"></a></h2>
+<p>Yapay zeka ve özellikle de makine öğrenmesi ile ilgili çalışmalar yapacak kişilerin belli düzeyde istatistiksel
+bilgilere sahip olması gerekmektedir. Şüphesiz istatistik pek çok alt alanı olan geniş bir bilim dalıdır. Bu nedenle
+istatistiksel konulara ilişkin pek çok ayrıntı vardır. Biz bu bölümde temel bilgiler vermekle yetineceğiz. Çeşitli
+ayrıntılar ilgili konuların anlatıldığı bölümde gerektiğinde açıklanacaktır. (Örneğin <em>kümeleme analizi (cluster
+analysis)</em> aslında istatistikte çok uzun süredir incelenen bir konudur. Ancak son yıllarda makine öğrenmesi bağlamında
+konunun önemi çok daha fazla artmış ve bu bağlamda pek çok algoritmik yöntem geliştirilmiştir. Dolayısıyla örneğin
+kümeleme analizi çok değişkenli istatistiğin bir konusu olduğu halde biz bu tekniğin ayrıntılarını <em>denetimsiz öğrenme
+(unsupervised learning)</em> içerisinde ele alacağız.)</p>
+<section id="olcek-kavrami-ve-olcek-turleri">
+<h3><span class="section-number">2.1.1. </span>Ölçek Kavramı ve Ölçek Türleri<a class="headerlink" href="#olcek-kavrami-ve-olcek-turleri" title="Link to this heading"></a></h3>
+<p>İstatistikte ölçülen ya da ölçülmüş olan değerlerin sınıflarına genel olarak <em>ölçek (scale)</em> denilmektedir. Pek çok
+kişi ölçeklerin yalnızca sayısal olduğunu sanmaktadır. Halbuki ölçekler başka biçimlerde de karşımıza çıkabilmektedir.
+İstatistikte ölçekler tipik olarak dört sınıfa ayrılmaktadır:</p>
+<section id="kategorik-nominal-olcekler">
+<h4><span class="section-number">2.1.1.1. </span>Kategorik (Nominal) Ölçekler<a class="headerlink" href="#kategorik-nominal-olcekler" title="Link to this heading"></a></h4>
+<p>Bu ölçeklerde söz konusu kümenin elemanları kategorik olgulardır. Örneğin cinsiyet, renk, coğrafi bölge gibi. Bu
+ölçekteki ölçülen ya da ifade edilen değerlerin sayısal karşılıkları yoktur. Örneğin <em>kadınlarla erkekler arasında
+sigara içme miktarı arasında anlamlı bir fark olup olmadığını</em> anlamak için gerçekleştirilen bir araştırmada ölçülmesi
+istenen değişkenlerden <em>cinsiyet</em> kategorik (nominal) bir ölçeğe ilişkindir. Benzer biçimde kişilerin renk
+tercihleriyle ilgili bir araştırmada renkler (siyah, beyaz, kırmızı gibi) kategorik bir ölçekle ifade edilirler.</p>
+</section>
+<section id="sirasal-ordinal-olcekler">
+<h4><span class="section-number">2.1.1.2. </span>Sırasal (Ordinal) Ölçekler<a class="headerlink" href="#sirasal-ordinal-olcekler" title="Link to this heading"></a></h4>
+<p>Bu ölçeklerdeki değerler de birer kategori belirtmekle birlikte bu kategoriler arasında büyüklük küçüklük ilişkisi söz
+konusudur. Örneğin eğitim durumu için kategorik değerler <em>ilköğretim</em>, <em>lise</em>, <em>üniversite</em> olabilir ve bunlar arasında
+sıra ilişkisi vardır. Bu nedenle <em>eğitim durumu</em> bir sıralı ölçek belirtmektedir.</p>
+</section>
+<section id="aralikli-interval-olcekler">
+<h4><span class="section-number">2.1.1.3. </span>Aralıklı (Interval) Ölçekler<a class="headerlink" href="#aralikli-interval-olcekler" title="Link to this heading"></a></h4>
+<p>Aralıklı ölçekler sayısal bilgi içerirler. Bu tür ölçeklerde iki puan arasındaki fark aynı miktar uzaklığı ya da
+yakınlığı ifade eder. Örneğin bir testte 20 puan alan 10 puan alandan belli miktarda daha iyidir. 30 puan alan da
+20 puan alandan aynı miktar kadar daha iyidir. Bu tür ölçeklerde mutlak sıfır noktası yoktur. Başka bir deyişle bu tür
+ölçeklerde sıfır <em>yokluğu</em> ya da <em>mevcut olmamayı</em> belirtmemektedir. Alınan puanlar her zaman belli bir göreli orijine
+göre anlamlıdır. Örneğin aslında sınavlardan alınan puanlar böyle bir ölçek türündedir. Sınavdan sıfır alınabilir.
+Ancak bu sıfır o kişinin o konu hakkında hiçbir şey bilmediği anlamına gelmez. Yani mutlak sıfır değildir. Ya da
+örneğin ısı belirten <em>derece (celsius)</em> bir aralıklı ölçeği belirtmektedir. 50 derece ile 40 derece arasındaki ısı
+farkı 40 derece ile 30 derece arasındaki fark kadardır ancak sıfır derece ısının olmadığı anlamına gelmez. Aralıklı
+ölçeklerde oran oluşturmak anlamlı olmayabilmektedir. Örneğin 20 derecelik ısı ile 10 derecelik ısı arasında iki kat
+bir oran vardır. Ancak biz 20 derecenin 10 dereceden iki kat daha sıcağı belirttiğini söyleyemeyiz.</p>
+</section>
+<section id="oransal-ratio-olcekler">
+<h4><span class="section-number">2.1.1.4. </span>Oransal (Ratio) Ölçekler<a class="headerlink" href="#oransal-ratio-olcekler" title="Link to this heading"></a></h4>
+<p>Bu ölçekler de sayısal bilgi içerirler. Oransal ölçekler aralık ölçeklerin tüm özelliklerine sahiptirler. Ancak ek
+olarak oransal ölçeklerde mutlak bir sıfır noktası da vardır. Dolayısıyla puanlar arasındaki oranlar mutlak olarak
+anlamlıdır. Örneğin uzunluk, kütle gibi temel fiziksel özellikler oransal ölçek türlerindendir. Bir nesnenin
+uzunluğunun sıfır olması onun uzunluğunun olmadığı, kütlesinin sıfır olması da onun kütlesinin olmadığı anlamına
+gelmektedir. Örneğin kişinin yaşı da oransal bir ölçek belirtir.</p>
+</section>
+</section>
+</section>
 </section>
 
 
