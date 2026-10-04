@@ -25,7 +25,9 @@ Bu ölçeklerde söz konusu kümenin elemanları kategorik olgulardır. Örneği
 ölçekteki ölçülen ya da ifade edilen değerlerin sayısal karşılıkları yoktur. Örneğin *kadınlarla erkekler arasında
 sigara içme miktarı arasında anlamlı bir fark olup olmadığını* anlamak için gerçekleştirilen bir araştırmada ölçülmesi
 istenen değişkenlerden *cinsiyet* kategorik (nominal) bir ölçeğe ilişkindir. Benzer biçimde kişilerin renk
-tercihleriyle ilgili bir araştırmada renkler (siyah, beyaz, kırmızı gibi) kategorik bir ölçekle ifade edilirler.
+tercihleriyle ilgili bir araştırmada renkler (siyah, beyaz, kırmızı gibi) kategorik bir ölçekle ifade edilirler. 
+Kategorik ölçekteki değerleri 0'dan itibaren sayılarla da ifade edebiliriz. Bu durum ölçeğini türünü değiştirmemektedir. 
+Kategorik ölçekteki değerler tüm gerçek değerleri değil yalnızca belirli değerleri alabilmektedir. 
 
 Sırasal (Ordinal) Ölçekler
 --------------------------
@@ -45,8 +47,8 @@ göre anlamlıdır. Örneğin aslında sınavlardan alınan puanlar böyle bir �
 Ancak bu sıfır o kişinin o konu hakkında hiçbir şey bilmediği anlamına gelmez. Yani mutlak sıfır değildir. Ya da
 örneğin ısı belirten *derece (celsius)* bir aralıklı ölçeği belirtmektedir. 50 derece ile 40 derece arasındaki ısı
 farkı 40 derece ile 30 derece arasındaki fark kadardır ancak sıfır derece ısının olmadığı anlamına gelmez. Aralıklı
-ölçeklerde oran oluşturmak anlamlı olmayabilmektedir. Örneğin 20 derecelik ısı ile 10 derecelik ısı arasında iki kat
-bir oran vardır. Ancak biz 20 derecenin 10 dereceden iki kat daha sıcağı belirttiğini söyleyemeyiz.
+ölçeklerde oran oluşturmak anlamlı olmayabilir. Örneğin 20 derecelik ısı ile 10 derecelik ısı arasında iki kat bir 
+oran vardır. Ancak biz 20 derecenin 10 dereceden iki kat daha sıcağı belirttiğini söyleyemeyiz.
 
 Oransal (Ratio) Ölçekler
 ------------------------
