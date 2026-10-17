@@ -7978,3 +7978,3235 @@ konusu olmalıdır):
 Burada yk one-hot-encoding yapılmış gerçek değerleri yk_hat ise softmax biçiminde elde edilmiş ağın çıktı
 katmanındaki değerleri temsil etmektedir.
 
+.. _metrik-fonksiyonlari-ve-model-saklama:
+
+===================================================================
+Metrik Fonksiyonlar, Modelin Diskte Saklanması ve Katmanlara Erişim
+===================================================================
+
+Metrik Fonksiyonlara Genel Bakış
+================================
+
+Anımsanacağı gibi *metrik fonksiyonlar* her epoch'tan sonra sınama verilerine uygulanan ve eğitimin gidişatı
+hakkında bilgi almak için kullanılan performans fonksiyonları idi. Problemin türüne göre çeşitli metrik
+fonksiyonlar hazır biçimde bulunmaktadır. Birden fazla metrik fonksiyon kullanılabileceği için metrik fonksiyonlar
+``compile`` metodunda ``metrics`` parametresine bir liste biçiminde girilmektedir. Metrik fonksiyonlar yazısal
+biçimde girilebileceği gibi ``tensorflow.keras.metrics`` modülündeki fonksiyonlar ve sınıflar biçiminde de
+girilebilmektedir.
+
+Metrik fonksiyonlar da tıpkı loss fonksiyonları gibi gerçek çıktı değerleriyle ağın ürettiği çıktı değerlerini
+parametre olarak almaktadır. Aslında loss fonksiyonları da bir çeşit metrik fonksiyonlardır. Ancak loss
+fonksiyonları optimizasyon algoritmaları tarafından minimize edilmek için kullanılmaktadır. Halbuki metrik
+fonksiyonlar bizim durumu daha iyi anlamamız için bizim tarafımızdan kullanılmaktadır.
+
+Aslında loss fonksiyonları da bir çeşit metrik fonksiyonlar olarak kullanılabilir. Ancak Keras zaten bize loss
+fonksiyonlarının değerlerini her epoch'ta eğitim ve sınama verileri için vermektedir. Dolayısıyla örneğin ikili
+sınıflandırma problemi için eğer biz loss fonksiyonu olarak *binary_crossentropy* girmişsek ayrıca bu fonksiyonu
+metrik olarak girmenin bir anlamı yoktur. Özetle her loss fonksiyonu bir metrik fonksiyon gibi de kullanılabilir.
+Ancak her metrik fonksiyon bir loss fonksiyonu olarak kullanılmaz.
+
+binary_accuracy Metrik Fonksiyonu
+=================================
+
+*binary_accuracy* isimli metrik fonksiyon ikili sınıflandırma problemleri için en yaygın kullanılan metrik
+fonksiyondur. Bu fonksiyon kabaca kaç gözlemin değerinin kestirilen değerle aynı olduğunun yüzdesini vermektedir.
+Örneğin ``diabetes.csv`` veri kümesinde *binary_accuracy* değerinin 0.70 olması demek her yüz ölçümün 70
+tanesinin doğru biçimde kestirilmesi demektir. *binary_accuracy* metrik değeri Keras'ta isimsel olarak
+girilebileceği gibi ``tensorflow.keras.metrics`` modülündeki fonksiyon ismi olarak da girilebilir.
+
+Aslında Keras'ta programcı kendi loss fonksiyonlarını ve metrik fonksiyonlarını da yazabilir. Ancak TensorFlow bu
+konuda yeterli dokümantasyona sahip değildir. TensorFlow kütüphanesinin çeşitli versiyonlarında çeşitli
+farklılıklar bulunabilmektedir. Bu nedenle bu fonksiyonların programcı tarafından yazılması için bu konuya dikkat
+etmek gerekir.
+
+Örneğin biz ``tensorflow.keras.metrics`` modülündeki ``binary_accuracy`` fonksiyonunu aşağıdaki gibi
+kullanabiliriz.
+
+.. code-block:: python
+
+   from tensorflow.keras.metrics import binary_accuracy
+   import numpy as np
+
+   y = np.array([1, 0, 1, 1, 0])
+   y_hat = np.array([0.90, 0.7, 0.6, 0.9, 0.6])
+
+   result = binary_accuracy(y, y_hat)
+   print(result)
+
+categorical_accuracy Metrik Fonksiyonu
+======================================
+
+Çok sınıflı sınıflandırma problemlerinde tipik olarak kullanılan metrik fonksiyon *categorical_accuracy* isimli
+fonksiyondur. Bu fonksiyon da yine gözlemlerin yüzde kaçının tam olarak isabet ettirildiğini belirtmektedir.
+Örneğin ikili sınıflandırmada 0.50 değeri iyi bir değer değildir. Çünkü zaten rastgele seçim yapılsa bile
+ortalama 0.50 başarı elde edilmektedir. Ancak 100 sınıflı bir problemde 0.50 başarı düşük bir başarı
+olmayabilir. Yine biz Keras'ta *categorical_accuracy* metrik fonksiyonunu isimsel biçimde ya da
+``tensorflow.keras.metrics`` modülündeki fonksiyon ismiyle kullanabiliriz.
+
+``tensorflow.keras.metrics`` modülündeki ``categorical_accuracy`` fonksiyonu aslında toplam isabetlere ilişkin
+bir Tensor nesnesi vermektedir, ortalama vermemektedir. Aşağıda bu fonksiyonun kullanımına bir örnek
+verilmiştir.
+
+.. code-block:: python
+
+   from tensorflow.keras.metrics import categorical_accuracy
+   import numpy as np
+
+   # elma, armut, kayısı
+
+   y = np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0], [0, 1, 0], [1, 0, 0]])
+   y_hat = np.array([[0.2, 0.7, 0.1], [0.2, 0.1, 0.7], [0.8, 0.1, 0.1], [0.7, 0.2, 0.1], [0.6, 0.2, 0.2]])
+
+   result = categorical_accuracy(y, y_hat)
+   result_ratio = np.sum(result) / len(result)
+   print(result_ratio)
+
+Regresyon Problemlerinde Metrik Fonksiyonlar
+============================================
+
+Regresyon problemleri için loss fonksiyonlarının çoğu aslında metrik fonksiyon olarak da kullanılabilmektedir.
+Örneğin biz böyle bir problemde loss fonksiyonu olarak *mean_squared_error* seçmişsek metrik fonksiyon olarak
+*mean_absolute_error* seçebiliriz. ``mean_absolute_error`` fonksiyonu loss fonksiyonu olarak o kadar iyi olmasa
+da metrik anlamda kişilerin kolay anlayabileceği bir fonksiyondur. Benzer biçimde regresyon problemlerinde
+*mean_absolute_percentage_error*, *mean_squared_logarithmic_error* fonksiyonları da metrik olarak
+kullanılabilmektedir.
+
+Loss fonksiyonların metrik fonksiyonlar olarak kullanılabileceğini belirtmiştik. Aslında örneğin
+``mean_absolute_error`` loss fonksiyonu ile ``mean_absolute_error`` metrik fonksiyonu aynı işlemi yapmaktadır.
+Ancak Keras'ta bu fonksiyonlar ``tensorflow.keras.losses`` ve ``tensorflow.keras.metrics`` modüllerinde ayrı ayrı
+bulundurulmuştur.
+
+Metrik Fonksiyonların Kısa ve Uzun İsimleri
+===========================================
+
+Metrik fonksiyonlar yazısal biçimde girilecekse onlar için uzun ya da kısa isimler kullanılabilmektedir. Örneğin:
+
+- ``'binary_accuracy'`` (kısa ismi yok)
+- ``'categorical_accuracy'`` (kısa ismi yok)
+- ``'mean_absolute_error'`` (kısa ismi ``'mae'``)
+- ``'mean_absolute_percentage_error'`` (kısa ismi ``'mape'``)
+- ``'mean_squared_error'`` kısa ismi (``'mse'``)
+
+Modelin Diskte Saklanması: save Metodu ve HDF5 Formatı
+======================================================
+
+Bir sinir ağı eğitildikten sonra onun diskte saklanması gerekebilir. Çünkü eğitim uzun sürebilir ve her
+bilgisayarı açtığımızda ağı yeniden eğitmemiz verimsiz bir çalışma biçimidir. Ayrıca eğitim tek seferde de
+yapılmayabilir. Yani örneğin bir kısım verilerle eğitim yapılıp sonuçlar saklanabilir. Sonra yeni veriler elde
+edildikçe eğitime devam edilebilir.
+
+Keras'ta yapılan eğitimlerin saklanması demekle neyi kastediyoruz? Tabii öncelikle tüm nöronlardaki *w* ve *bias*
+değerleri kastedilmektedir. Ayrıca Keras bize tüm modeli saklama imkanı da vermektedir. Bu durumda modelin yeniden
+kurulmasına da gerek kalmaz. Tüm model katmanlarıyla *w* ve *bias* değerleriyle saklanıp geri yüklenebilmektedir.
+
+Sinir ağı modelini saklamak için hangi dosya formatı uygundur? Çok fazla veri söz konusu olduğu için buna uygun
+tasarımı olan dosya formatları tercih edilmelidir. Örneğin bu işlem için *CSV* dosyaları hiç uygun değildir. İşte
+bu tür amaçlar için ilk akla gelen format *HDF (Hierarchical Data Format)* denilen formattır. Bu formatın beşinci
+versiyonu HDF5 ya da H5 formatı olarak bilinmektedir.
+
+Modeli bir bütün olarak saklamak için ``Sequential`` sınıfının ``save`` isimli metodu kullanılır. ``save``
+metodunun birinci parametresi dosyanın yol ifadesini almaktadır. ``save_format`` parametresi saklanacak dosyanın
+formatını belirtir. Bu parametre girilmezse dosya TensorFlow kütüphanesinin kullandığı *tf* formatı ile
+saklanmaktadır. Biz HDF5 formatı için bu parametreye ``'h5'`` girmeliyiz. Örneğin:
+
+.. code-block:: python
+
+   model.save('diabetes.h5', save_format='h5')
+
+Aşağıdaki örnekte *diabetes* örneği eğitildikten sonra ``save`` metodu ile saklanmıştır.
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('diabetes.csv')
+
+   from sklearn.impute import SimpleImputer
+
+   si = SimpleImputer(strategy='mean', missing_values=0)
+
+   impute_features = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+   df[impute_features] = si.fit_transform(df[impute_features])
+
+   dataset = df.to_numpy()
+
+   dataset_x = dataset[:, :-1]
+   dataset_y = dataset[:, -1]
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+   from tensorflow.keras import Sequential
+   from tensorflow.keras.layers import Input, Dense
+
+   model = Sequential(name='Diabetes')
+
+   model.add(Input((training_dataset_x.shape[1],)))
+   model.add(Dense(16, activation='relu', name='Hidden-1'))
+   model.add(Dense(16, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='sigmoid', name='Output'))
+   model.summary()
+
+   model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['binary_accuracy'])
+   model.fit(training_dataset_x, training_dataset_y, batch_size=32, epochs=100, validation_split=0.2)
+   eval_result = model.evaluate(test_dataset_x, test_dataset_y, batch_size=32)
+
+   for i in range(len(eval_result)):
+       print(f'{model.metrics_names[i]}: {eval_result[i]}')
+
+   model.save('diabetes.h5', save_format='h5')
+
+Saklanan Modelin Yüklenmesi: load_model Fonksiyonu
+==================================================
+
+HDF5 formatıyla sakladığımız model bir bütün olarak ``tensorflow.keras.models`` modülündeki ``load_model``
+fonksiyonu ile geri yüklenebilir. ``load_model`` fonksiyonu bizden yüklenecek dosyanın yol ifadesini alır.
+Fonksiyon geri dönüş değeri olarak model nesnesini vermektedir. Örneğin:
+
+.. code-block:: python
+
+   from tensorflow.keras.models import load_model
+
+   model = load_model('diabetes.h5')
+
+Artık biz modeli fit ettiğimiz biçimiyle tamamen geri almış durumdayız. Doğrudan ``predict`` metoduyla kestirim
+yapabiliriz.
+
+Aşağıdaki örnekte yukarıda save ettiğimiz model yüklenerek kestirim işlemi yapılmıştır.
+
+.. code-block:: python
+
+   from tensorflow.keras.models import load_model
+   import numpy as np
+
+   model = load_model('diabetes.h5')
+
+   predict_dataset = np.array([[2 ,90, 68, 12, 120, 38.2, 0.503, 28],
+                               [4, 111, 79, 47, 207, 37.1, 1.39, 56],
+                               [3, 190, 65, 25, 130, 34, 0.271, 26],
+                               [8, 176, 90, 34, 300, 50.7, 0.467, 58],
+                               [7, 106, 92, 18, 200, 35, 0.300, 48]])
+
+   predict_result = model.predict(predict_dataset)
+   print(predict_result)
+
+   for result in predict_result[:, 0]:
+       print('Şeker hastası' if result > 0.5 else 'Şeker Hastası Değil')
+
+Yalnızca Ağırlıkların Saklanması: save_weights Metodu
+=====================================================
+
+Aslında modelin tamamını değil yalnızca *w* ve *bias* değerlerini save etmek de mümkündür. Bunun için
+``Sequential`` sınıfının ``save_weights`` metodu kullanılmaktadır. Örneğin:
+
+.. code-block:: python
+
+   model.save_weights('diabetes-weights', save_format='h5')
+
+Aşağıdaki örnekte *diabetes* örneğindeki yalnızca modelin *w* ve *bias* değerleri saklanmıştır.
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('diabetes.csv')
+
+   from sklearn.impute import SimpleImputer
+
+   si = SimpleImputer(strategy='mean', missing_values=0)
+
+   impute_features = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+   df[impute_features] = si.fit_transform(df[impute_features])
+
+   dataset = df.to_numpy()
+
+   dataset_x = dataset[:, :-1]
+   dataset_y = dataset[:, -1]
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+   from tensorflow.keras import Sequential
+   from tensorflow.keras.layers import Input, Dense
+
+   model = Sequential(name='Diabetes')
+   model.add(Input((training_dataset_x.shape[1],)))
+   model.add(Dense(16, activation='relu', name='Hidden-1'))
+   model.add(Dense(16, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='sigmoid', name='Output'))
+   model.summary()
+
+   model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['binary_accuracy'])
+   model.fit(training_dataset_x, training_dataset_y, batch_size=32, epochs=100, validation_split=0.2)
+   eval_result = model.evaluate(test_dataset_x, test_dataset_y, batch_size=32)
+
+   for i in range(len(eval_result)):
+       print(f'{model.metrics_names[i]}: {eval_result[i]}')
+
+   model.save_weights('diabetes-weights.h5', save_format='h5')
+
+Ağırlıkların Geri Yüklenmesi: load_weights Metodu
+=================================================
+
+``save_weights`` metodu yalnızca *w* ve *bias* değerlerini save etmektedir. Bizim bunu geri yükleyebilmemiz için
+modeli yeniden aynı biçimde oluşturmamız ve compile işlemini yapmamız gerekir. *w* ve *bias* değerlerinin geri
+yüklenmesi için ``Sequential`` sınıfının ``load_weights`` metodu kullanılmaktadır. Örneğin:
+
+.. code-block:: python
+
+   model.load_weights('diabetes-weights.h5')
+
+Aşağıdaki örnekte yukarıdaki örnekteki modelin *w* ve *bias* değerleri geri yüklenmiştir. Tabii yukarıda da
+belirttiğimiz gibi ``save_weights`` model bilgilerini saklamadığı için modelin aynı biçimde yeniden
+oluşturulması gerekmektedir. Modelin *w* ve *bias* değerlerini ``load_weights`` metodu ile geri yüklerken veri
+kümesini oluşturmamız gerekmemektedir. ``save_weights`` metodu yalnızca *w* ve *bias* değerlerini save ettiği
+için model programcı tarafından orijinal haliyle oluşturulmalıdır.
+
+.. code-block:: python
+
+   from tensorflow.keras import Sequential
+   from tensorflow.keras.layers import Input, Dense
+
+   model = Sequential(name='Diabetes')
+
+   model.add(Input((8,)))
+   model.add(Dense(16, activation='relu', name='Hidden-1'))
+   model.add(Dense(16, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='sigmoid', name='Output'))
+   model.summary()
+
+   model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['binary_accuracy'])
+
+   model.load_weights('diabetes-weights.h5')
+
+   import numpy as np
+
+   predict_dataset = np.array([[2 ,90, 68, 12, 120, 38.2, 0.503, 28],
+                               [4, 111, 79, 47, 207, 37.1, 1.39, 56],
+                               [3, 190, 65, 25, 130, 34, 0.271, 26],
+                               [8, 176, 90, 34, 300, 50.7, 0.467, 58],
+                               [7, 106, 92, 18, 200, 35, 0.300, 48]])
+
+   predict_result = model.predict(predict_dataset)
+   print(predict_result)
+
+   for result in predict_result[:, 0]:
+       print('Şeker hastası' if result > 0.5 else 'Şeker Hastası Değil')
+
+Katman Nesnelerine Erişim: layers Özniteliği
+============================================
+
+Biz katman nesnelerini (``Dense`` nesnelerini) model sınıfının (``Sequential`` sınıfının) ``add`` metotlarıyla
+modelimize ekledik. Bu katman nesnelerini ileride kullanmak istediğimizde nasıl geri alabiliriz? Tabii ilk akla
+gelen yöntem katman nesnelerini yaratırken aynı zamanda saklamak olabilir. Örneğin:
+
+.. code-block:: python
+
+   model = Sequential(name='Diabetes')
+
+   model.add(Input((8,)))
+   layer1 = Dense(16, activation='relu', name='Hidden-1')
+   model.add(layer1)
+   layer2 = Dense(16, activation='relu', name='Hidden-2')
+   model.add(layer2)
+   layer3 = Dense(1, activation='sigmoid', name='Output')
+   model.add(layer3)
+   model.summary()
+
+Aslında böyle saklama işlemine gerek yoktur. Zaten model nesnesinin (``Sequential`` sınıfının) ``layers`` isimli
+özniteliği bir indeks eşliğinde bizim eklediğimiz katman nesnelerini bize vermektedir. ``layers`` örnek
+özniteliği bir Python listesidir. Örneğin:
+
+.. code-block:: python
+
+   layer2 = model.layers[2]
+
+Tabii ``layers`` özniteliği bize ``Input`` katmanını gereksiz olduğundan dolayı vermemektedir. Buradaki 0'ıncı
+indeks ilk saklı katmanı belirtmektedir.
+
+.. _callback-mekanizmasi-ve-get-set-weights:
+
+====================================================================
+Katman Ağırlıklarına Erişim, Kestirim Süreci ve Callback Mekanizması
+====================================================================
+
+Katman Ağırlıklarına Erişim: get_weights ve set_weights Metotları
+=================================================================
+
+Biz yukarıda tüm modeli, modelin *w* ve *bias* değerlerini saklayıp geri yükledik. Peki yalnızca tek bir
+katmandaki ağırlık değerlerini alıp geri yükleyebilir miyiz? İşte bu işlem katman sınıfının (yani ``Dense``
+sınıfının) ``get_weights`` ve ``set_weights`` isimli metotları ile yapılmaktadır. Biz bu metotlar sayesinde bir
+katman nesnesindeki *w* ve *bias* değerlerini NumPy dizisi olarak elde edip geri yükleyebiliriz.
+
+``Dense`` sınıfının ``get_weights`` metodu iki elemanlı bir listeye geri dönmektedir. Bu listenin her iki elemanı
+da NumPy dizisidir. Listenin ilk elemanı (0'ıncı indeksli elemanı) o katmandaki nöronların *w* değerlerini, ikinci
+elemanı ise *bias* değerlerini belirtmektedir. Katmandaki nöronların *w* değerleri iki boyutlu bir NumPy dizisi
+biçimindedir. Burada k'ıncı sütun önceki katmanın nöronlarının sonraki katmanın k'ıncı nöronuna bağlanmasındaki
+ağırlık değerlerini belirtmektedir. Benzer biçimde i'inci satır ise önceki katmanın i'inci nöronunun ilgili
+katmanın nöron bağlantısındaki ağırlık değerlerini belirtmektedir. Bu durumda örneğin [i, k] indeksindeki eleman
+önceki katmanın i'inci nöronunun ilgili katmanın k'ıncı nöronu ile bağlantısındaki ağırlığı belirtmektedir.
+
+``get_weights`` metodunun verdiği listenin ikinci elemanı (1'inci indeksli elemanı) nöronların *bias* değerlerini
+vermektedir. Bias değerlerinin ilgili katmandaki nöron sayısı kadar olması gerektiğine dikkat ediniz. Çünkü her
+nöron için bir tane bias değeri vardır.
+
+Örneğin yukarıdaki *diabetes* örneğinde ilk saklı katmandaki ağırlıkları şöyle elde edebiliriz:
+
+.. code-block:: python
+
+   layer = model.layers[0]
+   weights, bias = layer.get_weights()
+
+Burada ``weights`` dizisinin shape'i yazdırıldığında (8, 16) görülecektir. ``bias`` dizisinin shape'i
+yazdırıldığında ise (16,) görülecektir.
+
+Aşağıdaki *diabetes* örneğindeki ilk saklı katmanın *w* ve *bias* değerleri görüntülenmektedir.
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('diabetes.csv')
+
+   from sklearn.impute import SimpleImputer
+
+   si = SimpleImputer(strategy='mean', missing_values=0)
+
+   impute_features = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+   df[impute_features] = si.fit_transform(df[impute_features])
+
+   dataset = df.to_numpy()
+
+   dataset_x = dataset[:, :-1]
+   dataset_y = dataset[:, -1]
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+   from tensorflow.keras import Sequential
+   from tensorflow.keras.layers import Input, Dense
+
+   model = Sequential(name='Diabetes')
+
+   model.add(Input((training_dataset_x.shape[1],)))
+   model.add(Dense(16, activation='relu', name='Hidden-1'))
+   model.add(Dense(16, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='sigmoid', name='Output'))
+   model.summary()
+
+   model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['binary_accuracy'])
+   model.fit(training_dataset_x, training_dataset_y, batch_size=32, epochs=100, validation_split=0.2)
+   eval_result = model.evaluate(test_dataset_x, test_dataset_y, batch_size=32)
+
+   for i in range(len(eval_result)):
+       print(f'{model.metrics_names[i]}: {eval_result[i]}')
+
+   hidden1 = model.layers[0]
+   weights, bias = hidden1.get_weights()
+
+   print('Weights')
+   print(weights)
+
+   print('Bias')
+   print(bias)
+
+   print("5'inci girdi nöronunun ilk katmanın 9'uncu nöronuna bağlantısındaki w değeri")
+   w = weights[5, 9]
+   print(w)
+
+Bir katmandaki *w* ve *bias* değerlerini ``Dense`` sınıfının ``set_weights`` metodu ile geri yükleyebiliriz.
+Örneğin:
+
+.. code-block:: python
+
+   hidden1 = model.layers[0]
+   weights, bias = hidden1.get_weights()
+
+   weights = weights + 0.1
+   hidden1.set_weights([weights, bias])
+
+Burada birinci saklı katmandaki ağırlık değerlerine 0.1 eklenerek ağırlık değerleri geri yüklenmiştir.
+``set_weights`` metodunun iki elemanlı bir liste aldığına dikkat ediniz. Nasıl ``get_weights`` metodu hem *w* hem
+de *bias* değerlerini veriyorsa ``set_weights`` metodu da hem *w* hem de *bias* değerlerini istemektedir.
+
+Aşağıdaki örnekte ilk saklı katmandaki *w* değerlerine 0.1 toplanarak değerler geri yüklenmiştir. (Bu işlemde
+bir anlam aramayınız).
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('diabetes.csv')
+
+   from sklearn.impute import SimpleImputer
+
+   si = SimpleImputer(strategy='mean', missing_values=0)
+
+   impute_features = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+   df[impute_features] = si.fit_transform(df[impute_features])
+
+   dataset = df.to_numpy()
+
+   dataset_x = dataset[:, :-1]
+   dataset_y = dataset[:, -1]
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+   from tensorflow.keras import Sequential
+   from tensorflow.keras.layers import Input, Dense
+
+   model = Sequential(name='Diabetes')
+
+   model.add(Input((training_dataset_x.shape[1],)))
+   model.add(Dense(16, activation='relu', name='Hidden-1'))
+   model.add(Dense(16, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='sigmoid', name='Output'))
+   model.summary()
+
+   model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['binary_accuracy'])
+   model.fit(training_dataset_x, training_dataset_y, batch_size=32, epochs=100, validation_split=0.2)
+   eval_result = model.evaluate(test_dataset_x, test_dataset_y, batch_size=32)
+
+   for i in range(len(eval_result)):
+       print(f'{model.metrics_names[i]}: {eval_result[i]}')
+
+   hidden1 = model.layers[0]
+   weights, bias = hidden1.get_weights()
+
+   weights = weights + 0.1
+   hidden1.set_weights([weights, bias])
+
+Yapay Sinir Ağı ile Kestirim Sürecinin Aşamaları
+================================================
+
+Yapay sinir ağları ile kestirim yapabilmek için bazı aşamalardan geçmek gerekir. Bu aşamaları şöyle
+özetleyebiliriz:
+
+1) **Hedefin Belirlenmesi:** Öncelikle uygulamacının ne yapmak istediğine karar vermesi gerekir. Yani
+   uygulamacının çözmek istediği problem nedir? Bir sınıflandırma problemi midir? Regresyon problemi midir?
+   Şekil tanıma problemi midir? Doğal dili anlama problemi midir? gibi...
+
+2) **Kestirimle İlgili Olacak Özelliklerin (Sütunların) Belirlenmesi:** Tespit edilen problemin kestirimi için
+   hangi bilgilere gereksinim duyulmaktadır? Kestirim ile ilgili olabilecek özellikler nelerdir? Örneğin bir
+   eczanenin cirosunu tahmin etmek isteyelim. Burada ilk gelecek özellikler şunlar olabilir:
+
+   - Eczanenin konumu
+   - Eczanenin önünden geçen günlük insan sayısı
+   - Eczanenin destek ürünleri satıp satmadığı
+   - Eczanenin kozmetik ürünler satıp satmadığı
+   - Eczanenin anlaşmalı olduğu kurumlar
+   - Eczanenin büyüklüğü
+   - Eczanenin yakınındaki, hastanelerin ve sağlık ocaklarının sayısı
+   - Eczacının tanıdığı doktor sayısı
+
+3) **Eğitim İçin Verilerin Toplanması:** Eğitim için verilerin toplanması en zor süreçlerden biridir. Veri
+   toplama için şu yöntemler söz konusu olabilir:
+
+   - Anketler (Surveys)
+   - Daha önce elde edilmiş veriler
+   - Çeşitli kurumlar tarafından zaten elde edilmiş olan veriler
+   - Sensörler yoluyla elde edilen veriler
+   - Sosyal ağlardan elde edilen veriler
+   - Birtakım doğal süreç içerisinde oluşan veriler (Örneğin her müşteri için bir fiş kesildiğine göre bunlar
+     kullanılabilir)
+
+4) **Verilerin Kullanıma Hazır Hale Getirilmesi:** Veriler toplandıktan sonra bunların üzerinde bazı
+   önişlemlerin yapılması gerekmektedir. Örneğin gereksiz sütunlar atılmalıdır. Eksik veriler varsa bunlar bir
+   biçimde ele alınmalıdır. Kategorik veriler sayısallaştırılmalıdır. Text ve görüntü verileri kullanıma hazır
+   hale getirilmelidir. Özellik *ölçeklemeleri (feature scaling)* ve *özellik mühendisliği (feature
+   engineering)* işlemleri yapılmalıdır.
+
+5) **Yapay Sinir Ağı Modelinin Oluşturulması:** Probleme uygun bir yapay sinir ağı modeli oluşturulmalıdır.
+
+6) **Modelin Eğitilmesi ve Test Edilmesi:** Oluşturulan model eldeki veri kümesiyle eğitilmeli ve test
+   edilmelidir.
+
+7) **Kestirim İşleminin Yapılması:** Nihayet eğitilmiş model artık kestirim amacıyla kullanılmalıdır.
+
+Keras'ta Callback Mekanizmasına Giriş
+=====================================
+
+*Callback* sözcüğü programlamada belli bir olay devam ederken programcının verdiği bir fonksiyonun (genel olarak
+callable bir nesnenin) çağrılmasına ilişkin mekanizmayı anlatmak için kullanılmaktadır. Keras'ın da bir callback
+mekanizması vardır. Bu sayede biz çeşitli olaylar devam ederken bu olayları sağlayan metotların bizim callable
+nesnelerimizi çağırmasını sağlayabiliriz. Böylece birtakım işlemler devam ederken arka planda o işlemleri
+programlama yoluyla izleyebilir duruma göre gerekli işlemleri yapabiliriz.
+
+``Sequential`` sınıfının ``fit``, ``evaluate`` ve ``predict`` metotları *callbacks* isimli bir parametre
+almaktadır. İşte biz bu parametreye callback fonksiyonlarımızı ve sınıf nesnelerimizi verebiliriz. Bu metotlar da
+ilgili olaylar sırasında bizim verdiğimiz bu callable nesneleri çağırır.
+
+Aslında Keras'ta hazır bazı callback sınıflar zaten vardır. Dolayısıyla her ne kadar programcı kendi callback
+sınıflarını yazabilirse de aslında buna fazlaca gereksinim duyulmamaktadır. Keras'ın sağladığı hazır callback
+sınıfları genellikle gereksinimi karşılamaktadır. Keras'ın hazır callback sınıfları
+``tensorflow.keras.callbacks`` modülü içerisinde bulunmaktadır.
+
+History Callback Sınıfı ve Epoch Grafikleri
+===========================================
+
+En sık kullanılan callback sınıfı ``History`` isimli callback sınıftır. Aslında programcı bu callback sınıfını
+genellikle kendisi kullanmaz. ``Sequential`` sınıfının ``fit`` metodu zaten bu sınıf türünden bir nesneye geri
+dönmektedir. Örneğin:
+
+.. code-block:: python
+
+   hist = model.fit(....)
+
+``History`` callback sınıfı aslında işlemler sırasında devreye girmek için değil (bu da sağlanabilir) epoch'lar
+sırasındaki değerlerin kaydedilmesi için kullanılmaktadır. Yani programcı ``fit`` işlemi bittikten sonra bu
+callback nesnenin içerisinden ``fit`` işlemi sırasında elde edilen epoch değerlerini alabilmektedir. Dolayısıyla
+``fit`` metodunun bize verdiği ``History`` nesnesi eğitim sırasında her epoch'tan sonra elde edilen loss ve
+metrik değerleri barındırmaktadır. Anımsanacağı gibi ``fit`` metodu zaten eğitim sırasında her epoch'tan sonra
+birtakım değerleri ekrana yazıyordu. İşte ``fit`` metodunun geri döndürdüğü bu history nesnesi aslında bu metodun
+ekrana yazdığı bilgileri barındırmaktadır. ``History`` nesnesinin ``epoch`` özniteliği uygulanan epoch
+numaralarını bize verir. Ancak nesnenin en önemli elemanı ``history`` isimli özniteliğidir. Nesnenin ``history``
+isimli özniteliği bir sözlük türündendir. Sözlüğün anahtarları yazısal olarak loss ve metrik değer isimlerini
+barındırır. Bunlara karşı gelen değerler ise her epoch'taki ilgili değerleri belirten list türünden nesnelerdir.
+``History`` nesnesinin ``history`` sözlüğü her zaman *loss* ve *val_loss* anahtarlarını barındırır. Bunun
+dışında bizim belirlediğimiz metriklere ilişkin eğitim ve sınama sonuçlarını da barındırmaktadır. Örneğin biz
+metrik olarak *binary_accuracy* girmiş olalım. ``history`` sözlüğü bu durumda *binary_accuracy* ve
+*val_binary_accuracy* isimli iki anahtara da sahip olacaktır. Burada *val_xxx* biçiminde *val* ile başlayan
+anahtarlar sınama verisinden elde edilen değerleri, *val* ile başlamayan anahtarlar ise eğitim veri kümesinden
+elde edilen değerleri belirtir. *loss* değeri ve diğer metrik değerler epoch'un tamamı için elde edilen
+değerlerdir. Her epoch sonucunda bu değerler sıfırlanmaktadır. (Yani bu değerler kümülatif bir ortalama değil,
+her epoch'taki ortalamalara ilişkindir.)
+
+Epoch'lar sonrasında ``History`` nesnesi yoluyla elde edilen bilgilerin grafiği çizdirilebilir. Uygulamacılar
+eğitimin gidişatı hakkında fikir edinebilmek için genellikle epoch grafiğini çizdirirler. Epoch sayıları arttıkça
+başarının artacağını söyleyemeyiz. Hatta tam tersine belli bir epoch'tan sonra *overfitting* denilen olgu kendini
+gösterebilmekte model gitgide yanlış şeyleri öğrenir duruma gelebilmektedir. İşte uygulamacı genellikle *loss*,
+*val_loss*, *binary_accuracy*, *val_binary_accuracy* gibi grafikleri epoch sayılarına göre çizerek bunların
+uyumlu gidip gitmediğine bakabilir. Eğitimdeki verilerle sınama verilerinin birbirlerinden kopması genel olarak
+kötü bir gidişata işaret etmektedir. Uygulamacı bu grafiklere bakarak uygulaması gereken epoch sayısına karar
+verebilir. Örneğin:
+
+.. code-block:: python
+
+   import matplotlib.pyplot as plt
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Loss Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['loss'])
+   plt.plot(hist.epoch, hist.history['val_loss'])
+   plt.legend(['Loss', 'Validation Loss'])
+   plt.show()
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Binary Accuracy Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['binary_accuracy'])
+   plt.plot(hist.epoch, hist.history['val_binary_accuracy'])
+   plt.legend(['Accuracy', 'Validation Accuracy'])
+   plt.show()
+
+Aşağıda *diabetes* örneği için ``fit`` metodunun geri döndürdüğü ``History`` callback nesnesi kullanılarak epoch
+grafikleri çizdirilmiştir.
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('diabetes.csv')
+
+   from sklearn.impute import SimpleImputer
+
+   si = SimpleImputer(strategy='mean', missing_values=0)
+
+   impute_features = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+   df[impute_features] = si.fit_transform(df[impute_features])
+
+   dataset = df.to_numpy()
+
+   dataset_x = dataset[:, :-1]
+   dataset_y = dataset[:, -1]
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+   from tensorflow.keras import Sequential
+   from tensorflow.keras.layers import Input, Dense
+
+   model = Sequential(name='Diabetes')
+
+   model.add(Input((training_dataset_x.shape[1],)))
+   model.add(Dense(16, activation='relu', name='Hidden-1'))
+   model.add(Dense(16, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='sigmoid', name='Output'))
+   model.summary()
+
+   model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['binary_accuracy'])
+   hist = model.fit(training_dataset_x, training_dataset_y, batch_size=32, epochs=300, validation_split=0.2)
+
+   import matplotlib.pyplot as plt
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Loss Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['loss'])
+   plt.plot(hist.epoch, hist.history['val_loss'])
+   plt.legend(['Loss', 'Validation Loss'])
+   plt.show()
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Binary Accuracy Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['binary_accuracy'])
+   plt.plot(hist.epoch, hist.history['val_binary_accuracy'])
+   plt.legend(['Accuracy', 'Validation Accuracy'])
+   plt.show()
+
+   eval_result = model.evaluate(test_dataset_x, test_dataset_y, batch_size=32)
+
+   for i in range(len(eval_result)):
+       print(f'{model.metrics_names[i]}: {eval_result[i]}')
+
+.. note::
+
+   Bu grafikler gerçek eğitim verisine (``diabetes.csv``) ve gerçek bir eğitim sürecine dayandığından, veri
+   kümesi ve model eğitimi bu ortamda yeniden üretilemediği için grafik görseli burada oluşturulmamıştır; kod
+   yukarıda orijinal haliyle verilmiştir.
+
+History Nesnesinin callbacks Parametresiyle Elde Edilmesi
+=========================================================
+
+Aslında ``History`` callback nesnesi ``fit`` metodunun ``callbacks`` parametresi yoluyla da elde edilebilir.
+Örneğin:
+
+.. code-block:: python
+
+   from tensorflow.keras.callbacks import History
+   hist = History()
+
+   model.fit(training_dataset_x, training_dataset_y, batch_size=32, epochs=300, validation_split=0.2,
+             callbacks=[hist])
+
+Tabii buna hiç gerek yoktur. Zaten bu ``History`` callback nesnesi ``fit`` metodu tarafından metodun içerisinde
+oluşturulup geri dönüş değeri yoluyla bize verilmektedir.
+
+CSVLogger Callback Sınıfı
+=========================
+
+``CSVLogger`` isimli callback sınıfı epoch işlemlerinden elde edilen değerleri bir CSV dosyasının içerisine
+yazmaktadır. ``CSVLogger`` nesnesi yaratılırken ``__init__`` metodunda CSV dosyasının yol ifadesi verilir. Eğitim
+bittiğinde bu dosyanın içi doldurulmuş olacaktır. Örneğin:
+
+.. code-block:: python
+
+   from tensorflow.keras.callbacks import CSVLogger
+
+   hist = model.fit(training_dataset_x, training_dataset_y, batch_size=32, epochs=100, validation_split=0.2,
+           callbacks=[CSVLogger('diabtes-epoch.csv')])
+
+Aşağıdaki *diabetes* örneği için ``CSVLogger`` callback sınıfı yoluyla bir CSV dosyası yaratılmıştır.
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('diabetes.csv')
+
+   from sklearn.impute import SimpleImputer
+
+   si = SimpleImputer(strategy='mean', missing_values=0)
+
+   impute_features = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+   df[impute_features] = si.fit_transform(df[impute_features])
+
+   dataset = df.to_numpy()
+
+   dataset_x = dataset[:, :-1]
+   dataset_y = dataset[:, -1]
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+   from tensorflow.keras import Sequential
+   from tensorflow.keras.layers import Input, Dense
+
+   model = Sequential(name='Diabetes')
+
+   model.add(Input((training_dataset_x.shape[1],)))
+   model.add(Dense(16, activation='relu', name='Hidden-1'))
+   model.add(Dense(16, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='sigmoid', name='Output'))
+   model.summary()
+
+   model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['binary_accuracy'])
+
+   from tensorflow.keras.callbacks import CSVLogger
+   csv_logger = CSVLogger('diabetes-epoch-logs.csv')
+
+   hist = model.fit(training_dataset_x, training_dataset_y, batch_size=32, epochs=300, validation_split=0.2,
+                     callbacks=[csv_logger])
+
+   import matplotlib.pyplot as plt
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Loss Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['loss'])
+   plt.plot(hist.epoch, hist.history['val_loss'])
+   plt.legend(['Loss', 'Validation Loss'])
+   plt.show()
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Binary Accuracy Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['binary_accuracy'])
+   plt.plot(hist.epoch, hist.history['val_binary_accuracy'])
+   plt.legend(['Accuracy', 'Validation Accuracy'])
+   plt.show()
+
+   eval_result = model.evaluate(test_dataset_x, test_dataset_y, batch_size=32)
+
+   for i in range(len(eval_result)):
+       print(f'{model.metrics_names[i]}: {eval_result[i]}')
+
+.. _ozel-callback-siniflari-ve-ozellik-olceklemesi:
+
+=======================================================================
+Özel Callback Sınıfları Yazmak ve Özellik Ölçeklemesi (Feature Scaling)
+=======================================================================
+
+Kendi Callback Sınıfımızı Yazmak
+================================
+
+Daha önce de belirttiğimiz gibi tüm callback sınıfları ``tensorflow.keras.callbacks`` modülündeki ``Callback``
+isimli sınıftan türetilmiştir. Biz de bu sınıftan türetme yaparak kendi callback sınıflarımızı yazabiliriz.
+``fit``, ``evaluate`` ve ``predict`` metotları ``callbacks`` parametresine girilen callback nesnelerinin çeşitli
+metotlarını çeşitli olaylar sırasında çağırmaktadır. Programcı da kendi callback sınıflarını yazarken aslında bu
+taban ``Callback`` sınıfındaki metotları override eder. Örneğin her epoch bittiğinde ``Callback`` sınıfının
+``on_epoch_end`` isimli metodu çağrılmaktadır. ``Callback`` sınıfının bu metodunun içi boştur. Ancak biz türemiş
+sınıfta bu metodu override edersek (yani aynı isimle yeniden yazarsak) bizim override ettiğimiz metot devreye
+girecektir. ``on_epoch_end`` metodunun parametrik yapısı şöyle olmalıdır:
+
+.. code-block:: python
+
+   def on_epoch_end(epoch, logs):
+       pass
+
+Buradaki birinci parametre epoch numarasını (yani kaçıncı epoch olduğunu) ikinci parametre ise epoch sonrasındaki
+eğitim ve sınama işlemlerinden elde edilen loss ve metrik değerleri veren bir sözlük biçimindedir. Bu sözlüğün
+anahtarları ilgili değerleri belirten yazılardan değerleri de o anahtara ilişkin değerlerinden oluşmaktadır.
+
+Örneğin her epoch sonrasında biz bir fonksiyonumuzun çağrılmasını isteyelim. Bu fonksiyon içerisinde de *loss*
+değerini ve *val_loss* değerini ekrana yazdırmak isteyelim. Bu işlemi şöyle yapabiliriz:
+
+.. code-block:: python
+
+   class MyCallback(Callback):
+       def on_epoch_end(self, epoch, logs):
+           loss = logs['loss']
+           val_loss = logs['val_loss']
+           print(f'epoch: {epoch}, loss: {loss}, val_loss: {val_loss}')
+
+   mycallback = MyCallback()
+   hist = model.fit(training_dataset_x, training_dataset_y, batch_size=32, epochs=300,
+                   validation_split=0.2, callbacks=[mycallback], verbose=0)
+
+Burada ``fit`` metodunun ``verbose`` parametresine 0 değerini geçtik. ``fit`` metodu (``evaluate`` ve
+``predict`` metotlarında da aynı durum söz konusu) çalışırken zaten *loss* ve *metrik değerleri* ekrana
+yazdırmaktadır. ``verbose`` parametresi için 0 girildiğinde artık ``fit`` metodu ekrana bir şey yazmamaktadır.
+Dolayısıyla yalnızca bizim callback fonksiyonda ekrana yazdırdıklarımız ekranda görünecektir.
+
+Callback Sınıfının Olay Metotları ve Parametreleri
+==================================================
+
+``fit``, ``evaluate`` ve ``predict`` tarafından çağrılan ``Callback`` sınıfının metotlarının en önemli olanları
+şunlardır:
+
+- ``on_epoch_begin``
+- ``on_epoch_end``
+- ``on_batch_begin``
+- ``on_batch_end``
+- ``on_train_begin``
+- ``on_train_end``
+
+Tabii bir sınıf söz konusu olduğuna göre bu metotların birinci parametreleri ``self`` olacaktır. Bu metotların
+diğer parametreleri aşağıdaki gibidir:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Metot
+     - Parametreler
+   * - ``on_epoch_begin``
+     - self, epoch ve logs
+   * - ``on_epoch_end``
+     - self, epoch ve logs
+   * - ``on_batch_begin``
+     - self, batch ve logs
+   * - ``on_batch_end``
+     - self, batch ve logs
+   * - ``on_train_begin``
+     - self, logs
+   * - ``on_train_end``
+     - self, logs
+
+Aşağıdaki örnekte ``Callback`` sınıfından ``MyCallback`` isimli bir sınıf türetilmiştir. Bu sınıfta
+``on_epoch_end`` metodu override edilmiştir.
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('diabetes.csv')
+
+   from sklearn.impute import SimpleImputer
+
+   si = SimpleImputer(strategy='mean', missing_values=0)
+
+   impute_features = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+   df[impute_features] = si.fit_transform(df[impute_features])
+
+   dataset = df.to_numpy()
+
+   dataset_x = dataset[:, :-1]
+   dataset_y = dataset[:, -1]
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+   from tensorflow.keras.callbacks import Callback
+
+   class MyCallback(Callback):
+       def on_epoch_end(self, epoch, logs):
+           loss = logs['loss']
+           val_loss = logs['val_loss']
+           print(f'epoch: {epoch}, loss: {loss}, val_loss: {val_loss}')
+
+   from tensorflow.keras import Sequential
+   from tensorflow.keras.layers import Input, Dense
+
+   model = Sequential(name='Diabetes')
+
+   model.add(Input((training_dataset_x.shape[1],)))
+   model.add(Dense(16, activation='relu', name='Hidden-1'))
+   model.add(Dense(16, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='sigmoid', name='Output'))
+   model.summary()
+
+   model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['binary_accuracy'])
+
+   mycallback = MyCallback()
+
+   hist = model.fit(training_dataset_x, training_dataset_y, batch_size=32, epochs=300, validation_split=0.2,
+                     callbacks=[mycallback], verbose=0)
+
+   import matplotlib.pyplot as plt
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Loss Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['loss'])
+   plt.plot(hist.epoch, hist.history['val_loss'])
+   plt.legend(['Loss', 'Validation Loss'])
+   plt.show()
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Binary Accuracy Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['binary_accuracy'])
+   plt.plot(hist.epoch, hist.history['val_binary_accuracy'])
+   plt.legend(['Accuracy', 'Validation Accuracy'])
+   plt.show()
+
+   eval_result = model.evaluate(test_dataset_x, test_dataset_y, batch_size=32)
+
+   for i in range(len(eval_result)):
+       print(f'{model.metrics_names[i]}: {eval_result[i]}')
+
+.. note::
+
+   Bu örnekteki grafikler gerçek bir eğitim sürecinin (``diabetes.csv`` üzerinde 300 epoch'luk ``fit``
+   işleminin) sonuçlarına dayandığından ve bu ortamda gerçek bir eğitim çalıştırılamadığından, grafik görseli
+   burada oluşturulmamıştır; kod yukarıda orijinal haliyle verilmiştir.
+
+LambdaCallback Sınıfı
+=====================
+
+``LambdaCallback`` isimli callback sınıfı bizden ``__init__`` metodu yoluyla çeşitli fonksiyonlar alır ve bu
+fonksiyonları belli noktalarda çağırır. Metottaki parametreler belli olaylar gerçekleştiğinde çağrılacak
+fonksiyonları belirtmektedir. Parametrelerin anlamları şöyledir:
+
+- ``on_train_begin``: Eğitim başladığında çağrılacak fonksiyonu belirtir.
+- ``on_train_end``: Eğitim bittiğinde çağrılacak fonksiyonu belirtir.
+- ``on_epoch_begin``: Her epoch başladığında çağrılacak fonksiyonu belirtir.
+- ``on_epoch_end``: Her epoch bittiğinde çağrılacak fonksiyonu belirtir.
+- ``on_batch_begin``: Her batch işleminin başında çağrılacak fonksiyonu belirtir.
+- ``on_batch_end``: Her batch işlemi bittiğinde çağrılacak fonksiyonu belirtir.
+
+Bu fonksiyonların parametreleri şöyle olmalıdır:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Fonksiyon
+     - Parametreler
+   * - ``on_epoch_begin``
+     - epoch ve logs
+   * - ``on_epoch_end``
+     - epoch ve logs
+   * - ``on_batch_begin``
+     - batch ve logs
+   * - ``on_batch_end``
+     - batch ve logs
+   * - ``on_train_begin``
+     - logs
+   * - ``on_train_end``
+     - logs
+
+Burada ``epoch`` parametresi epoch numarasını, ``batch`` parametresi batch numarasını belirtir. ``logs``
+parametresi ise bir sözlük belirtmektedir. Bu sözlüğün içerisinde loss değeri gibi metrik değerler gibi önemli
+bilgiler vardır. epoch'lar için ``logs`` parametresi ``History`` nesnesindeki anahtarları içermektedir. Ancak
+batch'ler için ``logs`` parametresi *val* önekli değerleri içermeyecektir. Örneğin biz her epoch bittiğinde, her
+batch başladığında ve bittiğinde bir fonksiyonumuzun çağrılmasını isteyelim. Bunu şöyle gerçekleştirebiliriz:
+
+.. code-block:: python
+
+   def on_epoch_end_proc(epoch, logs):
+      pass
+
+   def on_batch_begin_proc(batch, logs):
+      pass
+
+   def on_batch_end_proc(batch, logs):
+       pass
+
+   from tensorflow.keras.callbacks import LambdaCallback
+
+   lambda_callback = LambdaCallback(on_epoch_end=on_epoch_end_proc, on_batch_begin=on_batch_begin_proc,
+                                     on_batch_end=on_batch_end_proc)
+
+   hist = model.fit(training_dataset_x, training_dataset_y, batch_size=32, epochs=300,
+               validation_split=0.2, callbacks=[lambda_callback], verbose=0)
+
+Aşağıdaki örnekte her epoch sonrasında *loss* ve *val_loss* değerleri callback fonksiyonda yazdırılmıştır. Ayrıca
+her epoch içerisindeki batch işlemlerinin sonucunda elde edilen *loss* değerleri de ekrana yazdırılmıştır. Aynı
+zamanda bu örnekte batch'lerdeki loss değerleri bir listede saklanmış ve bu loss değerlerinin ortalaması da
+ekrana yazdırılmıştır. ``fit`` metodu tarafından çağrılan ``on_epoch_end`` metodundaki *loss* değeri son
+batch'teki *loss* değeri olarak verilmektedir. Ancak ``History`` callback (ve ``fit`` metodunun ekrana
+yazdırdığı) epoch'a ilişkin *loss* değeri epoch içerisindeki batch'lerdeki ortalama *loss* değeridir. Maalesef
+Keras'taki bu değerlerin nasıl elde edildiği dokümanlarda ayrıntılı biçimde açıklanmamıştır. Dokümanlarda
+açıklanmayan özelliklerin zaman içerisinde değiştirilebileceğine dikkat ediniz.
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('diabetes.csv')
+
+   from sklearn.impute import SimpleImputer
+
+   si = SimpleImputer(strategy='mean', missing_values=0)
+
+   impute_features = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+   df[impute_features] = si.fit_transform(df[impute_features])
+
+   dataset = df.to_numpy()
+
+   dataset_x = dataset[:, :-1]
+   dataset_y = dataset[:, -1]
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+   from tensorflow.keras import Sequential
+   from tensorflow.keras.layers import Input, Dense
+
+   model = Sequential(name='Diabetes')
+
+   model.add(Input((training_dataset_x.shape[1],)))
+   model.add(Dense(16, activation='relu', name='Hidden-1'))
+   model.add(Dense(16, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='sigmoid', name='Output'))
+   model.summary()
+
+   model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['binary_accuracy'])
+
+   import numpy as np
+
+   batch_losses= []
+
+   def on_epoch_begin_proc(epoch, logs):
+       global batch_losses
+       batch_losses = []
+       print(f'epoch: {epoch}')
+
+   def on_epoch_end_proc(epoch, logs):
+       loss = logs['loss']
+       val_loss = logs['val_loss']
+       print(f'\nepoch: {epoch}, loss: {loss}, val_loss: {val_loss}')
+       print(f'batch mean: {np.mean(batch_losses)}')
+       print('-' * 30)
+
+   def on_batch_end_proc(batch, logs):
+       global total
+       loss = logs['loss']
+       batch_losses.append(loss)
+       print(f'\t\tbatch: {batch}, loss: {loss}')
+
+   from tensorflow.keras.callbacks import LambdaCallback
+
+   lambda_callback = LambdaCallback(on_epoch_begin=on_epoch_begin_proc, on_epoch_end=on_epoch_end_proc,
+                                     on_batch_end=on_batch_end_proc)
+
+   hist = model.fit(training_dataset_x, training_dataset_y, batch_size=32, epochs=100,
+           validation_split=0.2, callbacks=[lambda_callback], verbose='auto')
+
+   import matplotlib.pyplot as plt
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Loss Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['loss'])
+   plt.plot(hist.epoch, hist.history['val_loss'])
+   plt.legend(['Loss', 'Validation Loss'])
+   plt.show()
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Binary Accuracy Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['binary_accuracy'])
+   plt.plot(hist.epoch, hist.history['val_binary_accuracy'])
+   plt.legend(['Accuracy', 'Validation Accuracy'])
+   plt.show()
+
+   eval_result = model.evaluate(test_dataset_x, test_dataset_y, batch_size=32)
+
+   for i in range(len(eval_result)):
+       print(f'{model.metrics_names[i]}: {eval_result[i]}')
+
+.. note::
+
+   Bu örnekteki grafikler de gerçek bir eğitim sürecine dayandığından, bu ortamda yeniden üretilemediği için
+   görsel oluşturulmamıştır.
+
+LambdaCallback Sınıfının Kendi Yazımı
+=====================================
+
+``LambdaCallback`` sınıfını aslında basit bir biçimde biz de yazabiliriz. Burada yapacağımız şey sınıfın
+``__init__`` metodunda bize verilen fonksiyonları nesnenin özniteliklerinde saklamak ve override ettiğimiz
+metotlarda bunları çağırmaktır. Aşağıda ``LambdaCallback`` sınıfının nasıl yazıldığına ilişkin bir örnek
+verilmiştir. Bu örnekteki ``MyLambdaCallback`` sınıfı orijinal ``LambdaCallback`` sınıfının aynısı değildir. Bu
+örnekte yalnızca bu sınıfın nasıl yazıldığına ilişkin bir fikir vermeye çalışıyoruz.
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('diabetes.csv')
+
+   from sklearn.impute import SimpleImputer
+
+   si = SimpleImputer(strategy='mean', missing_values=0)
+
+   impute_features = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+   df[impute_features] = si.fit_transform(df[impute_features])
+
+   dataset = df.to_numpy()
+
+   dataset_x = dataset[:, :-1]
+   dataset_y = dataset[:, -1]
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+   from tensorflow.keras import Sequential
+   from tensorflow.keras.layers import Input, Dense
+
+   model = Sequential(name='Diabetes')
+
+   model.add(Input((training_dataset_x.shape[1],)))
+   model.add(Dense(16, activation='relu', name='Hidden-1'))
+   model.add(Dense(16, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='sigmoid', name='Output'))
+   model.summary()
+
+   model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['binary_accuracy'])
+
+   from tensorflow.keras.callbacks import Callback
+
+   class MyLambdaCallback(Callback):
+       def __init__(self, on_epoch_begin=None, on_epoch_end=None, on_batch_begin=None, on_batch_end=None):
+           self._on_epoch_begin = on_epoch_begin
+           self._on_epoch_end = on_epoch_end
+           self._on_batch_begin = on_batch_begin
+           self._on_batch_end = on_batch_end
+
+       def on_epoch_begin(self, epoch, logs):
+           if self._on_epoch_begin:
+               self._on_epoch_begin(epoch, logs)
+
+       def on_epoch_end(self, epoch, logs):
+           if self._on_epoch_end:
+               self._on_epoch_end(epoch, logs)
+
+       def on_batch_begin(self, batch, logs):
+           if self._on_batch_begin:
+               self._on_batch_begin(batch, logs)
+
+       def on_batch_end(self, batch, logs):
+           if self._on_batch_end:
+               self._on_batch_end(batch, logs)
+
+   import numpy as np
+
+   batch_losses= []
+
+   def on_epoch_begin_proc(epoch, logs):
+       global batch_losses
+       batch_losses = []
+       print(f'epoch: {epoch}')
+
+   def on_epoch_end_proc(epoch, logs):
+       loss = logs['loss']
+       val_loss = logs['val_loss']
+       print(f'\nepoch: {epoch}, loss: {loss}, val_loss: {val_loss}')
+       print(f'batch mean: {np.mean(batch_losses)}')
+       print('-' * 30)
+
+   def on_batch_end_proc(batch, logs):
+       global total
+       loss = logs['loss']
+       batch_losses.append(loss)
+       print(f'\t\tbatch: {batch}, loss: {loss}')
+
+   mylambda_callback = MyLambdaCallback(on_epoch_begin=on_epoch_begin_proc, on_epoch_end=on_epoch_end_proc,
+                                         on_batch_end=on_batch_end_proc)
+
+   hist = model.fit(training_dataset_x, training_dataset_y, batch_size=32, epochs=100, validation_split=0.2,
+                     callbacks=[mylambda_callback], verbose=0)
+
+   import matplotlib.pyplot as plt
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Loss Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['loss'])
+   plt.plot(hist.epoch, hist.history['val_loss'])
+   plt.legend(['Loss', 'Validation Loss'])
+   plt.show()
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Binary Accuracy Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['binary_accuracy'])
+   plt.plot(hist.epoch, hist.history['val_binary_accuracy'])
+   plt.legend(['Accuracy', 'Validation Accuracy'])
+   plt.show()
+
+   eval_result = model.evaluate(test_dataset_x, test_dataset_y, batch_size=32)
+
+   for i in range(len(eval_result)):
+       print(f'{model.metrics_names[i]}: {eval_result[i]}')
+
+.. note::
+
+   Bu örnekteki grafikler de gerçek bir eğitim sürecine dayandığından, bu ortamda yeniden üretilemediği için
+   görsel oluşturulmamıştır.
+
+Özellik Ölçeklemesi (Feature Scaling) Kavramı
+=============================================
+
+Bir nörona giren değerlerin *w* değerleriyle çarpılıp toplandığını (dot-product) ve sonuca bias değerinin
+toplanarak aktivasyon fonksiyonuna sokulduğunu biliyoruz. Örneğin modelde girdi katmanında x1, x2 ve x3 olmak
+üzere üç *sütun (feature)* bulunuyor olsun. Bu girdiler ilk saklı katmana sokulduğunda w1x1 + w2x2 + w3x3 + bias
+biçiminde bir toplam elde edilecektir. Bu toplam da aktivasyon fonksiyonuna sokulacaktır. İşte bu *dot product*
+işleminde x1, x2, x3 sütunlarının mertebeleri birbirlerinden çok farklıysa mertebesi yüksek olan sütunun *dot
+product* etkisi yüksek olacaktır. Bu durum da sanki o sütunun daha önemli olarak değerlendirilmesine yol
+açacaktır. Bu biçimdeki bir sinir ağı *geç yakınsar* ve gücü kestirim bakımından zayıflar. İşte bu nedenden
+dolayı işin başında sütunların (yani özelliklerin) mertebelerinin birbirlerine yaklaştırılması gerekmektedir. Bu
+işlemlere *özellik ölçeklemesi (feature scaling)* denilmektedir. Yapay sinir ağlarında sütunlar arasında
+mertebe farklılıkları varsa mutlaka özellik ölçeklemesi yapılmalıdır.
+
+Özellik ölçeklemesi makine öğrenmesinde başka konularda da gerekebilmektedir. Ancak bazı konularda ise
+gerekmemektedir. Biz kursumuzda her konuda özellik ölçeklemesinin gerekli olup olmadığını açıklayacağız.
+
+Özellik Ölçeklemesi Yöntemleri
+==============================
+
+Çeşitli özellik ölçeklemesi yöntemleri vardır. Veri kümelerinin dağılımına ve kullanılan yöntemlere göre değişik
+özellik ölçeklendirmeleri diğerlerine göre avantaj sağlayabilmektedir. En çok kullanılan iki özellik
+ölçeklendirmesi yöntemi *standart ölçekleme (standard scaling)* ve *minmax ölçeklemesi (minmax scaling)*'dir.
+
+Özellik Ölçeklemesi Hakkında Sık Sorulan Sorular
+================================================
+
+Özellik ölçeklemesi konusunda aşağıdaki sorular sıkça sorulmaktadır:
+
+**Soru:** Yapay sinir ağlarında özellik ölçeklemesi her zaman gerekir mi?
+
+**Cevap:** Eğer sütunlar mertebe olarak birbirlerine zaten yakınsa özellik ölçeklemesi yapılmayabilir.
+
+**Soru:** Gerektiği halde özellik ölçeklemesini yapmazsak ne olur?
+
+**Cevap:** Modelin kestirim gücü azalır. Yani performans düşer.
+
+**Soru:** Özellik ölçeklemesi gerekmediği halde özellik ölçeklemesi yaparsak bunun bir zararı dokunur mu?
+
+**Cevap:** Hayır dokunmaz.
+
+**Soru:** Kategorik sütunlara (0 ve 1'lerden oluşan ya da one-hot-encoding yapılmış) özellik ölçeklemesi
+uygulayabilir miyiz?
+
+**Cevap:** Bu sütunlara özellik ölçeklemesi uygulanmayabilir. Ancak uygulamanın bir sakıncası olmaz. Genellikle
+veri bilimcisi tüm sütunlara özellik ölçeklemesi uyguladığı için bunlara da uygulamaktadır.
+
+Özellik ölçeklemesi yalnızca x verilerine uygulanmalıdır, y verilerine özellik ölçeklemesi uygulamanın genel
+olarak faydası ve anlamı yoktur. Ayrıca bir nokta önemlidir: Biz ağımızı nasıl eğitmişsek öyle test ve kestirim
+yapmalıyız. Yani ağı eğitmeden önce özellik ölçeklemesi yapmışsak test işleminden önce test verilerini de
+kestirim işleminden önce kestirim verilerini de aynı biçimde ölçeklendirip işleme sokmalıyız.
+
+.. _standart-ve-minmax-olceklendirme:
+
+=========================================
+Standart Ölçekleme ve Min-Max Ölçeklemesi
+=========================================
+
+Standart Ölçekleme (Standard Scaling)
+=====================================
+
+En çok kullanılan özellik ölçeklendirmesi yöntemlerinden biri *standart ölçekleme (standard scaling)*
+yöntemidir. Bu yöntemde sütunlar diğerlerinden bağımsız olarak kendi aralarında standart normal dağılıma
+uydurulmaktadır. Bu işlem şöyle yapılmaktadır:
+
+.. code-block:: text
+
+   result = (x - mean(x)) / std(x)
+
+Tabii burada biz formülü temsili kod (pseudo code) olarak verdik. Buradaki *mean* sütunun ortalamasını *std* ise
+standart sapmasını belirtmektedir. Sütunu bu biçimde ölçeklendirdiğimizde değerler büyük ölçüde 0'ın etrafında
+toplanır. Standart ölçeklemenin değerleri standart normal dağılıma uydurmaya çalıştığına dikkat ediniz.
+
+Standart ölçeklemeye *standardizasyon (standardization)* da denilmektedir. Standart ölçekleme aşırı uçtaki
+değerlerden (outliers) olumsuz bir biçimde etkilenme eğilimindedir. Veri bilimcileri genellikle standart
+ölçeklemeyi default ölçekleme olarak kullanmaktadır. Bir NumPy dizisindeki sütunları aşağıdaki gibi bir
+fonksiyonla standart ölçeklemeye sokabiliriz.
+
+Standart ölçekleme yapan bir fonksiyonu aşağıdaki gibi yazabiliriz:
+
+.. code-block:: python
+
+   def standard_scaler(dataset):
+       scaled_dataset = np.zeros(dataset.shape)
+       for col in range(dataset.shape[1]):
+           scaled_dataset[:, col] = (dataset[:, col] - np.mean(dataset[:, col])) / np.std(dataset[:, col])
+       return scaled_dataset
+
+Tabii aslında NumPy'ın eksensel işlem yapma özelliğinden faydalanarak yukarıdaki işlemi aşağıdaki gibi tek
+satırla da yapabiliriz:
+
+.. code-block:: python
+
+   def standard_scaler(dataset):
+       return (dataset - np.mean(dataset, axis=0)) / np.std(dataset, axis=0)
+
+Aşağıda standart ölçeklemeye ilişkin bir örnek verilmiştir.
+
+.. code-block:: python
+
+   import numpy as np
+
+   data= np.array([4, 7, 1, 90, 45, 70, 23, 12, 6, 9, 45, 82, 65])
+   mean = np.mean(data)
+   std = np.std(data)
+   print(f'Mean: {mean}, Standard Deviation: {std}')
+
+   result = (data - mean) / std
+
+   print(f'Data: {data}')
+   print(f'Scaled Data: {result}')
+
+   print('--------------------------------')
+
+   dataset = np.array([[1, 2, 3], [2, 1, 4], [7, 3, 8], [8, 9, 2], [20, 12, 3]])
+
+   def standard_scaler(dataset):
+       scaled_dataset = np.zeros(dataset.shape)
+       for col in range(dataset.shape[1]):
+           scaled_dataset[:, col] = (dataset[:, col] - np.mean(dataset[:, col])) / np.std(dataset[:, col])
+       return scaled_dataset
+
+   result = standard_scaler(dataset)
+   print(dataset)
+   print(result)
+
+scikit-learn'de StandardScaler Sınıfı
+=====================================
+
+Aslında scikit-learn kütüphanesinde ``sklearn.preprocessing`` modülü içerisinde zaten standart ölçekleme yapan
+``StandardScaler`` isimli bir sınıf vardır. Bu sınıf diğer scikit-learn sınıfları gibi kullanılmaktadır. Yani
+önce ``StandardScaler`` sınıfı türünden bir nesne yaratılır. Sonra bu nesne ile ``fit`` ve ``transform``
+metotları çağrılır. Tabii ``fit`` ve ``transform`` metotlarında aynı veri kümesi kullanılacaksa bu işlem tek
+hamlede ``fit_transform`` metoduyla yapılabilir. Örneğin:
+
+.. code-block:: python
+
+   from sklearn.preprocessing import StandardScaler
+
+   ss = StandardScaler()
+   ss.fit(dataset)
+   scaled_dataset = ss.transform(dataset)
+
+``fit`` işlemi sütunların ortalamasını ve standart sapmasını nesnenin içerisinde saklamaktadır. ``transform``
+işleminde bu bilgiler kullanılmaktadır. ``fit`` işleminden sonra nesnenin özniteliklerinden sütunlara ilişkin bu
+bilgiler elde edilebilir. Örneğin ``fit`` işleminden sonra sınıfın ``mean_`` örnek özniteliğinden sütun
+ortalamaları, ``scale_`` örnek özniteliğinden sütun standart sapmaları ve ``var_`` örnek özniteliğinden
+sütunların varyansları elde edilebilir.
+
+Aşağıda ``StandardScaler`` sınıfının kullanımına ilişkin bir örnek verilmiştir.
+
+.. code-block:: python
+
+   dataset = np.array([[1, 2, 3], [2, 1, 4], [7, 3, 8], [8, 9, 2], [20, 12, 3]])
+   print(dataset)
+
+   from sklearn.preprocessing import StandardScaler
+
+   ss = StandardScaler()
+   ss.fit(dataset)
+
+   print(f'{ss.mean_}, {ss.scale_}')
+   scaled_dataset = ss.transform(dataset)
+   print(scaled_dataset)
+
+Eğitim, Test ve Kestirim Verilerinin Ölçeklendirilmesi
+======================================================
+
+Sinir ağlarında özellik ölçeklemesi yapılırken şu noktaya dikkat edilmelidir: Özellik ölçeklemesi önce eğitim
+veri kümesinde gerçekleştirilir. Sonra eğitim veri kümesindeki sütunlardaki bilgiler kullanılarak test veri
+kümesi ve kestirim veri kümesi ölçeklendirilir. (Yani test veri kümesi ve kestirim veri kümesi kendi arasında
+ölçeklendirilmez. Eğitim veri kümesi referans alınarak ölçeklendirilir. Çünkü modelin test edilmesi ve kestirimi
+eğitim şartlarında yapılmalıdır.) Bu durumu kodla şöyle ifade edebiliriz:
+
+.. code-block:: python
+
+   ss = StandardScaler()
+   ss.fit(training_dataset_x)
+
+   scaled_training_dataset_x = ss.transform(training_dataset_x)
+   scaled_test_dataset_x = ss.transform(test_dataset_x)
+   scaled_predict_dataset_x = ss.transform(predict_dataset_x)
+
+Örneğin ``diabetes.csv`` veri kümesi üzerinde standart ölçekleme yapmak isteyelim. Bunun için önce veri kümesini
+``dataset_x`` ve ``dataset_y`` biçiminde sonra da *eğitim* ve *test* olmak üzere ikiye ayırırız. Ondan sonra
+eğitim veri kümesi üzerinde özellik ölçeklemesi yapıp eğitimi uygularız. Yukarıda da belirttiğimiz gibi eğitim
+veri kümesinden elde edilen ölçekleme bilgisinin test işlemi öncesinde test veri kümesine de, kestirim işlemi
+öncesinde kestirim veri kümesine de uygulanması gerekmektedir.
+
+Aşağıda *diabetes* örneğini standart ölçeklendirme uygulayarak yeniden düzenliyoruz.
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('diabetes.csv')
+
+   from sklearn.impute import SimpleImputer
+
+   si = SimpleImputer(strategy='mean', missing_values=0)
+
+   impute_features = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+   df[impute_features] = si.fit_transform(df[impute_features])
+
+   dataset = df.to_numpy()
+
+   dataset_x = dataset[:, :-1]
+   dataset_y = dataset[:, -1]
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+   from sklearn.preprocessing import StandardScaler
+
+   ss = StandardScaler()
+
+   ss.fit(training_dataset_x)
+   scaled_training_dataset_x = ss.transform(training_dataset_x)
+   scaled_test_dataset_x = ss.transform(test_dataset_x)
+
+   from tensorflow.keras import Sequential
+   from tensorflow.keras.layers import Input, Dense
+
+   model = Sequential(name='Diabetes')
+
+   model.add(Input((training_dataset_x.shape[1],)))
+   model.add(Dense(16, activation='relu', name='Hidden-1'))
+   model.add(Dense(16, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='sigmoid', name='Output'))
+   model.summary()
+
+   model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['binary_accuracy'])
+   hist = model.fit(scaled_training_dataset_x, training_dataset_y, batch_size=32, epochs=100,
+                     validation_split=0.2)
+   eval_result = model.evaluate(scaled_test_dataset_x, test_dataset_y, batch_size=32)
+
+   import matplotlib.pyplot as plt
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Loss Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['loss'])
+   plt.plot(hist.epoch, hist.history['val_loss'])
+   plt.legend(['Loss', 'Validation Loss'])
+   plt.show()
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Binary Accuracy Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['binary_accuracy'])
+   plt.plot(hist.epoch, hist.history['val_binary_accuracy'])
+   plt.legend(['Accuracy', 'Validation Accuracy'])
+   plt.show()
+
+   for i in range(len(eval_result)):
+       print(f'{model.metrics_names[i]}: {eval_result[i]}')
+
+   import numpy as np
+
+   predict_dataset = np.array([[2 ,90, 68, 12, 120, 38.2, 0.503, 28],
+                               [4, 111, 79, 47, 207, 37.1, 1.39, 56],
+                               [3, 190, 65, 25, 130, 34, 0.271, 26],
+                               [8, 176, 90, 34, 300, 50.7, 0.467, 58],
+                               [7, 106, 92, 18, 200, 35, 0.300, 48]])
+
+   scaled_predict_dataset = ss.transform(predict_dataset)
+   predict_result = model.predict(scaled_predict_dataset)
+   print(predict_result)
+
+   for result in predict_result[:, 0]:
+       print('Şeker hastası' if result > 0.5 else 'Şeker Hastası Değil')
+
+.. note::
+
+   Buradaki epoch grafikleri gerçek bir eğitim sürecinin (``diabetes.csv`` üzerinde çalışan ``fit`` işleminin)
+   sonuçlarına dayandığından ve bu ortamda gerçek bir eğitim çalıştırılamadığından, grafik görseli burada
+   oluşturulmamıştır; kod yukarıda orijinal haliyle verilmiştir.
+
+Min-Max Ölçeklemesi
+===================
+
+Diğer çok kullanılan bir özellik ölçeklemesi yöntemi de *min-max* ölçeklemesi denilen yöntemdir. Bu ölçeklemede
+sütun değerleri [0, 1] arasında noktalı sayılarla temsil edilir. Min-max ölçeklemesi aşağıdaki temsili kodda
+olduğu gibi yapılmaktadır:
+
+.. code-block:: text
+
+   (a - min(a)) / (max(a) - min(a))
+
+Örneğin sütun değerleri aşağıdaki gibi olsun:
+
+.. code-block:: text
+
+   2
+   5
+   9
+   4
+   12
+
+Burada min-max ölçeklemesi şöyle yapılmaktadır:
+
+.. code-block:: text
+
+   2 => (2 - 2) / 10
+   5 => (5 - 2) / 10
+   9 => (9 - 2) / 10
+   4 => (4 - 2) / 10
+   12 => (12 - 2) / 10
+
+Min-max ölçeklemesinde en küçük değerin ölçeklenmiş değerinin 0 olduğuna, en büyük değerin ölçeklenmiş değerinin
+1 olduğuna, diğer değerlerin ise 0 ile 1 arasında ölçeklendirildiğine dikkat ediniz.
+
+Min-max ölçeklemesi yapan bir fonksiyon şöyle yazılabilir:
+
+.. code-block:: python
+
+   import numpy as np
+
+   def minmax_scaler(dataset):
+       scaled_dataset = np.zeros(dataset.shape)
+       for col in range(dataset.shape[1]):
+           min_val, max_val = np.min(dataset[:, col]), np.max(dataset[:, col])
+           scaled_dataset[:, col] = 0 if max_val - min_val == 0 else (dataset[:, col] - min_val) / (max_val - min_val)
+       return scaled_dataset
+
+Bir sütundaki tüm değerlerin aynı olduğunu düşünelim. Böyle bir sütunun veri kümesinde bulunmasının bir faydası
+olabilir mi? Tabii ki olmaz. Min-max ölçeklemesi yaparken sütundaki tüm değerler aynı ise sıfıra bölme gibi bir
+anomali oluşabilmektedir. Yukarıdaki kodda bu durum da dikkate alınmıştır. (Tabii aslında böyle bir sütun
+önişleme aşamasında veri kümesinden zaten atılması gerekir.) Yukarıdaki fonksiyonu yine NumPy'ın eksensel işlem
+yapma yeteneğini kullanarak tek satırda da yazabiliriz:
+
+.. code-block:: python
+
+   def minmax_scaler(dataset):
+       return (dataset - np.min(dataset, axis=0)) / (np.max(dataset, axis=0) - np.min(dataset, axis=0))
+
+Aşağıda min-max ölçeklemesine ilişkin bir örnek verilmiştir.
+
+.. code-block:: python
+
+   import numpy as np
+
+   def minmax_scaler(dataset):
+       scaled_dataset = np.zeros(dataset.shape)
+
+       for col in range(dataset.shape[1]):
+           min_val, max_val = np.min(dataset[:, col]), np.max(dataset[:, col])
+           scaled_dataset[:, col] = 0 if max_val - min_val == 0 else (dataset[:, col] - min_val) / (max_val - min_val)
+       return scaled_dataset
+
+   """
+   def minmax_scaler(dataset):
+           return (dataset - np.min(dataset, axis=0)) / (np.max(dataset, axis=0) - np.min(dataset, axis=0))
+   """
+
+   dataset = np.array([[1, 2, 3], [2, 1, 4], [7, 3, 8], [8, 9, 2], [20, 12, 3]])
+
+   result = minmax_scaler(dataset)
+   print(dataset)
+   print(result)
+
+scikit-learn'de MinMaxScaler Sınıfı
+===================================
+
+scikit-learn kütüphanesinde ``sklearn.preprocessing`` modülünde min-max ölçeklemesi yapan ``MinMaxScaler``
+isimli bir sınıf da bulunmaktadır. Sınıfın kullanımı tamamen benzerleri gibidir. Örneğin:
+
+.. code-block:: python
+
+   from sklearn.preprocessing import MinMaxScaler
+
+   mms = MinMaxScaler()
+   mms.fit(dataset)
+   scaled_dataset = mms.transform(dataset)
+
+Yine sınıfın ``fit`` ve ``transform`` işlemini birlikte yapan ``fit_transform`` isimli metodu bulunmaktadır.
+
+.. code-block:: python
+
+   dataset = np.array([[1, 2, 3], [2, 1, 4], [7, 3, 8], [8, 9, 2], [20, 12, 3]])
+
+   from sklearn.preprocessing import MinMaxScaler
+
+   mms = MinMaxScaler()
+   mms.fit(dataset)
+   scaled_dataset = mms.transform(dataset)
+
+   print(dataset)
+   print(scaled_dataset)
+
+Şimdi de *diabetes* örneğini min-max ölçeklemesi ile yeniden gerçekleştirelim. Aşağıdaki programı
+çalıştırdığımızda min-max ölçeklemesinin standart ölçeklemeden bu veri kümesi için daha iyi sonuçlar verdiğini
+görmekteyiz.
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('diabetes.csv')
+
+   from sklearn.impute import SimpleImputer
+
+   si = SimpleImputer(strategy='mean', missing_values=0)
+
+   impute_features = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+   df[impute_features] = si.fit_transform(df[impute_features])
+
+   dataset = df.to_numpy()
+
+   dataset_x = dataset[:, :-1]
+   dataset_y = dataset[:, -1]
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+   from sklearn.preprocessing import MinMaxScaler
+
+   mms = MinMaxScaler()
+
+   mms.fit(training_dataset_x)
+   scaled_training_dataset_x = mms.transform(training_dataset_x)
+   scaled_test_dataset_x = mms.transform(test_dataset_x)
+
+   from tensorflow.keras import Sequential
+   from tensorflow.keras.layers import Input, Dense
+
+   model = Sequential(name='Diabetes')
+
+   model.add(Input((training_dataset_x.shape[1],)))
+   model.add(Dense(16, activation='relu', name='Hidden-1'))
+   model.add(Dense(16, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='sigmoid', name='Output'))
+   model.summary()
+
+   model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['binary_accuracy'])
+   hist = model.fit(scaled_training_dataset_x, training_dataset_y, batch_size=32, epochs=100,
+                     validation_split=0.2)
+   eval_result = model.evaluate(scaled_test_dataset_x, test_dataset_y, batch_size=32)
+
+   import matplotlib.pyplot as plt
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Loss Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['loss'])
+   plt.plot(hist.epoch, hist.history['val_loss'])
+   plt.legend(['Loss', 'Validation Loss'])
+   plt.show()
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Binary Accuracy Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['binary_accuracy'])
+   plt.plot(hist.epoch, hist.history['val_binary_accuracy'])
+   plt.legend(['Accuracy', 'Validation Accuracy'])
+   plt.show()
+
+   for i in range(len(eval_result)):
+       print(f'{model.metrics_names[i]}: {eval_result[i]}')
+
+   import numpy as np
+
+   predict_dataset = np.array([[2 ,90, 68, 12, 120, 38.2, 0.503, 28],
+                               [4, 111, 79, 47, 207, 37.1, 1.39, 56],
+                               [3, 190, 65, 25, 130, 34, 0.271, 26],
+                               [8, 176, 90, 34, 300, 50.7, 0.467, 58],
+                               [7, 106, 92, 18, 200, 35, 0.300, 48]])
+
+   scaled_predict_dataset = mms.transform(predict_dataset)
+   predict_result = model.predict(scaled_predict_dataset)
+   print(predict_result)
+
+   for result in predict_result[:, 0]:
+       print('Şeker hastası' if result > 0.5 else 'Şeker Hastası Değil')
+
+.. note::
+
+   Buradaki epoch grafikleri de gerçek bir eğitim sürecine dayandığından, bu ortamda yeniden üretilemediği için
+   görsel oluşturulmamıştır.
+
+.. _maxabs-normalization-ve-regresyona-giris:
+
+============================================================================
+Maxabs Ölçeklemesi, Ölçekleme Bilgisinin Saklanması ve Normalization Katmanı
+============================================================================
+
+Maxabs Ölçeklemesi
+==================
+
+Diğer bir özellik ölçeklemesi de *maxabs* ölçeklemesi denilen ölçeklemedir. Maxabs ölçeklemesinde sütundaki
+değerler sütundaki değerlerin mutlak değerlerinin en büyüğüne bölünmektedir. Böylece sütun değerleri [-1, 1]
+arasına ölçeklenmektedir. Maxabs ölçeklemesi şöyle yapılmaktadır:
+
+.. code-block:: text
+
+   x / max(abs(x))
+
+Burada sütundaki tüm değerler en büyük mutlak değere bölündüğüne göre ölçeklenmiş değerler -1 ile +1 arasında
+olacaktır.
+
+scikit-learn kütüphanesinde *maxabs* ölçeklemesi ``MaxAbsScaler`` isimli sınıfla temsil edilmiştir. Bu sınıf
+diğer scikit-learn sınıflarında olduğu gibi kullanılmaktadır.
+
+Aşağıda *maxabs* ölçeklemesinin manuel ve scikit-learn kütüphanesiyle yapılmasına bir örnek verilmiştir.
+
+.. code-block:: python
+
+   import numpy as np
+
+   def maxabs_scaler(dataset):
+       scaled_dataset = np.zeros(dataset.shape)
+
+       for col in range(dataset.shape[1]):
+           maxabs_val = np.max(np.abs(dataset[:, col]))
+           scaled_dataset[:, col] = 0 if maxabs_val == 0 else  dataset[:, col] / maxabs_val
+       return scaled_dataset
+
+   """
+   def maxabs_scaler(dataset):
+           return dataset /  np.max(np.abs(dataset), axis=0)
+   """
+
+   dataset = np.array([[1, 2, 3], [2, 1, 4], [7, 3, 8], [8, 9, 2], [20, 12, 3]])
+
+   result = maxabs_scaler(dataset)
+   print(dataset)
+   print(result)
+
+   print('------------------------------------------------')
+
+   dataset = np.array([[1, 2, 3], [2, 1, 4], [7, 3, 8], [8, 9, 2], [20, 12, 3]])
+
+   from sklearn.preprocessing import MaxAbsScaler
+
+   mas = MaxAbsScaler()
+   mas.fit(dataset)
+   scaled_dataset = mas.transform(dataset)
+
+   print(dataset)
+   print(scaled_dataset)
+
+Aşağıda *diabetes* örneğinde maxabs ölçeklemesinin kullanılmasına ilişkin örnek verilmiştir. Diabetes örneğinde
+aslında maxabs ölçeklemesi diğerlerine göre uygun bir ölçekleme değildir. Ancak biz burada ölçeklemenin
+kullanımına ilişkin bir örnek vermek istiyoruz.
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('diabetes.csv')
+
+   from sklearn.impute import SimpleImputer
+
+   si = SimpleImputer(strategy='mean', missing_values=0)
+
+   impute_features = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+   df[impute_features] = si.fit_transform(df[impute_features])
+
+   dataset = df.to_numpy()
+
+   dataset_x = dataset[:, :-1]
+   dataset_y = dataset[:, -1]
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+   from sklearn.preprocessing import MaxAbsScaler
+
+   mas = MaxAbsScaler()
+
+   mas.fit(training_dataset_x)
+   scaled_training_dataset_x = mas.transform(training_dataset_x)
+   scaled_test_dataset_x = mas.transform(test_dataset_x)
+
+   from tensorflow.keras import Sequential
+   from tensorflow.keras.layers import Input, Dense
+
+   model = Sequential(name='Diabetes')
+
+   model.add(Input((training_dataset_x.shape[1],)))
+
+   model.add(Dense(16, activation='relu', name='Hidden-1'))
+   model.add(Dense(16, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='sigmoid', name='Output'))
+   model.summary()
+
+   model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['binary_accuracy'])
+   hist = model.fit(scaled_training_dataset_x, training_dataset_y, batch_size=32, epochs=100,
+                     validation_split=0.2)
+   eval_result = model.evaluate(scaled_test_dataset_x, test_dataset_y, batch_size=32)
+
+   import matplotlib.pyplot as plt
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Loss Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['loss'])
+   plt.plot(hist.epoch, hist.history['val_loss'])
+   plt.legend(['Loss', 'Validation Loss'])
+   plt.show()
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Binary Accuracy Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['binary_accuracy'])
+   plt.plot(hist.epoch, hist.history['val_binary_accuracy'])
+   plt.legend(['Accuracy', 'Validation Accuracy'])
+   plt.show()
+
+   for i in range(len(eval_result)):
+       print(f'{model.metrics_names[i]}: {eval_result[i]}')
+
+   import numpy as np
+
+   predict_dataset = np.array([[2 ,90, 68, 12, 120, 38.2, 0.503, 28],
+                               [4, 111, 79, 47, 207, 37.1, 1.39, 56],
+                               [3, 190, 65, 25, 130, 34, 0.271, 26],
+                               [8, 176, 90, 34, 300, 50.7, 0.467, 58],
+                               [7, 106, 92, 18, 200, 35, 0.300, 48]])
+
+   scaled_predict_dataset = mas.transform(predict_dataset)
+   predict_result = model.predict(scaled_predict_dataset)
+   print(predict_result)
+
+   for result in predict_result[:, 0]:
+       print('Şeker hastası' if result > 0.5 else 'Şeker Hastası Değil')
+
+.. note::
+
+   Buradaki epoch grafikleri gerçek bir eğitim sürecine dayandığından, bu ortamda yeniden üretilemediği için
+   görsel oluşturulmamıştır.
+
+Ölçekleme Yönteminin Seçimi
+===========================
+
+Biz yukarıda üç ölçeklendirmeyi tanıttık. Bunlar *standart ölçekleme*, *minmax ölçeklemesi* ve *maxabs
+ölçeklemesi* idi. Aslında bunların dışında başka ölçeklemeler de kullanılabilmektedir. Bu konuda başka
+kaynaklara başvurabilirsiniz. Peki elimizdeki veri kümesi için hangi ölçeklemenin daha iyi olduğuna nasıl karar
+verebiliriz? Aslında bu kararı vermenin çok pratik yolları yoktur. En iyi yöntem yine de *deneme yanılma
+yoluyla* kıyaslama yapmaktır. Fakat yine de ölçekleme türünü seçerken aşağıdaki durumlara dikkat edilmelidir:
+
+- Sütunlarda aşırı uç değerlerin (outliers) bulunduğu durumda minmax ölçeklemesi ölçeklenmiş değerlerin
+  birbirinden uzaklaşmasına yol açabilmektedir. Bu durumda bu ölçeklemenin performansı düşürebileceğine dikkat
+  etmek gerekir.
+
+- Sütunlardaki değerler normal dağılıma benziyorsa (örneğin doğal birtakım olgulardan geliyorsa) standart
+  ölçekleme diğerlerine göre daha iyi performans gösterebilmektedir.
+
+- Sütunlardaki değerler düzgün dağılmışsa ve aşırı uç değerler yoksa minmax ölçeklemesi tercih edilebilir.
+
+Ancak yine uygulamacılar veri kümeleri hakkında özel bir bilgiye sahip değilse ve deneme yanılma yöntemini
+kullanmak istemiyorlarsa standart ölçeklemeyi default ölçekleme olarak tercih etmektedir.
+
+Ölçekleme Bilgisinin Saklanması: pickle Modülü
+==============================================
+
+Peki özellik ölçeklemesi yaptığımız bir modeli nasıl saklayıp geri yükleyebiliriz? Yukarıdaki örneklerde biz
+özellik ölçeklemesini scikit-learn kullanarak yaptık. ``Sequential`` sınıfının ``save`` metodu modeli save
+ederken bu ölçeklemeler modelin bir parçası olmadığı için onları saklayamamaktadır. Bu nedenle bizim bu
+bilgileri ayrıca save etmemiz gerekmektedir. Ancak Keras'ta özellik ölçeklendirmeleri bir katman nesnesi olarak
+da bulundurulmuştur. Eğer özellik ölçeklemeleri bir katman ile yapılırsa bu durumda modeli zaten save ettiğimizde
+bu bilgiler de save edilmiş olacaktır. Biz burada scikit-learn ölçekleme bilgisinin nasıl saklanacağı ve geri
+yükleneceği üzerinde duracağız.
+
+Programlamada bir sınıf nesnesinin diskteki bir dosyaya yazılmasına ve oradan geri yüklenmesine *nesnelerin seri
+hale getirilmesi (object serialization)* denilmektedir. scikit-learn içerisinde *object serialization* işlemine
+yönelik özel sınıflar yoktur. Ancak seri hale getirme işlemi Python'un standart kütüphanesindeki ``pickle``
+modülü ile yapılabilmektedir. Örneğin scikit-learn ile standart ölçekleme yapmış olalım ve bu ölçekleme bilgisini
+Python'un standart ``pickle`` modülü ile bir dosyada saklamak isteyelim. Bu işlemi şöyle yapabiliriz:
+
+.. code-block:: python
+
+   import pickle
+
+   with open('diabetes-scaling.dat', 'wb') as f:
+       pickle.dump(ss, f)
+
+Nesneyi dosyadan geri yükleme işlemi de şöyle yapılmaktadır:
+
+.. code-block:: python
+
+   with open('diabetes-scaling.dat', 'rb') as f:
+       ss = pickle.load(f)
+
+Aşağıdaki örnekte model ``diabetes.h5`` dosyası içerisinde, ``MinMaxScaler`` nesnesi de
+``diabetes-scaling.dat`` dosyası içerisinde saklanmıştır ve geri yüklenmiştir.
+
+.. code-block:: python
+
+   # diabetes-scaling-save.py
+
+   import pandas as pd
+
+   df = pd.read_csv('diabetes.csv')
+
+   from sklearn.impute import SimpleImputer
+
+   si = SimpleImputer(strategy='mean', missing_values=0)
+
+   impute_features = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+   df[impute_features] = si.fit_transform(df[impute_features])
+
+   dataset = df.to_numpy()
+
+   dataset_x = dataset[:, :-1]
+   dataset_y = dataset[:, -1]
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+   from sklearn.preprocessing import StandardScaler
+
+   ss = StandardScaler()
+
+   ss.fit(training_dataset_x)
+   scaled_training_dataset_x = ss.transform(training_dataset_x)
+   scaled_test_dataset_x = ss.transform(test_dataset_x)
+
+   from tensorflow.keras import Sequential
+   from tensorflow.keras.layers import Input, Dense
+
+   model = Sequential(name='Diabetes')
+
+   model.add(Input((training_dataset_x.shape[1],)))
+   model.add(Dense(16, activation='relu', name='Hidden-1'))
+   model.add(Dense(16, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='sigmoid', name='Output'))
+   model.summary()
+
+   model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['binary_accuracy'])
+   hist = model.fit(scaled_training_dataset_x, training_dataset_y, batch_size=32, epochs=100,
+                     validation_split=0.2)
+   eval_result = model.evaluate(scaled_test_dataset_x, test_dataset_y, batch_size=32)
+
+   import matplotlib.pyplot as plt
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Loss Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['loss'])
+   plt.plot(hist.epoch, hist.history['val_loss'])
+   plt.legend(['Loss', 'Validation Loss'])
+   plt.show()
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Binary Accuracy Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['binary_accuracy'])
+   plt.plot(hist.epoch, hist.history['val_binary_accuracy'])
+   plt.legend(['Accuracy', 'Validation Accuracy'])
+   plt.show()
+
+   for i in range(len(eval_result)):
+       print(f'{model.metrics_names[i]}: {eval_result[i]}')
+
+   model.save('diabetes.h5')
+
+   import pickle
+
+   with open('diabetes-scaling.dat', 'wb') as f:
+       pickle.dump(ss, f)
+
+   # diabetes-scaling-load.py
+
+   import numpy as np
+
+   from tensorflow.keras.models import load_model
+   import pickle
+
+   model = load_model('diabetes.h5')
+
+   with open('diabetes-scaling.dat', 'rb') as f:
+       ss = pickle.load(f)
+
+   predict_dataset = np.array([[2 ,90, 68, 12, 120, 38.2, 0.503, 28],
+                               [4, 111, 79, 47, 207, 37.1, 1.39, 56],
+                               [3, 190, 65, 25, 130, 34, 0.271, 26],
+                               [8, 176, 90, 34, 300, 50.7, 0.467, 58],
+                               [7, 106, 92, 18, 200, 35, 0.300, 48]])
+
+   scaled_predict_dataset = ss.transform(predict_dataset)
+   predict_result = model.predict(scaled_predict_dataset)
+   print(predict_result)
+
+   for result in predict_result[:, 0]:
+       print('Şeker hastası' if result > 0.5 else 'Şeker Hastası Değil')
+
+.. note::
+
+   Buradaki epoch grafikleri de gerçek bir eğitim sürecine dayandığından, bu ortamda yeniden üretilemediği için
+   görsel oluşturulmamıştır.
+
+Özellik Ölçeklemesinin Bir Katman Olarak İfade Edilmesi
+=======================================================
+
+Yukarıda da belirttiğimiz gibi eğer biz ölçekleme işlemini Keras'ın bir katmanı gibi ifade edip uygularsak Keras
+modelini sakladığımızda zaten bu bilgi de saklanmış olacaktır. Son zamanlara kadar Keras'ta bu işlemi yapacak
+hazır katmanlar bulunmuyordu. Ancak daha sonraları Keras da diğer framework'ler gibi böylesi katmanları
+bulundurmaya başlamıştır. Tabii bu biçimdeki hazır katmanlar yokken programcılar yine bu işlemleri yapan kendi
+katman nesnelerini oluşturabiliyordu.
+
+Keras'ın Normalization Katmanı
+==============================
+
+Keras'a sonradan eklenen ``Normalization`` isimli katman özellik ölçeklemesi yapabilmektedir. ``Normalization``
+katmanı default olarak *standart ölçekleme* için düşünülmüştür. Ancak *minmax ölçeklemesi* için de
+kullanılabilir. Bu katmanı kullanabilmek için önce ``Normalization`` türünden bir nesnenin yaratılması gerekir.
+``Normalization`` sınıfının ``__init__`` metodunun parametrik yapısı şöyledir:
+
+.. code-block:: python
+
+   tf.keras.layers.Normalization(axis=-1, mean=None, variance=None, invert=False, **kwargs)
+
+Burada ``mean`` sütunların ortalama değerlerini, ``variance`` ise sütunların varyans değerlerini almaktadır.
+Ancak programcının bu değerleri girmesine gerek yoktur. ``Normalization`` sınıfının ``adapt`` isimli metodu
+bizden bir veri kümesi alıp bu değerleri o kümeden elde edebilmektedir. Bu durumda standart ölçekleme için
+``Normalization`` katmanı aşağıdaki gibi oluşturulabilir.
+
+.. code-block:: python
+
+   from tensorflow.keras.layers import Normalization
+
+   norm_layer = Normalization()
+   norm_layer.adapt(training_dataset_x)
+
+Tabii bu katmanı input katmanından sonra modele eklememiz gerekir. Örneğin:
+
+.. code-block:: python
+
+   model = Sequential(name='Diabetes')
+
+   model.add(Input((training_dataset_x.shape[1],)))
+   model.add(norm_layer)
+   model.add(Dense(16, activation='relu', name='Hidden-1'))
+   model.add(Dense(16, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='sigmoid', name='Output'))
+   model.summary()
+
+Örneğin:
+
+.. code-block:: python
+
+   import numpy as np
+
+   dataset = np.array([[1, 2, 3], [4, 5, 6], [3, 2, 7], [5, 9, 5]])
+   print(dataset)
+
+   from tensorflow.keras.layers import Normalization
+
+   norm_layer = Normalization()
+   norm_layer.adapt(dataset)
+
+   print(norm_layer.mean)
+   print(norm_layer.variance)
+
+Tabii biz ölçeklemeyi bir katman biçiminde modele eklediğimizde artık test ve predict işlemlerinde ayrıca
+ölçekleme yapmamıza gerek kalmamaktadır. Bu katman zaten modele dahil olduğuna göre işlemler ölçeklendirilerek
+yapılacaktır. Yukarıda da belirttiğimiz gibi özellik ölçeklemesini Keras'ın bir katmanına yaptırdığımızda ayrıca
+ölçekleme bilgilerinin saklanmasına gerek olmadığına dikkat ediniz. Çünkü ölçekleme bilgileri artık modelin bir
+parçası durumundadır.
+
+Aşağıda *diabetes* örneğinin Keras'ın hazır ``Normalization`` katmanı kullanılarak gerçekleştirimi verilmiştir.
+Burada biz konunun anlaşılması için gerekmediği halde modeli saklayıp geri de yükledik.
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('diabetes.csv')
+
+   from sklearn.impute import SimpleImputer
+
+   si = SimpleImputer(strategy='mean', missing_values=0)
+
+   impute_features = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+   df[impute_features] = si.fit_transform(df[impute_features])
+
+   dataset = df.to_numpy()
+
+   dataset_x = dataset[:, :-1]
+   dataset_y = dataset[:, -1]
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+   from tensorflow.keras import Sequential
+   from tensorflow.keras.layers import Input, Normalization, Dense
+
+   norm_layer = Normalization()
+   norm_layer.adapt(training_dataset_x)
+
+   model = Sequential(name='Diabetes')
+
+   model.add(Input((training_dataset_x.shape[1],)))
+   model.add(norm_layer)
+   model.add(Dense(16, activation='relu', name='Hidden-1'))
+   model.add(Dense(16, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='sigmoid', name='Output'))
+   model.summary()
+
+   model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['binary_accuracy'])
+   hist = model.fit(training_dataset_x, training_dataset_y, batch_size=32, epochs=100, validation_split=0.2)
+   eval_result = model.evaluate(test_dataset_x, test_dataset_y, batch_size=32)
+
+   import matplotlib.pyplot as plt
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Loss Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['loss'])
+   plt.plot(hist.epoch, hist.history['val_loss'])
+   plt.legend(['Loss', 'Validation Loss'])
+   plt.show()
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Binary Accuracy Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['binary_accuracy'])
+   plt.plot(hist.epoch, hist.history['val_binary_accuracy'])
+   plt.legend(['Accuracy', 'Validation Accuracy'])
+   plt.show()
+
+   for i in range(len(eval_result)):
+       print(f'{model.metrics_names[i]}: {eval_result[i]}')
+
+   import numpy as np
+
+   predict_dataset = np.array([[2 ,90, 68, 12, 120, 38.2, 0.503, 28],
+                               [4, 111, 79, 47, 207, 37.1, 1.39, 56],
+                               [3, 190, 65, 25, 130, 34, 0.271, 26],
+                               [8, 176, 90, 34, 300, 50.7, 0.467, 58],
+                               [7, 106, 92, 18, 200, 35, 0.300, 48]])
+
+   model.save('diabetes.h5')
+
+   from tensorflow.keras.models import load_model
+
+   model = load_model('diabetes.h5')
+
+   predict_result = model.predict(predict_dataset)
+   print(predict_result)
+
+   for result in predict_result[:, 0]:
+       print('Şeker hastası' if result > 0.5 else 'Şeker Hastası Değil')
+
+.. note::
+
+   Buradaki epoch grafikleri de gerçek bir eğitim sürecine dayandığından, bu ortamda yeniden üretilemediği için
+   görsel oluşturulmamıştır.
+
+Normalization Katmanı ile Min-Max Ölçeklemesi
+=============================================
+
+Keras'ta minmax ölçeklemesi için hazır bir katman bulunmamaktadır. Ancak böyle bir katman nesnesi programcı
+tarafından da oluşturulabilir. Aşağıdaki makalede buna ilişkin bir örnek verilmiştir:
+
+`Implementing sklearn-like Transformers in Keras: A Custom Preprocessing Layer Example
+<https://fdnieuwveldt.medium.com/implementing-sklearn-like-transformers-in-keras-a-custom-preprocessing-layer-example-60688ba821e0>`_
+
+Tabii biz henüz TensorFlow kütüphanesini incelemediğimiz için şu anda böyle bir örnek vermeyeceğiz.
+
+Aslında hazır ``Normalization`` sınıfını biz minmax ölçeklemesi için de kullanabiliriz. Standart ölçeklemenin
+aşağıdaki gibi yapıldığını anımsayınız:
+
+.. code-block:: text
+
+   (X - mu) / sigma
+
+Burada mu ve sigma ilgili sütunun ortalamasını ve standart sapmasını belirtmektedir. Minmax ölçeklemesinin ise
+şöyle yapıldığını anımsayınız:
+
+.. code-block:: text
+
+   (X - min ) / (max - min)
+
+O halde biz aslında standart ölçeklemeyi minmax ölçeklemesi haline de getirebiliriz. Burada mu değerinin min,
+sigma değerinin ise max - min olması gerektiğine dikkat ediniz. Örneğin:
+
+.. code-block:: python
+
+   mins = np.min(training_dataset_x, axis=0)
+   maxmin_diffs = np.max(training_dataset_x, axis=0) - np.min(training_dataset_x, axis=0)
+   norm_layer = Normalization(mean=mins, variance=maxmin_diffs ** 2)
+
+Aşağıda ``Normalization`` sınıfının minmax ölçeklemesi için kullanımına örnek verilmiştir.
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('diabetes.csv')
+
+   from sklearn.impute import SimpleImputer
+
+   si = SimpleImputer(strategy='mean', missing_values=0)
+
+   impute_features = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+   df[impute_features] = si.fit_transform(df[impute_features])
+
+   dataset = df.to_numpy()
+
+   dataset_x = dataset[:, :-1]
+   dataset_y = dataset[:, -1]
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+   from tensorflow.keras import Sequential
+   from tensorflow.keras.layers import Input, Normalization, Dense
+   import numpy as np
+
+   mins = np.min(training_dataset_x, axis=0)
+   maxmin_diffs = np.max(training_dataset_x, axis=0) - np.min(training_dataset_x, axis=0)
+
+   norm_layer = Normalization(mean=mins, variance=maxmin_diffs ** 2)
+
+   model = Sequential(name='Diabetes')
+
+   model.add(Input((training_dataset_x.shape[1],)))
+   model.add(norm_layer)
+   model.add(Dense(16, activation='relu', name='Hidden-1'))
+   model.add(Dense(16, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='sigmoid', name='Output'))
+   model.summary()
+
+   model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['binary_accuracy'])
+   hist = model.fit(training_dataset_x, training_dataset_y, batch_size=32, epochs=100, validation_split=0.2)
+   eval_result = model.evaluate(test_dataset_x, test_dataset_y, batch_size=32)
+   for i in range(len(eval_result)):
+       print(f'{model.metrics_names[i]}: {eval_result[i]}')
+
+   import matplotlib.pyplot as plt
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Loss Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['loss'])
+   plt.plot(hist.epoch, hist.history['val_loss'])
+   plt.legend(['Loss', 'Validation Loss'])
+   plt.show()
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Binary Accuracy Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['binary_accuracy'])
+   plt.plot(hist.epoch, hist.history['val_binary_accuracy'])
+   plt.legend(['Accuracy', 'Validation Accuracy'])
+   plt.show()
+
+   import numpy as np
+
+   predict_dataset = np.array([[2 ,90, 68, 12, 120, 38.2, 0.503, 28],
+                               [4, 111, 79, 47, 207, 37.1, 1.39, 56],
+                               [3, 190, 65, 25, 130, 34, 0.271, 26],
+                               [8, 176, 90, 34, 300, 50.7, 0.467, 58],
+                               [7, 106, 92, 18, 200, 35, 0.300, 48]])
+
+   model.save('diabetes.h5')
+
+   from tensorflow.keras.models import load_model
+
+   model = load_model('diabetes.h5')
+
+   predict_result = model.predict(predict_dataset)
+   print(predict_result)
+
+   for result in predict_result[:, 0]:
+       print('Şeker hastası' if result > 0.5 else 'Şeker Hastası Değil')
+
+.. note::
+
+   Buradaki epoch grafikleri de gerçek bir eğitim sürecine dayandığından, bu ortamda yeniden üretilemediği için
+   görsel oluşturulmamıştır.
+
+Regresyon Modellerine Giriş
+===========================
+
+Biz şimdiye kadar Keras ve sinir ağı modeli üzerinde temel konuları anlayabilmek için hep *diabetes* örneği
+üzerinde çalıştık. Şimdi başka veri kümelerini kullanarak başka örnekler üzerinde çalışacağız.
+
+Anımsanacağı gibi çıktının sınıfsal olmadığı modellere *regresyon modelleri* deniyordu. Biz kursumuzda bu
+durumu vurgulamak için *lojistik olmayan regresyon modelleri* terimini de kullanıyorduk. Regresyon modellerinde
+sinir ağının çıktı katmanındaki aktivasyon fonksiyonu *linear* olmalıdır. Linear aktivasyon fonksiyonu bir şey
+yapmayan fonksiyondur. Başka bir deyişle f(x) değerinin x ile aynı olduğu fonksiyondur. (Zaten anımsanacağı gibi
+Dense katmanında activation parametresi girilmezse default durumda aktivasyon fonksiyonu *linear* alınmaktaydı.)
+
+.. _auto-mpg-regresyon-ornegi:
+
+=========================================
+Auto-MPG Veri Kümesi ile Regresyon Örneği
+=========================================
+
+Auto-MPG Veri Kümesine Giriş
+============================
+
+*Auto-MPG* otomobillerin bir galon benzinle kaç mil gidebildiklerinin (başka bir deyişle yakıt tüketiminin)
+tahmin edilmesi amacıyla oluşturulmuş bir veri kümesidir. Regresyon problemleri için sık kullanılan veri
+kümelerinden biridir. Veriler 80'li yılların başlarında toplanmıştır. O zamanki otomobil teknolojisi dikkate
+alınmalıdır. Veri kümesi aşağıdaki adresten indirilebilir:
+
+`UCI Machine Learning Repository: Auto MPG Data Set <https://archive.ics.uci.edu/dataset/9/auto+mpg>`_
+
+Veri kümesi bir zip dosyası olarak indirilmektedir. Buradaki ``auto-mpg.data`` dosyasını kullanabilirsiniz. Zip
+dosyasındaki ``auto-mpg.names`` dosyasında veri kümesi hakkında açıklamalar ve sütunların isimleri ve anlamları
+bulunmaktadır.
+
+Veri kümesindeki sütunlar SPACE karakterleriyle ve son sütun da TAB karakteriyle birbirlerinden ayrılmıştır.
+Sütunların anlamları şöyledir:
+
+.. list-table::
+   :header-rows: 1
+
+   * - No
+     - Sütun
+     - Tür
+   * - 1
+     - mpg
+     - continuous
+   * - 2
+     - cylinders
+     - multi-valued discrete
+   * - 3
+     - displacement
+     - continuous
+   * - 4
+     - horsepower
+     - continuous
+   * - 5
+     - weight
+     - continuous
+   * - 6
+     - acceleration
+     - continuous
+   * - 7
+     - model year
+     - multi-valued discrete
+   * - 8
+     - origin
+     - multi-valued discrete
+   * - 9
+     - car name
+     - string (unique for each instance)
+
+Burada orijin kategorik bir sütundur. Buradaki değer 1 ise araba Amerika orijinli, 2 ise Avrupa orijinli ve 3 ise
+Japon orijinlidir.
+
+Veri kümesinin text dosyadaki görünümü aşağıdaki gibidir:
+
+.. code-block:: text
+
+   18.0   8   307.0      130.0      3504.      12.0   70  1	"chevrolet chevelle malibu"
+   15.0   8   350.0      165.0      3693.      11.5   70  1	"buick skylark 320"
+   18.0   8   318.0      150.0      3436.      11.0   70  1	"plymouth satellite"
+   16.0   8   304.0      150.0      3433.      12.0   70  1	"amc rebel sst"
+   17.0   8   302.0      140.0      3449.      10.5   70  1	"ford torino"
+   25.0   4   98.00      ?          2046.      19.0   71  1	"ford pinto"
+   19.0   6   232.0      100.0      2634.      13.0   71  1	"amc gremlin"
+   16.0   6   225.0      105.0      3439.      15.5   71  1	"plymouth satellite custom"
+   17.0   6   250.0      100.0      3329.      15.5   71  1	"chevrolet chevelle malib
+   ....
+
+Veri kümesi incelendiğinde dördüncü sütunda (horsepower) ``?`` karakteri ile belirtilen eksik verilerin
+bulunduğu görülmektedir. Veri kümesindeki veriler az olmadığı için bu eksik verilerin bulunduğu satırlar tamamen
+atılabilir. Ya da daha önceden de yaptığımız gibi ortalama değerle imputation uygulanabilir. Ayrıca arabanın
+yakıt tüketimi arabanın markası ile ilişkili olsa da arabaların pek çok alt modelleri vardır. Bu nedenle son
+sütundaki araba isimlerinin kestirimde faydası dokunmayacaktır. Bu sütun da veri kümesinden atılabilir.
+
+Veri Kümesinin Okunması
+=======================
+
+Veri kümesinin bir başlık kısmı içermediğine dikkat ediniz. ``read_csv`` default durumda veri kümesinde başlık
+kısmının olup olmadığına kendi algoritması ile karar vermektedir. Ancak başlık kısmının bu biçimde ``read_csv``
+tarafından otomatik belirlenmesi sağlam bir yöntem değildir. Bu nedenle bu veri kümesi okunurken ``read_csv``
+fonksiyonunda ``header`` parametresi ``None`` geçilmelidir. ``read_csv`` default olarak sütunlardaki
+ayıraçların ``,`` karakteri olduğunu varsaymaktadır. Halbuki bu veri kümesinde sütun ayıraçları ASCII SPACE ve
+TAB karakterleridir. Bu nedenle dosyanın ``read_csv`` tarafından düzgün parse edilebilmesi için ``delimiter``
+parametresine ``r'\s+'`` biçiminde *düzenli ifade (regular expression)* kalıbı girilmelidir. (Düzenli ifadeler
+*Python Uygulamaları* kursunda ele alınmaktadır.) ``read_csv`` fonksiyonu eğer dosyada başlık kısmı yoksa sütun
+isimlerini 0, 1, ... biçiminde nümerik almaktadır.
+
+Bu durumda yukarıdaki veri kümesinin okunması şöyle yapılabilir:
+
+.. code-block:: python
+
+   df = pd.read_csv('auto-mpg.data', delimiter=r'\s+', header=None)
+
+Gereksiz Sütunun Atılması
+=========================
+
+Şimdi bizim araba markalarının bulunduğu son sütundan kurtulmamız gerekir. Bu işlemi şöyle yapabiliriz:
+
+.. code-block:: python
+
+   df = df.iloc[:, :-1]
+
+Tabii bu işlemi ``DataFrame`` sınıfının ``drop`` metodu ile de yapabiliriz:
+
+.. code-block:: python
+
+   df.drop(8, axis=1, inplace=True)
+
+Aslında bu sütun ``read_csv`` ile okuma sırasında ``usecols`` parametresi yardımıyla da atılabilir.
+
+Eksik Verilerin İşlenmesi
+=========================
+
+Şimdi de 3'üncü indeksli sütundaki eksik verileri temsil eden ``?`` bulunan satırlar üzerinde çalışalım. Yukarıda
+da belirttiğimiz gibi bu sütundaki eksik verilerin sayıları çok az olduğu için veri kümesinden atılabilirler. Bu
+işlem şöyle yapılabilir:
+
+.. code-block:: python
+
+   df = df[df.iloc[:, 3] != '?']
+
+Ancak biz geçmiş konuları da kullanabilmek için bu eksik verileri sütun ortalamaları ile doldurmaya (imputation)
+çalışalım. Burada dikkat edilmesi gereken nokta DataFrame nesnesinin 3'üncü indeksli sütununun türünün nümerik
+olmamasıdır. Bu nedenle öncelikle bu sütunun türünü nümerik hale getirmek gerekir. Tabii sütunda ``?``
+karakterleri olduğuna göre önce bu karakterler yerine 0 gibi nümerik değerleri yerleştirmeliyiz:
+
+.. code-block:: python
+
+   df.iloc[df.loc[:, 3] == '?', 3] = 0
+
+Tabii eğer ilgili sütunda zaten 0 değerleri varsa bu durumda 0 ile doldurmak yerine ``np.nan`` değeri ile
+doldurma yolunu tercih edebilirsiniz. Örneğin:
+
+.. code-block:: python
+
+   df.iloc[df.loc[:, 3] == '?', 3] = np.nan
+
+Artık sütunun türünü nümerik hale getirebiliriz:
+
+.. code-block:: python
+
+   df[3] = df[3].astype('float64')
+
+Aslında ``read_csv`` ile okuma sırasında da fonksiyonun ``na_values`` parametresi yardımıyla işin başında
+``?`` karakterleri yerine fonksiyonun ``np.nan`` değerlerini yerleştirmesini de sağlayabiliriz.
+
+Burada doğrudan indekslemede sütun isimlerinin kullanılması gerektiğine, sütun isimlerinin de sütun başlığı
+olmadığı için sayısal biçimde verildiğine dikkat ediniz. Artık 3'üncü indeksli sütun üzerinde imputation
+uygulayabiliriz:
+
+.. code-block:: python
+
+   from sklearn.impute import SimpleImputer
+
+   si = SimpleImputer(strategy='mean', missing_values=0)
+   df[3] = si.fit_transform(df[[3]])
+
+Kategorik Sütunun One-Hot-Encoding ile Dönüştürülmesi
+=====================================================
+
+Henüz NumPy'a dönmeden önce 7'inci sütundaki kategorik verileri Pandas'ın ``get_dummies`` fonksiyonu ile
+*one-hot-encoding* biçimine dönüştürebiliriz:
+
+.. code-block:: python
+
+   df = pd.get_dummies(df, columns=[7], dtype='uint8')
+
+Artık NumPy'a dönebiliriz:
+
+.. code-block:: python
+
+   dataset = df.to_numpy()
+
+x ve y Olarak Ayırma, Eğitim ve Test Ayrımı
+===========================================
+
+Şimdi de veri kümesini x ve y olarak ayrıştıracağız. Ancak y verilerinin son sütunda değil ilk sütunda olduğuna
+dikkat ediniz:
+
+.. code-block:: python
+
+   dataset_x = dataset[:, 1:]
+   dataset_y = dataset[:, 0]
+
+Bundan sonra veri kümesi eğitim ve test amacıyla ``train_test_split`` fonksiyonu ile ayrıştırılabilir:
+
+.. code-block:: python
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+Özellik Ölçeklemesi
+===================
+
+Artık özellik ölçeklemesi yapabiliriz. Özellik ölçeklemesini scikit-learn kullanarak ya da yukarıda da
+bahsettiğimiz gibi ``Normalization`` isimli Keras katmanı kullanarak da yapabiliriz. Sütun dağılımlarına
+bakıldığında standart ölçekleme yerine minmax ölçeklemesinin daha iyi performans verebileceği izlenimi
+edinilmektedir. Ancak bu konuda deneme yanılma yöntemi uygulamak gerekir. Biz default standart ölçekleme
+uygulayalım:
+
+.. code-block:: python
+
+   from sklearn.preprocessing import StandardScaler
+
+   ss = StandardScaler()
+   ss.fit(training_dataset_x)
+   scaled_training_dataset_x = ss.transform(training_dataset_x)
+   scaled_test_dataset_x = ss.transform(test_dataset_x)
+
+Modelin Oluşturulması, Derlenmesi ve Eğitilmesi
+===============================================
+
+Artık modelimizi oluşturabiliriz. Bunun için yine iki saklı katman kullanacağız. Saklı katmanlardaki aktivasyon
+fonksiyonlarını yine *relu* olarak alacağız. Ancak çıktı katmanındaki aktivasyonun *linear* olması gerektiğini
+anımsayınız:
+
+.. code-block:: python
+
+   model = Sequential(name='Auto-MPG')
+
+   model.add(Input((training_dataset_x.shape[1],)))
+   model.add(Dense(32, activation='relu', name='Hidden-1'))
+   model.add(Dense(32, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='linear', name='Output'))
+   model.summary()
+
+Şimdi de modelimizi compile edip ``fit`` işlemi uygulayalım. Modelimiz için optimizasyon algoritması yine
+*rmsprop* seçilebilir. Regresyon problemleri için loss fonksiyonunun genellikle *mean_squared_error* biçiminde
+alınabileceğini belirtmiştik. Yine regresyon problemleri için *mean_absolute_error* metrik değeri kullanılabilir:
+
+.. code-block:: python
+
+   model.compile(optimizer='rmsprop', loss='mse', metrics=['mae'])
+   hist = model.fit(scaled_training_dataset_x, training_dataset_y, batch_size=32, epochs=200,
+                     validation_split=0.2)
+
+Modelin Test Edilmesi
+=====================
+
+Modelimizi test veri kümesiyle test edebiliriz:
+
+.. code-block:: python
+
+   eval_result = model.evaluate(scaled_test_dataset_x, test_dataset_y, batch_size=32)
+
+   for i in range(len(eval_result)):
+       print(f'{model.metrics_names[i]}: {eval_result[i]}')
+
+Kestirim İşlemi
+===============
+
+Şimdi kestirim yapmaya çalışalım. Kestirilecek veriler üzerinde de one-hot-encoding dönüştürmesinin ve özellik
+ölçeklemesinin yapılması gerektiğini anımsayınız. Kestirilecek verileri ``predict.csv`` isimli bir dosyada
+aşağıdaki gibi oluşturmuş olalım:
+
+.. code-block:: text
+
+   8,307.0,130.0,3504,12.0,70,1
+   4,350.0,165.0,3693,11.5,77,2
+   8,318.0,150.0,3436,11.0,74,3
+
+Bu dosyayı okuduktan sonra, predict işlemi yapmadan önce sırasıyla *one-hot-encoding* ve standart ölçeklemenin
+uygulanması gerekir:
+
+.. code-block:: python
+
+   predict_df = pd.read_csv('predict.csv', header=None)
+   predict_df = pd.get_dummies(predict_df, columns=[6])
+   predict_dataset_x = predict_df.to_numpy()
+   scaled_predict_dataset_x = ss.transform(predict_dataset_x)
+
+   predict_result = model.predict(scaled_predict_dataset_x)
+
+   for val in predict_result[:, 0]:
+       print(val)
+
+Tüm İşlemlerin Bir Arada Verilmesi
+==================================
+
+Aşağıda tüm işlemler bir bütün halinde verilmiştir.
+
+.. code-block:: python
+
+   import pandas as pd
+   import numpy as np
+
+   df = pd.read_csv('auto-mpg.data', delimiter=r'\s+', header=None)
+
+   df = df.iloc[:, :-1]
+   df.iloc[df.loc[:, 3] == '?', 3] = np.nan
+
+   df[3] = df[3].astype('float64')
+
+   from sklearn.impute import SimpleImputer
+
+   si = SimpleImputer(strategy='mean', missing_values=np.nan)
+   df[3] = si.fit_transform(df[[3]])
+
+   df = pd.get_dummies(df, columns=[7], dtype='uint8')
+
+   dataset = df.to_numpy()
+
+   dataset_x = dataset[:, 1:]
+   dataset_y = dataset[:, 0]
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+   from sklearn.preprocessing import StandardScaler
+
+   ss = StandardScaler()
+   ss.fit(training_dataset_x)
+   scaled_training_dataset_x = ss.transform(training_dataset_x)
+   scaled_test_dataset_x = ss.transform(test_dataset_x)
+
+   from tensorflow.keras import Sequential
+   from tensorflow.keras.layers import Input, Dense
+
+   model = Sequential(name='Auto-MPG')
+
+   model.add(Input((training_dataset_x.shape[1],)))
+   model.add(Dense(32, activation='relu', name='Hidden-1'))
+   model.add(Dense(32, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='linear', name='Output'))
+   model.summary()
+
+   model.compile(optimizer='rmsprop', loss='mse', metrics=['mae'])
+   hist = model.fit(scaled_training_dataset_x, training_dataset_y, batch_size=32, epochs=200,
+                     validation_split=0.2)
+   eval_result = model.evaluate(scaled_test_dataset_x, test_dataset_y, batch_size=32)
+
+   for i in range(len(eval_result)):
+       print(f'{model.metrics_names[i]}: {eval_result[i]}')
+
+   import matplotlib.pyplot as plt
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Loss Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['loss'])
+   plt.plot(hist.epoch, hist.history['val_loss'])
+   plt.legend(['Loss', 'Validation Loss'])
+   plt.show()
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Mean Absolute Error', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['mae'])
+   plt.plot(hist.epoch, hist.history['val_mae'])
+   plt.legend(['Mean Absolute Error', 'Validation Mean Absolute Error'])
+   plt.show()
+
+   # prediction
+
+   predict_df = pd.read_csv('predict.csv', header=None)
+   predict_df = pd.get_dummies(predict_df, columns=[6])
+   predict_dataset_x = predict_df.to_numpy()
+   scaled_predict_dataset_x = ss.transform(predict_dataset_x)
+
+   predict_result = model.predict(scaled_predict_dataset_x)
+
+   for val in predict_result[:, 0]:
+       print(val)
+
+.. note::
+
+   Buradaki epoch grafikleri gerçek bir eğitim sürecine (Auto-MPG veri kümesi üzerinde 200 epoch'luk ``fit``
+   işlemine) dayandığından ve bu ortamda gerçek bir eğitim çalıştırılamadığından, grafik görseli burada
+   oluşturulmamıştır; kod yukarıda orijinal haliyle verilmiştir.
+
+.. _onehotencoder-categories-ve-bhp-veri-kumesi:
+
+============================================================================
+OneHotEncoder'da categories Parametresi ve Boston Housing Prices Veri Kümesi
+============================================================================
+
+get_dummies Fonksiyonunun Sınırlılığı
+=====================================
+
+One-hot-encoding işleminde Pandas'ın ``get_dummies`` fonksiyonunu kullanırken dikkat ediniz. Bu fonksiyon
+one-hot-encoding yapılacak sütundaki kategorileri kendisi belirlemektedir. (Bu fonksiyon *one-hot-encoding*
+yapılacak sütunda unique olan değerlerden hareketle kategorileri belirler.) Eğer predict yapacağınız CSV
+dosyasındaki satırlar tüm kategorileri içermezse bu durum bir sorun yaratır. scikit-learn içerisindeki
+``OneHotEncoder`` sınıfı bu tür durumlarda *categories* isimli parametreyle bizlere yardımcı olmaktadır.
+Maalesef ``get_dummies`` fonksiyonunun böyle bir parametresi yoktur.
+
+``OneHotEncoder`` sınıfının ``__init__`` metodunda ``categories`` isimli parametre ilgili sütundaki kategorileri
+belirtmek için düşünülmüştür. Biz *one-hot-encoding* yapılacak sütundaki kategorileri kendimiz belirlemek
+istiyorsak bu parametreyi kullanabiliriz. ``categories`` parametresi iki boyutlu bir liste olarak girilmelidir.
+Çünkü birden fazla sütun *one-hot-encoding* işlemine sokulabilmektedir. Bu durumda bu iki boyutlu listenin her
+elemanı sırasıyla sütunlardaki kategorileri belirtir. Örneğin:
+
+.. code-block:: python
+
+   ohe = OneHotEncoder(sparse=False, categories=[[0, 1, 2], ['elma', 'armut', 'kayısı']])
+
+Burada biz iki sütunlu bir veri kümesinin iki sütununu da one-hot-encoding yapmak istemekteyiz. Bu veri
+tablosunun ilk sütunundaki kategoriler 0, 1, 2 biçiminde, ikinci sütunundaki kategoriler ``'elma'``, ``'armut'``,
+``'kayısı'`` biçimindedir. Eğer bu sütunlarda daha az kategori varsa burada belirtilen sayıda ve sırada sütun
+oluşturulacaktır.
+
+Tabii ``OneHotEncoder`` sınıfı ile ``fit`` işlemi yaptığımızda zaten bu kategoriler nesnenin içerisinde
+oluşturulmaktadır. Anımsanacağı gibi ``OneHotEncoder`` sınıfının ``categories_`` örnek özniteliği bize ``fit``
+işleminden elde edilen kategorileri vermektedir. Bu nesne eğer saklanmışsa doğrudan predict işleminde
+kullanılabilir. Bu durumda bir sorun oluşmayacaktır. Peki eğer bu nesne saklanmamışsa ne yapabiliriz?
+
+Eğitim ve Kestirim Arasında Sütun Uyuşmasının Sağlanması
+========================================================
+
+Predict işlemi yapılırken uygulanan *one-hot-encoding* işlemindeki sütunların eğitimdeki *one-hot-encoding*
+sütunlarıyla uyuşması gerekir. Aslında kütüphanelerde *one-hot-encoding* işlemini yapan fonksiyonlar ve metotlar
+önce sütunlardaki unique elemanları belirleyip sonra onları sıraya dizip sütunları bu sırada oluşturmaktadır.
+Örneğin Pandas'daki ``get_dummies`` fonksiyonu ve scikit-learn'deki ``OneHotEncoder`` sınıfı böyle davranmaktadır.
+Fakat yine de tam uyuşma için one-hot-encoding işlemlerini farklı sınıflarla yapmamaya çalışınız. Predict
+işlemindeki *one-hot-encoding* sütunların eğitimde kullanılan one-hot-encoding sütunlarıyla uyuşmasını sağlamak
+için eğitimde kullanılan sütunlardaki değerleri saklayabilirsiniz. ``OneHotEncoder`` sınıfının ``categories_``
+örnek özniteliği zaten bu kategorileri bize vermektedir.
+
+Burada NumPy ve Pandas ile ilgili bir ayrıntı üzerinde durmak istiyoruz. NumPy'daki ``unique`` fonksiyonu ve
+metodu unique elemanları elde ettikten sonra onları sıraya dizip vermektedir. Ancak Pandas'taki ``unique``
+fonksiyonu ve metodu sıraya dizme işlemini ayrıca yapmamaktadır.
+
+Aşağıda Auto-MPG veri kümesinde predict işleminin nasıl yapıldığı gösterilmektedir. Burada predict sırasında
+yeni bir ``OneHotEncoder`` nesnesi oluşturulmamış, eğitim sırasındaki ``OneHotEncoder`` nesnesi kullanılmıştır.
+Ayrıca bu örnekte modelde kullanılan nesnelerin diskte saklandığına da dikkat ediniz.
+
+.. code-block:: python
+
+   import pandas as pd
+   import numpy as np
+
+   df = pd.read_csv('auto-mpg.data', delimiter=r'\s+', header=None)
+
+   df = df.iloc[:, :-1]
+   df.iloc[df.loc[:, 3] == '?', 3] = np.nan
+
+   df[3] = df[3].astype('float64')
+
+   from sklearn.impute import SimpleImputer
+
+   si = SimpleImputer(strategy='mean', missing_values=np.nan)
+   df[3] = si.fit_transform(df[[3]])
+
+   df_1 = df.iloc[:, :7]
+   df_2 = df.iloc[:, [7]]
+
+   dataset_1 = df_1.to_numpy()
+   dataset_2 = df_2.to_numpy()
+
+   import numpy as np
+   from sklearn.preprocessing import OneHotEncoder
+
+   ohe = OneHotEncoder(sparse_output=False)
+   dataset_2 = ohe.fit_transform(dataset_2)
+
+   dataset = np.concatenate([dataset_1, dataset_2], axis=1)
+
+   dataset_x = dataset[:, 1:]
+   dataset_y = dataset[:, 0]
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+   from sklearn.preprocessing import StandardScaler
+
+   ss = StandardScaler()
+   ss.fit(training_dataset_x)
+   scaled_training_dataset_x = ss.transform(training_dataset_x)
+   scaled_test_dataset_x = ss.transform(test_dataset_x)
+
+   from tensorflow.keras import Sequential
+   from tensorflow.keras.layers import Input, Dense
+
+   model = Sequential(name='Auto-MPG')
+
+   model.add(Input((training_dataset_x.shape[1],)))
+   model.add(Dense(32, activation='relu', name='Hidden-1'))
+   model.add(Dense(32, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='linear', name='Output'))
+   model.summary()
+
+   model.compile(optimizer='rmsprop', loss='mse', metrics=['mae'])
+   hist = model.fit(scaled_training_dataset_x, training_dataset_y, batch_size=32, epochs=200,
+                     validation_split=0.2)
+   eval_result = model.evaluate(scaled_test_dataset_x, test_dataset_y, batch_size=32)
+
+   for i in range(len(eval_result)):
+       print(f'{model.metrics_names[i]}: {eval_result[i]}')
+
+   import matplotlib.pyplot as plt
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Loss Graph', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['loss'])
+   plt.plot(hist.epoch, hist.history['val_loss'])
+   plt.legend(['Loss', 'Validation Loss'])
+   plt.show()
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Mean Absolute Error', pad=10, fontsize=14)
+   plt.xticks(range(0, 300, 10))
+   plt.plot(hist.epoch, hist.history['mae'])
+   plt.plot(hist.epoch, hist.history['val_mae'])
+   plt.legend(['Mean Absolute Error', 'Validation Mean Absolute Error'])
+   plt.show()
+
+   model.save('auto-mpg.h5')
+
+   import pickle
+
+   with open('auto-mpg.pickle', 'wb') as f:
+       pickle.dump((ohe, ss), f)
+
+   # prediction
+
+   predict_df = pd.read_csv('predict.csv', header=None)
+   predict_df_1 = predict_df.iloc[:, :6]
+   predict_df_2 = predict_df.iloc[:, [6]]
+
+   predict_dataset_1 = predict_df_1.to_numpy()
+   predict_dataset_2 = predict_df_2.to_numpy()
+   predict_dataset_2  = ohe.transform(predict_dataset_2)
+
+   predict_dataset = np.concatenate([predict_dataset_1, predict_dataset_2], axis=1)
+   scaled_predict_dataset = ss.transform(predict_dataset)
+   predict_result = model.predict(scaled_predict_dataset)
+
+   for val in predict_result[:, 0]:
+       print(val)
+
+.. note::
+
+   Buradaki epoch grafikleri gerçek bir eğitim sürecine dayandığından, bu ortamda yeniden üretilemediği için
+   görsel oluşturulmamıştır.
+
+Saklanan Model ve Nesnelerin Geri Yüklenmesi
+============================================
+
+Aşağıdaki örnekte save edilmiş olan model nesnesinin ve scikit-learn nesnelerinin başka bir Python programında
+nasıl yüklenerek kullanılacağı gösterilmektedir.
+
+.. code-block:: python
+
+   import pickle
+   import numpy as np
+   import pandas as pd
+   from tensorflow.keras.models import load_model
+
+   # prediction
+
+   model = load_model('auto-mpg.h5')
+
+   with open('auto-mpg.pickle', 'rb') as f:
+       ohe, ss = pickle.load(f)
+
+   predict_df = pd.read_csv('predict.csv', header=None)
+   predict_df_1 = predict_df.iloc[:, :6]
+   predict_df_2 = predict_df.iloc[:, [6]]
+
+   predict_dataset_1 = predict_df_1.to_numpy()
+   predict_dataset_2 = predict_df_2.to_numpy()
+   predict_dataset_2  = ohe.transform(predict_dataset_2)
+
+   predict_dataset = np.concatenate([predict_dataset_1, predict_dataset_2], axis=1)
+   scaled_predict_dataset = ss.transform(predict_dataset)
+   predict_result = model.predict(scaled_predict_dataset)
+
+   for val in predict_result[:, 0]:
+       print(val)
+
+Birden Fazla Sütunun Tek Hamlede One-Hot-Encoding Yapılması
+===========================================================
+
+Bir veri kümesinde *one-hot-encoding* yapılacak birden fazla sütun varsa -yukarıdaki örnekte olduğu gibi- veri
+kümesini önce *one-hot-encoding* yapılacak kısım ile yapılmayacak kısmı iki parçaya ayırıp one-hot-encoding
+işlemini tek hamlede birden fazla sütun için uygulayabilirsiniz. Anımsanacağı gibi scikit-learn içerisindeki
+``OneHotEncoder`` sınıfı zaten tek hamlede birden fazla sütunu *one-hot-encoding* yapabiliyordu. İzleyen
+paragraflarda bu tür örnekler üzerinde duracağız.
+
+One-Hot-Encoding İşleminin Keras Katmanı Olarak Yapılması
+=========================================================
+
+Peki *one-hot-encoding* işlemi Keras'taki bir katmana yaptırılamaz mı? Biz daha önce özellik ölçeklemesini bir
+katmana yaptırmıştık. Ancak maalesef Keras bu konuda önemli bir pratiklik sunmamaktadır. one-hot-encoding yapan
+bir katman nesnesi programcı tarafından oluşturulabilir. Ancak bunun oluşturulabilmesi için TensorFlow
+kütüphanesinin kullanımının biliniyor olması gerekir. Keras içerisinde ``CategoryEncoding`` isimli bir katman
+bulunuyor olsa da bu katman tüm girdideki sütunları *one-hot encoding* yapmaktadır. Bu nedenle bu katmanın
+kullanılabilmesi için girdi katmanın parçalara ayrılması gerekir. Bu işlemleri ileride *Keras Modelinin
+Fonksiyonel Biçimde Oluşturulması* konusu içerisinde ele alacağız.
+
+Boston Housing Prices (BHP) Veri Kümesine Giriş
+===============================================
+
+Regresyon problemlerinde çok kullanılan veri kümelerinden biri de *Boston Housing Prices (BHP)* isimli veri
+kümesidir. Bu veri kümesi daha önce görmüş olduğumuz *Melbourne Housing Snapshot (MHS)* veri kümesine
+benzemektedir. Bu veri kümesinde evlerin çeşitli bilgileri sütunlar halinde kodlanmıştır. Amaç yine evin
+fiyatının kestirilmesidir. Veriler 1970 yılında toplanmıştır. Bu nedenle ev fiyatları size düşükmüş gibi
+gelebilir. (Türkiye'de yaşayan kişilerin bir bölümü ABD'de ve Avrupa ülkelerinde hiç enflasyon olmadığını
+sanabiliyorlar. Biz paradan 6 sıfır attık. Ancak örneğin dolardan hiçbir zaman sıfır atılmadı. ABD'deki
+enflasyon çok düşük olsa bile 70'li yıllardan bu yana enflasyondaki bileşik artış aradaki farkı dikkate değer
+hale gelmektedir.) BHP veri kümesi aşağıdaki bağlantıdan indirilebilir:
+
+`Kaggle: Boston House Prices <https://www.kaggle.com/datasets/vikrishnan/boston-house-prices>`_
+
+Buradan veri kümesini bir zip dosyası biçiminde indireceksiniz. Zip dosyası açıldığında ``housing.csv`` isimli
+dosya elde edilmektedir. Veri kümesi aşağıdaki görünümdedir:
+
+.. code-block:: text
+
+   0.00632  18.00   2.310  0  0.5380  6.5750  65.20  4.0900   1  296.0  15.30 396.90   4.98  24.00
+   0.02731   0.00   7.070  0  0.4690  6.4210  78.90  4.9671   2  242.0  17.80 396.90   9.14  21.60
+   0.02729   0.00   7.070  0  0.4690  7.1850  61.10  4.9671   2  242.0  17.80 392.83   4.03  34.70
+   0.03237   0.00   2.180  0  0.4580  6.9980  45.80  6.0622   3  222.0  18.70 394.63   2.94  33.40
+   0.06905   0.00   2.180  0  0.4580  7.1470  54.20  6.0622   3  222.0  18.70 396.90   5.33  36.20
+   0.02985   0.00   2.180  0  0.4580  6.4300  58.70  6.0622   3  222.0  18.70 394.12   5.21  28.70
+   0.08829  12.50   7.870  0  0.5240  6.0120  66.60  5.5605   5  311.0  15.20 395.60  12.43  22.90
+   0.14455  12.50   7.870  0  0.5240  6.1720  96.10  5.9505   5  311.0  15.20 396.90  19.15  27.10
+   ............
+
+Burada da görüldüğü gibi her ne kadar dosyanın uzantısı ``.csv`` ise de aslında sütunlar virgüllerle değil SPACE
+karakterleriyle ayrıştırılmıştır. Tüm sütunlarda sayısal bilgiler olduğu için aslında bu dosya en kolay bir
+biçimde NumPy'ın ``loadtxt`` fonksiyonuyla okunabilir. Örneğin:
+
+.. code-block:: python
+
+   dataset = np.loadtxt('housing.csv')
+
+Ancak biz kursumuzda ilk aşamaları hep Pandas ile yaptığımızdan aynı süreçleri izlemek için okumayı da yine
+Pandas'ın ``read_csv`` fonksiyonuyla yapacağız. Tabii ``read_csv`` fonksiyonunda yine ``delimiter`` parametresi
+boşlukları belirten *düzenli ifade (regular expression)* biçiminde olmalıdır. Dosyada bir başlık kısmının
+olmadığına da dikkat ediniz. ``read_csv`` fonksiyonu ile okumayı şöyle yapabiliriz:
+
+.. code-block:: python
+
+   df = pd.read_csv('housing.csv', header=None, delimiter=r'\s+')
+
+Veri kümesindeki sütunlar için İngilizce olarak aşağıdaki açıklamalar yapılmıştır:
+
+.. list-table::
+   :header-rows: 1
+
+   * - No
+     - Sütun
+     - Açıklama (İngilizce)
+   * - 1
+     - CRIM
+     - per capita crime rate by town
+   * - 2
+     - ZN
+     - proportion of residential land zoned for lots over 25,000 sq.ft.
+   * - 3
+     - INDUS
+     - proportion of non-retail business acres per town
+   * - 4
+     - CHAS
+     - Charles River dummy variable (= 1 if tract bounds river; 0 otherwise)
+   * - 5
+     - NOX
+     - nitric oxides concentration (parts per 10 million)
+   * - 6
+     - RM
+     - average number of rooms per dwelling
+   * - 7
+     - AGE
+     - proportion of owner-occupied units built prior to 1940
+   * - 8
+     - DIS
+     - weighted distances to five Boston employment centers
+   * - 9
+     - RAD
+     - index of accessibility to radial highways
+   * - 10
+     - TAX
+     - full-value property-tax rate per $10,000
+   * - 11
+     - PTRATIO
+     - pupil-teacher ratio by town
+   * - 12
+     - B
+     - 1000(Bk − 0.63)² where Bk is the proportion of blacks by town
+   * - 13
+     - LSTAT
+     - % lower status of the population
+   * - 14
+     - MEDV
+     - Median value of owner-occupied homes in $1000s
+
+Buradaki son sütun evin fiyatını 1000 dolar cinsinden belirtmektedir. Veri kümesinde eksik veri yoktur. Veri
+kümesinin 4'üncü sütununda kategorik bir bilgi bulunmaktadır. Ancak bu alanda yalnızca 0 ve 1 biçiminde iki değer
+vardır. İki değerli sütunlar için *one-hot-encoding* işlemine gerek olmadığını anımsayınız. Ancak 9'uncu sütunda
+ikiden daha fazla sınıf içeren kategorik bir bilgi bulunmaktadır. Dolayısıyla bu sütun üzerinde
+*one-hot-encoding* dönüştürmesi uygulamalıyız. Sütunlar arasında önemli basamaksal farklılıklar göze
+çarpmaktadır. Yani veri kümesi üzerinde özellik ölçeklemesinin yapılması gerekmektedir. Veri kümesinin
+sütunlarında aşırı uç değerler (outliers) de bulunmamaktadır. Özellik ölçeklemesi için standart ölçekleme ya da
+min-max ölçeklemesi kullanılabilir.
+
+.. _bhp-model-olusturma-ve-egitim:
+
+===============================================================
+Boston Housing Prices Veri Kümesi ile Model Oluşturma ve Eğitim
+===============================================================
+
+Kategorik Sütunun One-Hot-Encoding İle Dönüştürülmesi
+=====================================================
+
+BHP veri kümesi için oluşturulmuş olan CSV dosyasında bir başlık kısmı olmadığına dikkat ediniz. Pandas'ın
+``read_csv`` fonksiyonu ile CSV dosyası okunurken eğer dosyada başlık kısmı yoksa Pandas sütun başlık isimlerini
+0'dan başlayarak sayısal biçimde vermektedir.
+
+8'inci sütun kategorik olduğu için o sütunu *one-hot-encoding* işlemine sokalım:
+
+.. code-block:: python
+
+   highway_class = df.iloc[:, 8].to_numpy()
+
+   ohe = OneHotEncoder(sparse_output=False)
+   ohe_highway = ohe.fit_transform(highway_class.reshape(-1, 1))
+
+Şimdi *one-hot-encoding* işleminden elde ettiğimiz matrisi DataFrame nesnesinin sonuna yerleştirebiliriz. Tabii
+bundan önce bu sütunu silip "y" verilerini de ayırmalıyız:
+
+.. code-block:: python
+
+   dataset_y = df.iloc[:, -1].to_numpy()
+   df.drop([8, 13], axis=1, inplace=True)
+   dataset_x = pd.concat([df, pd.DataFrame(ohe_highway)], axis=1).to_numpy()
+
+Veri Kümesinin Eğitim/Test Olarak Ayrılması ve Özellik Ölçeklemesi
+==================================================================
+
+Şimdi elimizde NumPy dizisine dönüştürülmüş olan ``dataset_x`` ve ``dataset_y`` verileri var. Artık veri
+kümesini eğitim ve test olmak üzere ikiye ayırabiliriz:
+
+.. code-block:: python
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.1)
+
+Bu işlemden sonra diğer adımları uygulayabiliriz. Ancak önce eğitim veri kümesini ölçeklememiz gerekir:
+
+.. code-block:: python
+
+   ss = StandardScaler()
+   ss.fit(training_dataset_x)
+   scaled_dataset_x = ss.transform(training_dataset_x)
+
+Burada standart ölçekleme uyguladık. Ancak bu veri kümesine min-max ölçeklemesi de uygulayabilirsiniz.
+
+Modelin Oluşturulması ve Eğitilmesi
+===================================
+
+Veri kümesi için iki saklı katman içeren klasik model kullanılabilir:
+
+.. code-block:: python
+
+   model = Sequential(name='Boston-Housing-Prices')
+   model.add(Input((training_dataset_x.shape[1], ), name='Input'))
+   model.add(Dense(64, activation='relu', name='Hidden-1'))
+   model.add(Dense(64, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='linear', name='Output'))
+   model.summary()
+
+   model.compile('rmsprop', loss='mse', metrics=['mae'])
+   hist = model.fit(scaled_training_dataset_x, training_dataset_y, batch_size=32, epochs=200,
+                     validation_split=0.2)
+
+Modelin çıktı katmanındaki aktivasyon fonksiyonunun *linear* olduğuna, loss fonksiyonunun
+*mean_squared_error* olduğuna, metrik değerin de *mean_absolute_error* olduğuna dikkat ediniz.
+
+Tüm Kodun Bir Arada Verilmesi
+=============================
+
+Aşağıda BHP veri kümesi uygulamasının tüm kodları verilmiştir.
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('housing.csv', delimiter=r'\s+', header=None)
+
+   highway_class = df.iloc[:, 8].to_numpy()
+
+   from sklearn.preprocessing import OneHotEncoder
+
+   ohe = OneHotEncoder(sparse_output=False)
+   ohe_highway = ohe.fit_transform(highway_class.reshape(-1, 1))
+
+   dataset_y = df.iloc[:, -1].to_numpy()
+   df.drop([8, 13], axis=1, inplace=True)
+   dataset_x = pd.concat([df, pd.DataFrame(ohe_highway)], axis=1).to_numpy()
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.1)
+
+   from sklearn.preprocessing import StandardScaler
+
+   ss = StandardScaler()
+   ss.fit(training_dataset_x)
+   scaled_training_dataset_x = ss.transform(training_dataset_x)
+   scaled_test_dataset_x = ss.transform(test_dataset_x)
+
+   from tensorflow.keras.models import Sequential
+   from tensorflow.keras.layers import Dense, Input
+
+   model = Sequential(name='Boston-Housing-Prices')
+   model.add(Input((training_dataset_x.shape[1], ), name='Input'))
+   model.add(Dense(64, activation='relu', name='Hidden-1'))
+   model.add(Dense(64, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='linear', name='Output'))
+   model.summary()
+
+   model.compile('rmsprop', loss='mse', metrics=['mae'])
+   hist = model.fit(scaled_training_dataset_x, training_dataset_y, batch_size=32, epochs=200,
+                     validation_split=0.2)
+
+   import matplotlib.pyplot as plt
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Epoch - Loss Graph', fontsize=14, pad=10)
+   plt.plot(hist.epoch, hist.history['loss'])
+   plt.plot(hist.epoch, hist.history['val_loss'])
+   plt.legend(['Loss', 'Validation Loss'])
+   plt.show()
+
+   plt.figure(figsize=(14, 6))
+   plt.title('Mean Absolute Error - Validation Mean Absolute Error Graph', fontsize=14, pad=10)
+   plt.plot(hist.epoch, hist.history['mae'])
+   plt.plot(hist.epoch, hist.history['val_mae'])
+   plt.legend(['Mean Absolute Error', 'Validation Mean Absolute Error'])
+   plt.show()
+
+   eval_result = model.evaluate(scaled_test_dataset_x , test_dataset_y, batch_size=32)
+   for i in range(len(eval_result)):
+       print(f'{model.metrics_names[i]}: {eval_result[i]}')
+
+   """
+   import pickle
+
+   model.save('boston-housing-prices.h5')
+   with open('boston-housing-prices.pickle', 'wb') as f:
+       pickle.dump([ohe, ss], f)
+   """
+
+   predict_df = pd.read_csv('predict-boston-housing-prices.csv', delimiter=r'\s+', header=None)
+
+   highway_class = predict_df.iloc[:, 8].to_numpy()
+   ohe_highway = ohe.transform(highway_class.reshape(-1, 1))
+   predict_df.drop(8, axis=1, inplace=True)
+   predict_dataset_x = pd.concat([predict_df, pd.DataFrame(ohe_highway)], axis=1).to_numpy()
+   scaled_predict_dataset_x = ss.transform(predict_dataset_x )
+   predict_result = model.predict(scaled_predict_dataset_x)
+
+   for val in predict_result[:, 0]:
+       print(val)
+
+   #  predict-boston-housing-prices.csv
+
+    0.13554  12.50   6.070  0  0.4090  5.5940  36.80  6.4980   4  345.0  18.90 396.90  13.09
+    0.12816  12.50   6.070  0  0.4090  5.8850  33.00  6.4980   4  345.0  18.90 396.90   8.79
+    0.08826   0.00  10.810  0  0.4130  6.4170   6.60  5.2873   4  305.0  19.20 383.73   6.72
+    0.15876   0.00  10.810  0  0.4130  5.9610  17.50  5.2873   4  305.0  19.20 376.94   9.88
+    0.09164   0.00  10.810  0  0.4130  6.0650   7.80  5.2873   4  305.0  19.20 390.91   5.52
+    0.19539   0.00  10.810  0  0.4130  6.2450   6.20  5.2873   4  305.0  19.20 377.17   7.54
+
+.. note::
+
+   Buradaki epoch grafikleri gerçek bir eğitim sürecine (BHP veri kümesi üzerinde 200 epoch'luk ``fit``
+   işlemine) dayandığından ve bu ortamda gerçek bir eğitim çalıştırılamadığından, grafik görseli burada
+   oluşturulmamıştır; kod yukarıda orijinal haliyle verilmiştir.
+
