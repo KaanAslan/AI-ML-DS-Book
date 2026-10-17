@@ -4225,3 +4225,3756 @@ sütunu atabiliriz. Örneğin:
 .. code-block:: python
 
     transformed_df = pd.get_dummies(df.iloc[:, 1:], dtype='uint8')
+
+.. _kategorik-degiskenlerin-kodlanmasi-2:
+
+====================================================================================
+Kategorik Değişkenlerin Kodlanması: Dummy Variable, Binary ve Çok Etiketli Kodlama
+====================================================================================
+
+get_dummies Fonksiyonu ile Temel Kodlama
+=========================================
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('test.csv')
+
+   print(df, end='\n\n')
+
+   ohe_df = pd.get_dummies(df, columns=['RenkTercihi', 'Meslek'])
+
+   print(ohe_df)
+
+get_dummies Fonksiyonunda prefix Parametresi
+=============================================
+
+Yukarıda da belirttiğimiz gibi ``get_dummies`` fonksiyonu default durumda oluşturduğu sütunlara kategorik sütun
+isimlerini ve kategorileri ``_`` ile birleştirerek vermektedir. Ancak biz istersek ``prefix`` parametresi ile bu
+önekleri değiştirebiliriz. Örneğin:
+
+.. code-block:: python
+
+   df = pd.read_csv('test.csv')
+
+   transformed_df = pd.get_dummies(df, columns=['RenkTercihi', 'Meslek'], dtype='uint8', prefix=['R', 'M'])
+
+Burada oluşturulacak sütunlar için önekler sırasıyla ``R`` ve ``M`` biçiminde verilmiştir.
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('test.csv')
+
+   transformed_df = pd.get_dummies(df, columns=['RenkTercihi', 'Meslek'], dtype='uint8', prefix=['R', 'M'])
+   print(transformed_df)
+
+get_dummies Fonksiyonunda prefix_sep Parametresi
+=================================================
+
+Yine yukarıda belirttiğimiz gibi sütun isimlerinin birleştirilmesi için kullanılan karakter ``prefix_sep`` isimli
+parametreyle değiştirilebilmektedir. Örneğin:
+
+.. code-block:: python
+
+   df = pd.read_csv('test.csv')
+
+   transformed_df = pd.get_dummies(df, columns=['RenkTercihi', 'Meslek'], dtype='uint8', prefix=['R', 'M'],
+                                    prefix_sep='-')
+
+Burada artık önekler ``R-`` ve ``M-`` haline getirilmiştir.
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('test.csv')
+
+   transformed_df = pd.get_dummies(df, columns=['RenkTercihi', 'Meslek'], dtype='uint8', prefix=['R', 'M'],
+                                    prefix_sep='-')
+   print(transformed_df)
+
+to_categorical Fonksiyonu ile One-Hot-Encoding
+===============================================
+
+One-hot-encoding dönüştürmesi ``tensorflow.keras`` kütüphanesindeki ``to_categorical`` fonksiyonuyla da
+yapılabilmektedir. Keras ile çalıştığımızda doğrudan bu fonksiyonu tercih edebilmekteyiz. ``to_categorical``
+fonksiyonunu kullanmadan önce kategorik sütunun sayısal biçime dönüştürülmüş olması gerekir. Yani biz sütun üzerinde
+-eğer sütun yazısal kategoriler içeriyorsa- önce ``LabelEncoder`` işlemini uygulamalıyız. ``to_categorical``
+fonksiyonu aynı anda birden fazla sütunu one-hot-encoding yapamamaktadır. Bu nedenle ``to_categorical`` diğer
+seçeneklere göre kullanımı daha zor bir fonksiyondur. ``to_categorical`` fonksiyonu Keras kütüphanesindeki ``utils``
+isimli modülde bulunmaktadır. Fonksiyonu kullanmak için aşağıdaki gibi import işlemi yapabilirsiniz:
+
+.. code-block:: python
+
+   from tensorflow.keras.utils import to_categorical
+
+Tabii bu fonksiyonu kullanabilmeniz için ``tensorflow`` kütüphanesinin de yüklü olması gerekir. Biz zaten izleyen
+konularda bu kütüphaneyi kullanacağız. Kütüphane şöyle yüklenebilir:
+
+.. code-block:: bash
+
+   pip install tensorflow
+
+Aşağıda ``test.csv`` dosyasındaki *RenkTercihi* ve *Meslek* sütunları üzerinde ``to_categorical`` fonksiyonuyla
+one-hot-encoding dönüştürmesinin nasıl yapıldığına yönelik bir örnek veriyoruz:
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('test.csv')
+
+   from tensorflow.keras.utils import to_categorical
+
+   from sklearn.preprocessing import LabelEncoder
+
+   le = LabelEncoder()
+
+   transformed_color = le.fit_transform(df['RenkTercihi'])
+   transformed_occupation = le.fit_transform(df['Meslek'])
+
+   ohe_color = to_categorical(transformed_color)
+   ohe_occupation = to_categorical(transformed_occupation)
+
+   color_categories = ['RenkTercihi_' + color for color in df['RenkTercihi'].unique()]
+   occupation_categories = ['Meslek_' + occupation for occupation in df['Meslek'].unique()]
+
+   df.drop(['RenkTercihi', 'Meslek'], axis=1, inplace=True)
+
+   df[color_categories] = ohe_color
+   df[occupation_categories] = ohe_occupation
+
+   print(df)
+
+One-Hot-Encoding İşleminin Manuel Olarak Yapılması
+====================================================
+
+One-hot-encoding dönüştürmesi manuel yöntemle de yapılabilir. Bu işlemi manuel yapmanın çeşitli yöntemleri vardır.
+Ancak en basit yöntemlerden biri NumPy'ın ``eye`` fonksiyonundan faydalanmaktır. Bu fonksiyon bize birim matris verir.
+Bir NumPy dizisi bir listeyle indekslenebildiğine göre bu birim matris ``LabelEncoder`` ile sayısal biçime
+dönüştürülmüş bir dizi ile indekslenirse istenilen dönüştürme yapılmış olur. Örneğin dönüştürülecek sütun bilgileri
+şöyle olsun:
+
+.. list-table::
+   :header-rows: 1
+
+   * - RenkTercihi
+   * - Kırmızı
+   * - Mavi
+   * - Yeşil
+   * - Yeşil
+   * - Mavi
+   * - Kırmızı
+   * - Mavi
+
+Buradaki sütunda üç farklı kategori vardır: Kırmızı, Mavi, ve Yeşil. Bunlar ``LabelEncoder`` yapılırsa sütun şu biçime
+dönüşecektir:
+
+.. code-block:: text
+
+   RenkTercihi
+   -----------
+   0
+   1
+   2
+   2
+   1
+   0
+   1
+
+Sütunda 3 farklı kategori olduğu için 3x3'lük aşağıdaki gibi bir birim matris oluşturulur:
+
+.. code-block:: text
+
+   1 0 0
+   0 1 0
+   0 0 1
+
+Sonrada bu birim matris bir dizi ile indekslenirse one-hot-encoding işlemi gerçekleştirilir. İndekslemede tüm satır
+bilgisinin elde edileceğine dikkat ediniz.
+
+Aşağıda buna ilişkin bir örnek verilmiştir. ``test.csv`` dosyasını yukarıda vermiştik.
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('test.csv')
+
+   print(df, end='\n\n')
+
+   import numpy as np
+
+   color_cats = np.unique(df['RenkTercihi'].to_numpy())
+   occupation_cats = np.unique(df['Meslek'].to_numpy())
+
+   from sklearn.preprocessing import LabelEncoder
+
+   le = LabelEncoder()
+   df['RenkTercihi'] = le.fit_transform(df['RenkTercihi'])
+   df['Meslek'] = le.fit_transform(df['Meslek'])
+
+   print(df, end='\n\n')
+
+   color_um = np.eye(len(color_cats))
+   occupation_um = np.eye(len(occupation_cats))
+
+   ohe_color = color_um[df['RenkTercihi'].to_numpy()]
+   ohe_occupation = occupation_um[df['Meslek'].to_numpy()]
+
+   df.drop(['RenkTercihi', 'Meslek'], axis=1, inplace=True)
+   df[color_cats] = ohe_color
+   df[occupation_cats] = ohe_occupation
+
+   print(df, end='\n\n')
+
+Dummy Variable Encoding
+========================
+
+*One-hot-encoding* işleminin bir versiyonuna da *dummy variable encoding* denilmektedir. Şöyle ki: *one-hot-encoding*
+işleminde n tane kategori için n tane sütun oluşturuluyordu. Halbuki *dummy variable encoding* işleminde n tane
+kategori için n - 1 tane sütun oluşturulmaktadır. Çünkü bu yöntemde bir kategori tüm sütunlardaki sayının 0 olması ile
+ifade edilmektedir. Örneğin Kırmızı, Yeşil, Mavi kategorilerinin bulunduğu bir sütun şöyle *dummy variable encoding*
+biçiminde dönüştürülebilir:
+
+.. list-table::
+   :header-rows: 1
+
+   * -
+     - Mavi
+     - Yeşil
+   * - Kırmızı
+     - 0
+     - 0
+   * - Mavi
+     - 1
+     - 0
+   * - Yeşil
+     - 0
+     - 1
+
+Görüldüğü gibi kategorilerden biri (burada *Kırmızı*) tüm elemanı 0 olan satırla temsil edilmiştir. Böylece sütun
+sayısı bir eksiltilmiştir.
+
+*Dummy variable encoding* işlemi için farklı sınıflar ya da fonksiyonlar kullanılmamaktadır. Bu işlem
+*one-hot-encoding* yapan sınıflar ve fonksiyonlarda özel bir parametreyle gerçekleştirilmektedir. Örneğin scikit-learn
+kütüphanesindeki ``OneHotEncoder`` sınıfının ``drop`` parametresi ``first`` olarak geçilirse bu durumda transform
+işlemi *dummy variable encoding* biçiminde yapılmaktadır. Örneğin ``test.csv`` dosyası aşağıdaki gibi olsun:
+
+.. code-block:: text
+
+   AdıSoyadı,Kilo,Boy,Yaş,RenkTercihi,Meslek
+   Sacit Bulut,78,172,34,Kırmızı,Mühendis
+   Ayşe Er,67,168,45,Yeşil,Mühendis
+   Ahmet San,85,182,32,Kırmızı,Avukat
+   Macit Şen,98,192,65,Mavi,Doktor
+   Talat Demir,85,181,49,Yeşil,Avukat
+   Sibel Ünlü,72,172,34,Mavi,Doktor
+   Ali Serçe,75,165,21,Yeşil,Mühendis
+
+Biz de *RenkTercihi* sütununu *dummy variable encoding* ile dönüştürmek isteyelim. Bu işlemi şöyle yapabiliriz:
+
+.. code-block:: python
+
+   df = pd.read_csv('test.csv')
+
+   ohe = OneHotEncoder(sparse_output=False, drop='first')
+   transformed_data = ohe.fit_transform(df[['RenkTercihi']])
+
+   print(df['RenkTercihi'])
+   print(ohe.categories_)
+   print(transformed_data)
+
+Buradan şu çıktılar elde edilmiştir:
+
+.. code-block:: text
+
+   0    Kırmızı
+   1      Yeşil
+   2    Kırmızı
+   3       Mavi
+   4      Yeşil
+   5       Mavi
+   6      Yeşil
+   Name: RenkTercihi, dtype: object
+   [array(['Kırmızı', 'Mavi', 'Yeşil'], dtype=object)]
+   [[0. 0.]
+    [0. 1.]
+    [0. 0.]
+    [1. 0.]
+    [0. 1.]
+    [1. 0.]
+    [0. 1.]]
+
+Görüldüğü gibi burada *Kırmızı* kategorisi [0, 0] biçiminde kodlanmıştır.
+
+.. code-block:: python
+
+   import pandas as pd
+   from sklearn.preprocessing import OneHotEncoder
+
+   df = pd.read_csv('test.csv')
+
+   ohe = OneHotEncoder(sparse_output=False, drop='first')
+   transformed_data = ohe.fit_transform(df[['RenkTercihi']])
+
+   print(df['RenkTercihi'])
+   print(ohe.categories_)
+   print(transformed_data)
+
+Pandas'ın ``get_dummies`` fonksiyonunda ``drop_first`` parametresi ``True`` geçilirse *dummy variable encoding*
+uygulanmaktadır. Örneğin:
+
+.. code-block:: python
+
+   df = pd.read_csv('test.csv')
+
+   transformed_df = pd.get_dummies(df, columns=['RenkTercihi', 'Meslek'], dtype='uint8', drop_first=True)
+
+Burada veri kümesinin *RenkTercihi* ve *Meslek* sütunları *dummy variable encoding* olarak kodlanmaktadır.
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('test.csv')
+
+   transformed_df = pd.get_dummies(df, columns=['RenkTercihi', 'Meslek'], dtype='uint8', drop_first=True)
+   print(transformed_df)
+
+LabelBinarizer Sınıfı
+======================
+
+Scikit-learn içerisinde ``OneHotEncoder`` sınıfına benzer işlem yapan ``LabelBinarizer`` isimli bir sınıf da
+bulunmaktadır. Bu sınıf özellikle veri kümesindeki kategorik X sütunları için değil kategorik Y sütunları için
+kullanılmaktadır. Bu sınıfla fit ve transform işlemi yapılırken bu metotlara çok boyutlu değil tek boyutlu bir liste,
+demet, NumPy dizisi ya da Series nesnesi verilir. ``LabelBinarizer`` sınıfı da ``OneHotEncoder`` sınıfı gibi tüm
+sütunları 0 olan yalnızca bir tane sütunu 1 olan değerler üretir. Örneğin:
+
+.. code-block:: python
+
+   from sklearn.preprocessing import LabelBinarizer
+
+   y = ['elma', 'armut', 'elma', 'kayısı', 'elma', 'kayısı', 'armut']
+
+   lb = LabelBinarizer()
+   transformed_labels = lb.fit_transform(y)
+   print(transformed_labels)
+
+Burada *elma*, *armut*, *kayısı* olmak üzere toplam üç farklı sınıf vardır. Bu nedenle kodlama sonucunda üç sütun
+oluşacaktır. Yukarıdaki kodlama sonucunda elde edilen ``transformed_labels`` dizisi şöyle olacaktır:
+
+.. code-block:: text
+
+   [[0 1 0]
+    [1 0 0]
+    [0 1 0]
+    [0 0 1]
+    [0 1 0]
+    [0 0 1]
+    [1 0 0]]
+
+Görüldüğü gibi tıpkı one-hot-encoding kodlamasında olduğu gibi satırda yalnızca bir tane 1 vardır. Sınıflar yine önce
+sıraya dizilerek numaralandırılmaktadır:
+
+.. code-block:: text
+
+   armut  elma   kayısı
+
+    0      1       0
+    1      0       0
+    0      1       0
+    0      0       1
+    0      1       0
+    0      0       1
+    1      0       0
+
+Peki ``LabelBinarizer`` sınıfı ile ``OneHotEncoder`` sınıfı arasında ne fark vardır? Aslında bu iki sınıf birbirine
+oldukça benzemektedir. Aralarındaki farkları ve benzerlikleri şöyle açıklayabiliriz:
+
+- Her iki sınıf da tüm bitleri 0 olan yalnızca tek biti 1 olan satırlar vermektedir.
+
+- ``LabelBinarizer`` sınıfı girdiyi tek boyutlu bir dizi (liste, demet, Series gibi) biçiminde alırken
+  ``OneHotEncoder`` sınıfı çok boyutlu bir dizi olarak (liste listesi, NumPy dizi listesi, DataFrame nesnesi gibi)
+  almaktadır.
+
+- ``LabelBinarizer`` sınıfı çıktıyı ``int64`` türünden bir NumPy dizisi olarak verirken ``OneHotEncoder`` sınıfı
+  default olarak ``float64`` türünden vermektedir. (``OneHotEncoder`` sınıfında çıktının dtype türü
+  değiştirilebilmektedir.)
+
+.. code-block:: python
+
+   from sklearn.preprocessing import LabelBinarizer
+
+   y = ['elma', 'armut', 'elma', 'kayısı', 'elma', 'kayısı', 'armut']
+
+   lb = LabelBinarizer()
+   transformed_labels = lb.fit_transform(y)
+   print(transformed_labels)
+
+Kategori Sayısı Fazla Olduğunda Alternatif Yöntemler
+=====================================================
+
+Sütundaki kategori sayısı çok fazla ise *one-hot-encoding* dönüştürmesi çok fazla sütunun veri tablosuna eklenmesine
+yol açmaktadır. Aslında pek çok durumda bunun önemli bir sakıncası yoktur. Ancak sütun sayısının fazlalaşması veri
+kümesinin bellekte çok yer kaplamasına ve bunların işlenmesi için gereken sürenin uzamasına yol açmaktadır. Peki
+kategori çok fazla ise ve biz çok fazla sütunun veri kümesine eklenmesini istemiyorsak bu durumda ne yapabiliriz?
+Yöntemlerden biri çeşitli kategorileri başka üst kategoriler içerisinde toplamak olabilir. Böylece aslında bir grup
+kategori sınıflandırılarak bunlardan daha az kategori elde edilebilir. Yöntemlerden diğeri *one-hot-encoding* yerine
+alternatif başka kodlamaların kullanılmasıdır. Burada da akla *binary encoding* yöntemi gelmektedir. Tabii kategorik
+veriler için en iyi yöntem aslında *one-hot-encoding* yöntemidir. Uygulamacı mümkün olduğunca bu yöntemi kullanmaya
+çalışmalıdır.
+
+Binary Encoding
+================
+
+*Binary encoding* yönteminde her kategori ikilik sistemde bir sayıymış gibi ifade edilmektedir. Örneğin sütunda 256
+tane kategori olsun. Bu kategoriler 0'dan 255'e kadar numaralandırılabilir. 0 ile 255 arasındaki sayılar 2'lik
+sistemde 8 bit ile ifade edilebilir. Örneğin bir kategorinin sayısal değeri (``LabelEncoder`` yapıldığını düşünelim)
+14 olsun. Biz bu kategoriyi aşağıdaki gibi 8 bit'lik 2'lik sistemde bir sayı biçiminde kodlayabiliriz:
+
+.. code-block:: text
+
+   0 0 0 0 1 1 1 0
+
+Tabii kategori sayısı tam 2'nin kuvveti kadar olmak zorunda değildir. Bu durumda kategori sayısı N olmak üzere gerekli
+olan bit sayısı (yani sütun sayısı) ``ceil(log2(N))`` hesabı ile elde edilebilir.
+
+*Binary encoding* işlemi manuel bir biçimde yapılabilir. Bunun için maalesef Pandas'ta ya da NumPy'da bir fonksiyon
+bulundurulmamıştır. scikit-learn kütüphanesinin ana modülleri içerisinde de böyle bir sınıf yoktur. Ancak scikit-learn
+kütüphanesinin contribute girişimlerinden birinde bu işlemi yapan bir ``BinaryEncoder`` isminde bir sınıf
+bulunmaktadır. Bu sınıf ``category_encoders`` isimli bir paket içerisindedir ve bu paket ayrıca yüklenmelidir. Yükleme
+şöyle yapılabilir:
+
+.. code-block:: bash
+
+   pip install category_encoders
+
+``BinaryEncoder`` sınıfının genel kullanımı diğer scikit-learn sınıflarında olduğu gibidir. Yani önce fit, sonra
+transform yapılır. Yine ``test.csv`` dosyamız aşağıdaki gibi olsun:
+
+.. code-block:: text
+
+   AdıSoyadı,Kilo,Boy,Yaş,RenkTercihi,Meslek
+   Sacit Bulut,78,172,34,Kırmızı,Mühendis
+   Ayşe Er,67,168,45,Yeşil,Mühendis
+   Ahmet San,85,182,32,Kırmızı,Avukat
+   Macit Şen,98,192,65,Mavi,Doktor
+   Talat Demir,85,181,49,Yeşil,Avukat
+   Sibel Ünlü,72,172,34,Mavi,Doktor
+   Ali Serçe,75,165,21,Yeşil,Mühendis
+
+``BinaryEncoder`` sınıfı ``category_encoders`` paketinin ``Binary`` modülünün içerisinde bulunmaktadır. Dolayısıyla
+sınıfı kullanabilmek için aşağıdaki gibi import işlemi yapabiliriz:
+
+.. code-block:: python
+
+   from category_encoders.binary import BinaryEncoder
+
+``BinaryEncoder`` sınıfının ``transform`` fonksiyonu default durumda Pandas DataFrame nesnesi vermektedir. Ancak nesne
+yaratılırken ``return_df`` parametresi ``False`` geçilirse bu durumda transform fonksiyonları NumPy dizisi geri
+döndürmektedir. Örneğin:
+
+.. code-block:: python
+
+   df = pd.read_csv('test.csv')
+
+   be = BinaryEncoder()
+   transformed_data = be.fit_transform(df['Meslek'])
+   print(transformed_data)
+
+Burada *Meslek* sütunu *binary encoding* biçiminde kodlanmıştır. ``BinaryEncoder`` kodlamada değerleri 1'den
+başlatılmaktadır. Yukarıdaki işlemden aşağıdaki gibi bir çıktı elde edilmiştir:
+
+.. code-block:: text
+
+      Meslek_0  Meslek_1
+   0         0         1
+   1         0         1
+   2         1         0
+   3         1         1
+   4         1         0
+   5         1         1
+   6         0         1
+
+``BinaryEncoder`` sınıfı ile biz tek boyutlu ya da çok boyutlu (yani tek sütunu ya da birden fazla sütunu)
+kodlayabiliriz. Örneğin:
+
+.. code-block:: python
+
+   be = BinaryEncoder()
+   transformed_data = be.fit_transform(df[['RenkTercihi', 'Meslek']])
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('test.csv')
+
+   from category_encoders.binary import BinaryEncoder
+
+   be = BinaryEncoder()
+   transformed_data = be.fit_transform(df[['RenkTercihi', 'Meslek']])
+   print(transformed_data)
+
+   df.drop(['RenkTercihi', 'Meslek'], axis=1, inplace=True)
+   df[transformed_data.columns] = transformed_data    # pd.concat((df, transformed_data), axis=1)
+   print(df)
+
+Tıpkı ``get_dummies`` fonksiyonunda olduğu gibi aslında bir DataFrame bütünsel olarak da verilebilir. Yine default
+durumda tüm yazısal sütunlar *binary encoding* dönüştürmesine sokulmaktadır. Ancak biz ``BinaryEncoder`` sınıfının
+``__init__`` metodunda ``cols`` parametresi ile hangi sütunların dönüştürüleceğini belirleyebiliriz. Örneğin:
+
+.. code-block:: python
+
+   df = pd.read_csv('test.csv')
+
+   from category_encoders.binary import BinaryEncoder
+
+   be = BinaryEncoder(cols=['RenkTercihi', 'Meslek'])
+   transformed_df = be.fit_transform(df)
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('test.csv')
+
+   from category_encoders.binary import BinaryEncoder
+
+   be = BinaryEncoder(cols=['RenkTercihi', 'Meslek'])
+   transformed_df = be.fit_transform(df)
+   print(transformed_df)
+
+Çok Etiketli (Multi-Label) Sütunların Kodlanması: MultiLabelBinarizer
+======================================================================
+
+Bir sütunun satırlarına sıfır tane ya da daha fazla etiket iliştirilebiliyorsa böyle sütunlara *çok etiketli
+(multi-label)* sütunlar denilmektedir. Bu tür sütunlar genellikle *çok etiketli sınıflandırma (multi-label
+classification)* denilen sınıflandırma problemlerinde karşımıza çıkmaktadır. Çok etiketli sınıflandırma problemlerinde
+hedef değişken birden fazla etiketten oluşabilen kategorik bir sütun görünümündedir. Bu tür problemlerde satırlar için
+en uygun etiketlerin atanması istenir. Örneğin kişilerin yazdıkları yazılardan hareketle psikiyatrik bağlamda klinik
+odaklarının belirlenmesi istensin. Bu veri kümesinde satırlar yazılardan hedef değişken de bu yazılara atanan
+etiketlerden oluşmaktadır. Aşağıda böyle bir veri kümesi için bir örnek görüyorsunuz:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Yazılar
+     - Etiketler
+   * - Son zamanlarda hiçbir şeyden keyif almıyorum ve sürekli mutsuzum.
+     - depresyon
+   * - Topluluk önünde konuşmam gerektiğinde panik oluyorum, nefes alamıyorum.
+     - anksiyete, fobi
+   * - Duygularım çok hızlı değişiyor, bir anda sinirlenip sonra ağlamaya başlıyorum.
+     - borderline
+   * - Kafamda sürekli endişe düşünceleri var, gece bile rahat uyuyamıyorum.
+     - anksiyete
+   * - İnsanların bana zarar vereceğinden korkuyorum, yalnız kalmak istiyorum.
+     - fobi, anksiyete
+   * - Hayatın anlamını sorguluyorum, çoğu zaman yaşamak istemiyorum.
+     - depresyon, borderline
+
+Bu biçimdeki çok etiketli veri kümelerinde her satırın etiket sayısı aynı olmadığı için bu durum pek çok yöntemi
+uygularken bir sorun haline gelmektedir. İşte bu tür çok etiketli veri kümelerinde sayısal hale getirme işlemi
+genellikle şöyle yapılmaktadır:
+
+- Önce tüm etiketler elde edilir.
+- Etiketler için etiket sayısı kadar sütun oluşturulur.
+- Sonra her satırdaki etiketler tüm etiketler dikkate alınarak sütunsal biçimde 1 ya da 0 olarak kodlanır. (İlgili
+  etiket satırda varsa 0, yoksa 1 olarak kodlama yapılmaktadır.)
+
+Şimdi bir örnek verelim. Yukarıdaki veri kümesindeki etiketler şunlardır: *depresyon*, *anksiyete*, *fobi*,
+*borderline*. Bu durumda bu etiketler toplam 4 sütun ile aşağıdaki gibi ifade edilecektir:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Yazılar
+     - depresyon
+     - anksiyete
+     - fobi
+     - borderline
+   * - Son zamanlarda hiçbir şeyden keyif almıyorum ve sürekli mutsuzum.
+     - 1
+     - 0
+     - 0
+     - 0
+   * - Topluluk önünde konuşmam gerektiğinde panik oluyorum, nefes alamıyorum.
+     - 0
+     - 1
+     - 1
+     - 0
+   * - Duygularım çok hızlı değişiyor, bir anda sinirlenip sonra ağlamaya başlıyorum.
+     - 0
+     - 0
+     - 0
+     - 1
+   * - Kafamda sürekli endişe düşünceleri var, gece bile rahat uyuyamıyorum.
+     - 0
+     - 1
+     - 0
+     - 0
+   * - İnsanların bana zarar vereceğinden korkuyorum, yalnız kalmak istiyorum.
+     - 0
+     - 1
+     - 1
+     - 0
+   * - Hayatın anlamını sorguluyorum, çoğu zaman yaşamak istemiyorum.
+     - 1
+     - 0
+     - 0
+     - 1
+
+Çok etiketli veri kümelerini yukarıdaki gibi sayısal hale getirmek için scikit-learn içerisinde
+``MultiLabelBinarizer`` isimli bir sınıf bulundurulmuştur. Sınıfın genel kullanımı diğer scikit-learn sınıflarında
+olduğu gibidir. Önce ``MultiLabelBinarizer`` sınıfı türünden bir nesne yaratılır. Sonra bu nesne ile fit ve transform
+işlemleri yapılır. Ancak sınıfın ``fit`` metoduna liste, demet, NumPy dizisi gibi nesnelerden oluşan liste, demet,
+Series gibi nesneleri vermeliyiz. Örneğin biz ``fit`` metoduna her bir elemanı bir listeden oluşan bir liste (yani
+liste listesi) verebileceğimiz gibi her bir elemanı listeden oluşan bir Series nesnesi de verebiliriz. Sınıfın
+``transform`` metodu ``fit`` metoduyla aynı biçimde organize edilmiş değerleri parametre olarak alır, onları sayısal
+hale getirir ve bir NumPy dizisine geri döner. Tabii ``fit_transform`` işlemi birlikte de yapılabilmektedir. Sınıfın
+diğer bazı ayrıntıları için scikit-learn dokümanlarına başvurabilirsiniz.
+
+Şimdi ``MultiLabelBinarizer`` sınıfının kullanımına bir örnek verelim. Örnek veri kümemiz ``dataset.csv`` isimli bir
+dosyada aşağıdaki içeriğe sahip biçimde bulunuyor olsun:
+
+.. code-block:: text
+
+   text,labels
+   "Son zamanlarda hiçbir şeyden keyif almıyorum ve sürekli mutsuzum.","depresyon"
+   "Topluluk önünde konuşmam gerektiğinde panik oluyorum, nefes alamıyorum.","anksiyete,fobi"
+   "Duygularım çok hızlı değişiyor, bir anda sinirlenip sonra ağlamaya başlıyorum.","borderline"
+   "Kafamda sürekli endişe düşünceleri var, gece bile rahat uyuyamıyorum.","anksiyete"
+   "İnsanların bana zarar vereceğinden korkuyorum, yalnız kalmak istiyorum.","fobi,anksiyete"
+   "Hayatın anlamını sorguluyorum, çoğu zaman yaşamak istemiyorum.","depresyon,borderline"
+
+Biz bu CSV dosyasını Pandas'ın ``read_csv`` fonksiyonu ile okuduğumuzda her iki sütunu da yazılardan oluşan bir
+DataFrame nesnesi elde ederiz:
+
+.. code-block:: python
+
+   df = pd.read_csv('dataset.csv')
+
+DataFrame içerisindeki *labels* sütununu Series nesnesi olarak elde edip ona ``apply`` metodunu uygulayarak DataFrame
+sütununu listelerden oluşan bir sütun haline getirebiliriz.
+
+.. code-block:: python
+
+   df['labels'] = df['labels'].apply(lambda s: s.split(','))
+
+``apply`` metodu her satırı bizim verdiğimiz fonksiyona sokup o satırı verdiğimiz fonksiyonun geri dönüş değeri ile
+değiştirmektedir. Bu işlem sonucunda ``df['labels']`` sütunu şu hale gelecektir:
+
+.. code-block:: text
+
+   0                [depresyon]
+   1          [anksiyete, fobi]
+   2               [borderline]
+   3                [anksiyete]
+   4          [fobi, anksiyete]
+   5    [depresyon, borderline]
+   Name: labels, dtype: object
+
+Artık ``MultiLabelBinarizer`` nesnesini yaratıp fit ve transform işlemlerini yapabiliriz:
+
+.. code-block:: python
+
+   mlb = MultiLabelBinarizer()
+   transformed_labels = mlb.fit_transform(df['labels'])
+   print(transformed_labels)
+
+Bu işlemlerden şöyle bir NumPy dizisi elde edilecektir:
+
+.. code-block:: text
+
+   [
+       [0 0 1 0]
+       [1 0 0 1]
+       [0 1 0 0]
+       [1 0 0 0]
+       [1 0 0 1]
+       [0 1 1 0]
+   ]
+
+Tabii aslında biz yukarıdaki ``fit_transform`` işlemini doğrudan aşağıdaki gibi de yapabilirdik:
+
+.. code-block:: python
+
+   mlb = MultiLabelBinarizer()
+   transformed_labels = mlb.fit_transform(df['labels'].apply(lambda s: s.split(',')))
+   print(transformed_labels)
+
+.. code-block:: python
+
+   import pandas as pd
+   from sklearn.preprocessing import MultiLabelBinarizer
+
+   df = pd.read_csv('dataset.csv')
+
+   mlb = MultiLabelBinarizer()
+   transformed_labels = mlb.fit_transform(df['labels'].apply(lambda s: s.split(',')))
+   print(transformed_labels)
+
+
+.. _yapay-sinir-aglarina-giris:
+
+==========================================================================================
+Yapay Sinir Ağlarına Giriş: Biyolojik Temeller, Matematiksel Model ve Regresyon Kavramları
+==========================================================================================
+
+Giriş
+=====
+
+Yapay zeka ve makine öğrenmesi alanının en önemli yöntemlerinin başında *yapay sinir ağları (artificial neural
+networks)* ve *derin öğrenme (deep learning)* denilen yöntemler gelmektedir. Biz de bu bölümde belli bir derinlikte
+bu konuları ele alacağız.
+
+Yapay Sinir Ağlarının Tarihçesi
+===============================
+
+Yapay sinir ağlarının teorisi ilk zamanlar sinir bilimle (neuroscience), psikolojiyle ve matematikle uğraşan bilim
+insanları tarafından geliştirilmiştir. Yapay sinir ağları ilk kez Warren McCulloch ve Walter Pitts isimli kişiler
+tarafından 1943 yılında ortaya atılmıştır. 1940'lı yılların sonlarına doğru Donald Hebb isimli psikolog da *Hebbian
+Learning* kavramıyla, 1950'li yıllarda da Frank Rosenblatt isimli araştırmacı da *perceptron* kavramıyla alana
+önemli katkılarda bulunmuştur. Bu yıllar henüz elektronik bilgisayarların çok yeni olduğu yıllardı. Halbuki yapay
+sinir ağlarına yönelik algoritmalar için önemli bir CPU gücü gerekmekteydi. Bu nedenle özellikle 1960'lı yıllarda bu
+konuda bir motivasyon eksikliği oluşmuştur. Yapay sinir ağları sonraki dönemlerde yeniden popüler olmaya
+başlamıştır. Derin öğrenme konusunun önem kazanmasıyla da popülaritesi hepten artmıştır.
+
+Yapay Sinir Ağlarının Uygulama Alanları
+=======================================
+
+Yapay sinir ağlarının pek çok farklı alanda uygulaması vardır. Örneğin:
+
+- Metinlerin sınıflandırılması ve kategorize edilmesi (text classification and categorization)
+- Üretici yapay zeka
+- Metin üretimi (text generation) ve dil modelleri
+- Ses tanıma (speech recognition)
+- Karakter tanıma (character recognition)
+- İsimlendirilmiş varlıkların tanınması (named entity recognition)
+- Sözcük gruplarının aynı anlama gelip gelmediğinin belirlenmesi (paraphrase detection and identification)
+- Makine çevirisi (machine translation)
+- Örüntü tanıma (pattern recognition)
+- Yüz tanıma (face recognition)
+- Finansal uygulamalar (portföy yönetimi, kredi değerlendirmesi, sahtecilik, gayrimenkul değerlemesi, döviz
+  fiyatlarının tahmini vs.)
+- Endüstriyel problemlerin çözümü
+- Biyomedikal mühendisliğine ilişkin bazı uygulamalar (Örneğin medikal görüntü analizi, hastalığa tanı koyma ve
+  tedavi planı oluşturma gibi)
+- Optimizasyon problemlerinin çözümü
+- Pazarlama süreçlerinde karşılaşılan problemlerin çözümü
+- Ulaştırma problemlerinin çözümü
+
+Biyolojik Sinir Sistemi ve Nöron Kavramı
+========================================
+
+Yapay sinir ağları (artificial neural networks) insanın sinir sisteminden esinlenerek geliştirilmiş olan yöntemler
+grubudur. Her ne kadar artık yapay sinir ağlarının insanın sinir sistemiyle yakın bir ilgisi kalmamış olsa da biz
+geleneksel biçimde önce bu yöntemler grubunun ilham kaynağı olan insanın sinir sistemi üzerinde bazı açıklamalarla
+konuya başlayacağız.
+
+Sinir sisteminin temel yapı taşı *nöron (neuron)* denilen hücrelerdir. Bir nöron bir çekirdeğe sahiptir. Nöronun
+başka nörondan gelen iletileri alan *dendrit (dendrite)* denilen bir kısmı vardır. Pek çok nöronda bir dal
+biçiminde uzanan aksonlar da bulunmaktadır. Aksonların uçlarında küçük *düğmecikler (terminal buttons)* vardır.
+Bir nöron ateşlendiğinde bu düğmeciklerden *nörotransmiter (neurotransmitter)* denilen kimyasallar zerk edilir.
+Bunlar diğer nöronun reseptörleri tarafından alınmaktadır. Ateşleme nörondaki *aksiyon potansiyeli (action
+potential)* belli bir düzeye geldiğinde gerçekleşmektedir. Bir nöron duruma göre yüzlerce nörona bağlı
+olabilmektedir. Bir nöronun akson ucu ile diğer nöronun dendrit reseptörleri arasındaki bölgeye *sinaps*
+denilmektedir.
+
+Çeşitli nörotransmiterler vardır. Her nörotransmiter anahtarın kilide uyması gibi farklı reseptörler tarafından
+alınmaktadır. Bir nörotransmiteri sinapslarda artıran maddelere *agonist*, azaltan maddelere ise *antagonist*
+denilmektedir. Agonist etki çeşitli biçimlerde sağlanabilmektedir. Örneğin bunun için presinaptik nöronda
+(nörotransmiterleri zerk eden nöron) nörotransmiter miktarı ya da örneğin post sinaptik nörondaki (nörotransmiterleri
+alan nöron) reseptör duyarlılığı artırılabilir. Bir nörotransmiter zerk edildikten sonra akson uçları tarafından
+geri alınmaktadır. Buna *geri alım (reuptake)* işlemi denir. Reuptake mekanizmasının inhibe edilmesiyle de
+sinapstaki nörotransmiter etkinliği artırılabilmektedir. Örneğin SSRI (Selective Serotonin Reuptake Inhibitors)
+denilen antidepresan ilaçlar bu mekanizmayla sinapslardaki serotonin miktarını artırma iddiasındadır.
+
+Nöronların bir kısmına *duyusal nöronlar (sensory neurons)* denilmektedir. Bunlar dış fiziksel uyaranları alıp onu
+kimyasal düzeye dönüştürmekte işlev görürler. İletiler nihai olarak beyindeki bazı bölümlerde işlenmektedir.
+Örneğin beynin arka kısmına *oksipital lob* denilmektedir. Görsel iletiler buradaki nöron ağı tarafından işlenir.
+Bazı nöronlara ise *motor nöronlar (motor neurons)* denilmektedir. Motor nöronlar kaslara bağlıdır ve kasların
+kasılmalarını sağlarlar. Örneğin elimizi hareket ettirmek istediğimizde bu süreç beynin emir vermesiyle başlayan
+nöral iletinin ele ulaşıp oradaki kasları hareket ettirmesiyle sağlanmaktadır. Dolayısıyla bu nöral ileti bozulursa
+felç durumu ortaya çıkmaktadır.
+
+Nöronlarda *miyelin kılıfı (myelin sheath)* denilen özel bir kılıf bulunabilmektedir. Bu kılıf nöral iletiyi
+hızlandırmaktadır. Beyinde bu kılıfın olduğu nöronlar beyaz renkte gözüktüğü için bu bölgelere *beyaz madde (white
+matter)*, miyelinsiz nöronlar da gri bir biçimde gözüktüğü için bu nöronların bulunduğu bölgelere de *gri madde
+(gray matter)* denilmektedir.
+
+Makine öğrenmesindeki yapay sinir ağları yukarıda da belirttiğimiz gibi insanın sinir sisteminden ilham alınarak
+tasarlanmıştır. Ancak artık bu ilham noktası önemini kaybetmiş gibidir. Bu nedenle pek çok uzman artık bu konuyu
+*yapay sinir ağları* yerine yalnızca *sinir ağları* biçiminde ifade etmektedir.
+
+Yapay Nöronun Matematiksel Modeli
+=================================
+
+Yapay sinir ağları yapay nöronların birbirlerine bağlanmasıyla oluşturulmaktadır. Bir nöronun çeşitli girdileri
+olabilir fakat yalnızca bir tane çıktısı vardır. Nöronun girdileri aslında veri kümesindeki satırları temsil
+etmektedir. Yani veri kümesindeki satırlar nöronun girdileri olarak kullanılmaktadır. Nöronun girdilerini xi ile
+temsil edersek her girdi *ağırlık (weight) değeri* denilen bir değerle çarpılır ve bu çarpımların toplamları elde
+edilir. Ağırlık değerlerini wi ile gösterirsek bu xi değerleri onlara karşı gelen wi değerleriyle çarpılıp
+toplanmaktadır. Örneğin nöronun 5 tane girdisi olsun, bu 5 girdi aşağıdaki gibi 5 ayrı ağırlık değerleriyle
+çarpılıp toplanacaktır:
+
+.. code-block:: text
+
+   total = x1w1 + x2w2 + x3w3 + x4w4 + x5w5
+
+İki vektörün karşılıklı elemanlarının çarpımlarının toplamına İngilizce *dot product* denilmektedir. (Dot product
+işlemi ``np.dot`` fonksiyonuyla yapılabilmektedir.) Elde edilen dot product değeri *bias* denilen bir değerle
+toplanır. Biz bias değerini b ile temsil edeceğiz. Bu durumda 5 girdisi olan nörondan elde edilen toplam şöyle
+olacaktır:
+
+.. code-block:: text
+
+   total = x1w1 + x2w2 + x3w3 + x4w4 + x5w5 + b
+
+İşte elde edilen bu toplam da *aktivasyon fonksiyonu (activation function)* ya da *transfer fonksiyonu (transfer
+function)* denilen bir fonksiyona sokulmaktadır. Böylece o nöronun nihai çıktısı elde edilmektedir. Bu işlemleri
+aşağıdaki gibi ifade edebiliriz.
+
+.. code-block:: text
+
+   out = activation(x1w1 + x2w2 + x3w3 + x4w4 + x5w5 + b)
+
+Bu işlemi şekilsel olarak şöyle de gösterebiliriz:
+
+.. figure:: _static/neuron-model.png
+   :alt: Tek bir nöronun girdi, ağırlık, bias, toplama ve aktivasyon fonksiyonu ile çıktı üretme şeması
+   :align: center
+   :width: 600px
+
+   Tek bir nöronun matematiksel modeli: girdiler ağırlıklarla çarpılıp bias ile toplanır, elde edilen ``net``
+   değeri bir aktivasyon fonksiyonundan geçirilerek çıktı üretilir.
+
+Burada bir noktaya dikkat ediniz: w değerleri ve b değeri nöronun içindedir. x değerleri ise nörona giriş olarak
+uygulanmaktadır. İzleyen paragraflarda da belirteceğimiz gibi yapay sinir ağının eğitilmesi aslında nöronların
+içerisindeki w değerlerinin ve b değerlerinin uygun biçimde konumlandırılması anlamına gelmektedir.
+
+Nöronun içerisindeki işlemleri XW + b biçiminde matrisel formda da ifade edebiliriz. Burada X bir satır vektörü W
+da bir sütun vektörüdür:
+
+.. code-block:: text
+
+                           ┌    ┐
+                           │ w1 │
+   ┌                     ┐ │ w2 │
+   │ x1  x2  x3  ...  xn │ │ w3 │ +  b =   x1w1 + x2w2 + x3w3 + ... + xnwn + b
+   └                     ┘ │....│
+                           │ wn │
+                           └    ┘
+
+           (1 × n)        (n × 1)         (1 × 1)
+
+O halde nörondaki girdinin çıktıya dönüştürülmesi işlemini matrisel biçimde şöyle de gösterebiliriz:
+
+.. code-block:: text
+
+   out = activation(XW + b)
+
+Çoklu Nöron Katmanı ve Matris Gösterimi
+=======================================
+
+Şimdi ağımızda tek bir nöron değil K tane farklı nöronun bulunduğunu düşünelim. N tane girdinin de (yani Xi'lerin)
+bu nöronların hepsine bağlandığını varsayalım. Her nöronun ağırlık değerleri ve bias değeri diğerlerinden
+farklıdır. Dolayısıyla K tane nöronun çıktısı aşağıdaki gibi bir matrisle gösterilebilir:
+
+.. code-block:: text
+
+   outs = activation(XW + b)
+
+Artık burada X 1XN boyutunda, W matrisi ise NxK boyutunda ve b matrisi de 1XK boyutundadır. Sonuç olarak buradan K
+tane çıktı değeri elde edilecektir. Buradaki XW işleminin artık dot product belirtmediğine bir matris çarpımı
+belirttiğine dikkat ediniz. Gösterimimizdeki X matrisi bir satır vektörü durumundadır:
+
+.. code-block:: text
+
+   X = [x1, x2, x3, ..., xn]
+
+Bu matris Nx1 boyutundadır. W matrisi ise aşağıdaki görünümdedir:
+
+.. code-block:: text
+
+   w11  w21 w31 ... wk1
+   w12  w22 w32 ... wk2
+   w13  w23 w33 ... wk3
+   ...  ... ... ... ...
+   w1n  w2n w3n ... wkn
+
+Bu matris de NxK boyutundadır. Buradaki X matrisi ile W matrisi matris çarpımına sokulduğunda 1XK boyutunda bir
+matris elde edilecektir. Gösterimimizdeki b matrisi şöyle temsil edilebilir:
+
+.. code-block:: text
+
+   b = [b1, b2, b3, ...., bk]
+
+Bu matrisin de 1XK boyutunda olduğuna dikkat ediniz. Böylece XW + b işleminden 1XK boyutunda bir matris elde
+edilecektir. Tabii biz bu matris çarpımını WX + b biçiminde ters de oluşturabilirdik. Bu durumda W matrisi şöyle
+olacaktır:
+
+.. code-block:: text
+
+   w11  w12 w13 ... w1n
+   w21  w22 w23 ... w2n
+   w31  w32 w33 ... w3n
+   ...  ... ... ... ...
+   wk1  wk2 wk3 ... wkn
+
+Söz konusu X matrisi de şöyle olacaktır:
+
+.. code-block:: text
+
+   x1
+   x2
+   x3
+   ...
+   xk
+
+Tabii bu durumda b matrisi de şöyle olacaktır:
+
+.. code-block:: text
+
+   b1 b2 b3 ... bk
+
+Artık burada W matrisinin KxN boyutunda olduğuna, X ve b matrislerinin de Kx1 boyutunda olduğuna dikkat ediniz.
+Genellikle XW + b gösterimi yerine WX + b gösterimi tercih edilmektedir.
+
+Sinir Ağının Eğitilmesi
+=======================
+
+Bir sinir ağının amacı *kestirimde* bulunmaktır. Yani biz ağa girdi olarak xi değerlerini veririz. Ağdan
+hedeflediğimiz çıktıyı elde etmeye çalışırız. Ancak bunu yapabilmemiz için nöronlardaki w değerlerinin ve b
+değerlerinin biliniyor olması gerekir. Peki bu değerleri nasıl elde edilmektedir?
+
+Sinir ağları *denetimli (supervised)* bir öğrenme modeli sunmaktadır. Daha önceden de belirttiğimiz gibi denetimli
+öğrenmede önce sistemin mevcut verilerle eğitilmesi gerekmektedir. İşte bir sinir ağının eğitilmesi aslında
+nöronlardaki w değerlerinin ve b değerlerinin uygun biçimde belirlenmesi anlamına gelmektedir. Başka bir deyişle
+önce biz ağımızı mevcut verilerle eğitip bu w ve b değerlerinin uygun biçimde oluşturulmasını sağlarız. Ondan sonra
+kestirim yaparız. Tabii ağ ne kadar iyi eğitilirse ağın yapacağı kestirim de o kadar isabetli olacaktır.
+
+Örneğin biz bir dairenin fiyatını tahmin etmeye çalışalım. Bunun için öncelikle veri toplamamız gerekir. Çeşitli
+daireler için şu verilerin toplandığını varsayalım:
+
+- Dairenin büyüklüğü
+- Dairenin kaçıncı katta olduğu
+- Dairenin içinde bulunduğu binanın yaşı
+- Dairenin yaşam alanına uzaklığı
+- Dairenin ne kadar yakında metro durağı olduğu
+- Dairenin içinde bulunduğu binanın otopark miktarı
+- Apartman aidatı
+
+İşte elimizdeki veri kümesinin sütunlarını (özelliklerini) bu bilgiler oluşturmaktadır. Bizim çeşitli dairelerin bu
+bilgilerini elde etmiş olmamız ve onların satış fiyatlarını da biliyor olmamız gerekir. Yani bizim işin başında
+sinir ağına girdi yapacağımız bilgilerle ağın vermesi gereken gerçek çıktılardan oluşan bir veri kümesine
+gereksinimimiz vardır. İşte ağın eğitimi için bu veri kümesini kullanırız. Ağımızı bu gerçek verilerle eğittikten
+sonra artık nöronlardaki w ve b değerleri konumlandırılmış olacaktır. Biz de kestirim yapmak istediğimizde ağımıza
+dairenin yukarıdaki bilgilerini veririz. Ağımız da bize çıktı olarak o dairenin olması gereken fiyatını verir.
+
+Eğitim sırasında tüm nöronların içerisindeki ağırlık değerlerinin ve bias değerlerinin nasıl konumlandırıldığını
+merak edebilirsiniz. İşte eğitim sırasında olması gereken değerle ağın verdiği değer arasındaki fark minimize
+edilmeye çalışılmaktadır. Buna sinir ağlarındaki optimizasyon işlemi denilmektedir. Optimizasyon algoritmaları
+türevde zincir kuralı kullanılarak çıktıdan geriye doğru nöronların ağırlık değerlerini ve bias değerlerini
+güncellemektedir. Böylece ağ eğitildikçe bu w ve bias değerleri daha iyi konumlandırılmaktadır. Bu kestirimin
+iyileştirilmesi anlamına gelmektedir.
+
+Sinir Ağı Bileşenleri Hakkında Sorular
+======================================
+
+Biz yukarıda bir sinir ağının temel çalışma mekanizmasını açıkladık. Ancak bir sinir ağını oluşturabilmek için bu
+ağın bileşenleri hakkında daha fazla bilgi sahibi olmamız gerekir. Ağın bileşenleri hakkında aklımıza gelebilecek
+tipik sorular şunlardır:
+
+- Ağın nöron katmanlarının sayısı ne olmalıdır?
+- Katmanlardaki nöronların sayıları ve katman bağlantıları nasıl olmalıdır?
+- Nöronlarda kullanılan aktivasyon fonksiyonları nasıl olmalıdır?
+- Ağdaki w ve b değerlerini oluşturmak için kullanılan optimizasyon algoritmaları nelerdir ve nasıl çalışmaktadır?
+
+Biz de bir süreç içerisinde bu sorulara yanıtlar vereceğiz. Ancak bir noktaya dikkatinizi çekmek istiyoruz: Sinir
+ağlarında önemli bir işlem yükü vardır. Buradaki işlemlerin programcılar tarafından manuel bir biçimde her
+defasında yeniden (ad-hoc biçimde) yapılması çok zahmetlidir. İşte zamanla bu sinir ağı işlemlerini kendi içlerinde
+yapan kütüphaneler geliştirilmiştir. Bugün artık uygulamacılar bu işlemleri programlar yazarak değil zaten bu
+konuda çözüm üreten hazır kütüphaneleri kullanarak yapmaktadır.
+
+Regresyon Kavramı ve Sınıflandırma
+==================================
+
+İstatistikte girdi değerlerinden hareketle çıktı değerinin belirlenmesine (tahmin edilmesine) yönelik süreçlere
+*regresyon (regression)* denilmektedir. İstatistikte regresyon modelleri çeşitli biçimlerde
+sınıflandırılabilmektedir. İstatistikte çıktıya göre regresyon modelleri tipik olarak ikiye ayrılmaktadır:
+
+1) Sınıflandırma Amacıyla Oluşturulan Regresyon Modelleri
+2) Gerçek Bir Değer Elde Etmek Amacıyla Oluşturulan Regresyon Modelleri
+
+Her ne kadar sınıflandırma işlemi de geniş anlamda bir regresyon işlemi gibi olsa da sınıflandırma istatistiksel
+yöntemlerin dışında çeşitli başka yöntemlerle de yapılabilmektedir. İstatistiksel olarak sınıflandırma işlemi
+*hedefi bir olasılık fonksiyonu olan, üzerine bir karar kuralı eklenmiş* bir regresyon problemidir.
+
+Gerçek bir değer elde etmek amacıyla oluşturulan regresyon modellerinde bir olasılık değeri değil gerçek ve sürekli
+bir değer elde edilmektedir. Örneğin bir dairenin yukarıda belirttiğimiz özellikleri girdiler olabilir, dairenin
+fiyatı da çıktı olabilir. Burada çıktı sürekli sayısal bir değerdir. Çıktının bir sınıf biçiminde elde edildiği
+regresyon modellerinde çıktı gerçek bir değer değil sınıf ya da kategori belirten ayrık bir değerdir. Örneğin
+girdiler bir resmin pixel'leri olabilir. Çıktı da bu resmin elma mı, armut mu, kayısı mı olduğuna yönelik kategorik
+bir bilgi olabilir. İstatistikte bu tür sınıflandırma yapan tipik regresyon modeline *lojistik regresyon* ya da
+*logit regresyonu* denilmektedir. (Lojistik regresyondaki *lojistik* sözcüğünün günlük hayatta çokça
+karşılaştığımız *lojistik hizmetlerdeki* *lojistik* sözcüğü ile bir ilgisi yoktur. Buradaki *lojistik* sözcüğü
+matematikteki *logaritma* sözcüğünün kısaltmasından gelmektedir.)
+
+Makine öğrenmesinde kestirim işlemleri kabaca iki gruba ayrılmaktadır:
+
+1) Sınıflandırma işlemleri
+2) Regresyon işlemleri
+
+Makine öğrenmesinde regresyon terimi gerçek bir değer elde etmek amacıyla oluşturulan modeller için
+kullanılmaktadır.
+
+İkili ve Çok Sınıflı Sınıflandırma
+==================================
+
+Sınıflandırma işlemlerinde çıktının olabileceği değerlere *sınıf (class)* denilmektedir. Sınıflandırma
+problemlerinde eğer çıktı ancak iki değerden biri olabiliyorsa bu tür sınıflandırma problemlerine *iki sınıflı
+sınıflandırma (binary classification)* problemleri denilmektedir. Örneğin bir film hakkında yazılan yorum
+yazısının *olumlu* ya da *olumsuz* biçiminde iki değerden oluştuğunu düşünelim. Buradaki sınıflandırma işlemi
+ikili sınıflandırma işlemidir. Benzer biçimde bir biyomedikal görüntüdeki kitlenin *iyi huylu (benign)* mu *kötü
+huylu (malign)* mu olduğuna yönelik sınıflandırma da ikili sınıflandırmaya bir örnektir. Eğer sınıflandırmada
+çıktı sınıflarının sayısı ikiden fazla ise böyle sınıflandırma problemlerine *çok sınıflı (multiclass)*
+sınıflandırma problemleri denilmektedir. Örneğin bir resmin hangi meyveye ilişkin olduğunun tespit edilmesi için
+kullanılan sınıflandırma modeli *çok sınıflı* bir modeldir.
+
+Yukarıda da belirttiğimiz gibi istatistikte *lojistik regresyon* denildiğinde aslında default olarak *iki sınıflı
+(binary)* lojistik regresyon anlaşılmaktadır. Çok sınıflı lojistik regresyonlara istatistikte genellikle İngilizce
+*multiclass logistic regression* ya da *multinomial logistic regression* denilmektedir.
+
+.. _perceptron-ve-sinir-agi-katmanlari:
+
+=================================================================
+Perceptron, Sinir Ağı Katmanları ve Yapay Sinir Ağı Kütüphaneleri
+=================================================================
+
+Perceptron ve Basit Nöron Modeli
+================================
+
+En basit yapay sinir ağı tek bir nörondan oluşan mimaridir. Buna *perceptron* denilmektedir. Perceptron'u tek
+hücrelilere benzetebiliriz. Perceptron kavramı 1957-1958 yıllarında Frank Rosenblatt tarafından ortaya atılmıştır.
+Perceptron'da bir tane nöron vardır. N tane girdi bu nörondaki w değerleriyle dot product yapılıp bias değeri ile
+toplanarak aktivasyon fonksiyonuna sokulur. Bu durumu şekilsel olarak şöyle gösterebiliriz:
+
+.. figure:: _static/perceptron-model.png
+   :alt: Perceptron modeli: girdiler ağırlıklarla çarpılır, toplanır, bias eklenir, aktivasyondan geçirilir
+   :align: center
+   :width: 520px
+
+   Tek nöronlu perceptron modeli: her girdi kendi ağırlığıyla çarpılır, toplam bias ile birleştirilip aktivasyon
+   fonksiyonundan (f(z)) geçirilerek çıktı (ŷ) elde edilir.
+
+Yalnızca tek nörondan oluşan perceptron *doğrusal olarak ayrıştırılabilen (linearly separable)* ikili
+sınıflandırma problemlerine ya da yalın çoklu regresyon problemlerine uygulanabilmektedir. Her ne kadar tek bir
+nöron bile bazı problemleri çözebiliyorsa da problemler karmaşıklaştıkça ağdaki nöron sayılarının ve katmanların
+artırılması gerekmektedir.
+
+Aslında aktivasyon fonksiyonunun *sigmoid* olduğu, optimizasyon için kullanılan kayıp (loss) fonksiyonunun
+*binary-cross-entropy* olduğu perceptron tamamen istatistikteki lojistik regresyonla aynı anlama gelmektedir.
+Benzer biçimde aktivasyon fonksiyonun doğrusal (linear) olduğu, kayıp fonksiyonun da *mean-squared-error* olduğu
+perceptron da çoklu doğrusal regresyonla aynı anlama gelmektedir. Görüldüğü gibi perceptron lojistik regresyon ve
+çoklu doğrusal regresyon işlemlerini yapabilmektedir.
+
+Aşağıda bir nöronun bir sınıfla temsil edilmesine ilişkin bir örnek veriyoruz.
+
+.. code-block:: python
+
+   import numpy as np
+
+
+   class Neuron:
+       def __init__(self, ninputs):
+           self.ninputs = ninputs
+           self.activation = Neuron.sigmoid
+
+       def set_weights(self, weights, b, activation=None):
+           if self.ninputs != len(weights):
+               raise ValueError('invalid weights!..')
+           self.weights = weights
+           self.b = b
+           if activation:
+               self.activation = activation
+
+       def output(self, x):
+           if self.ninputs != len(x):
+               raise ValueError('invalid inputs')
+           return self.activation(np.dot(self.weights, x) + self.b)
+
+       @staticmethod
+       def sigmoid(x):
+           return 1 / (1 + np.e ** x)
+
+   # test
+
+
+   n = Neuron(5)
+   n.set_weights(np.array([1, 2, 3, 4, 5]), 1)
+   result = n.output(np.array([1, 2, 3, 4, 5]))
+   print(result)
+
+Çok Nöronlu Ağlarda Bağlantılar: Yoğun ve Seyrek Bağlantı
+=========================================================
+
+Peki bir sinir ağında birden fazla nöron olduğunda bunların arasındaki bağlantı nasıl olacaktır? Örneğin ağımızda
+bir değil üç nöron olsun ve 4 tane de girdi olsun. Bu durumda girdiler bu dört girdi üç nörona da bağlanacaktır. Bu
+üç nörondan üç ayrı çıkış elde edilecektir:
+
+.. figure:: _static/dense-layer-3neurons.png
+   :alt: Dört girdinin üç nörona yoğun biçimde bağlandığı şema
+   :align: center
+   :width: 260px
+
+   Dört girdinin üç nörona (N1, N2, N3) yoğun (dense) biçimde bağlanması: her girdi, her nörona bağlıdır.
+
+Bir nöronun çıktısının sonraki katmandaki tüm nöronlara girdi yapılması ile oluşturulan bağlantıya *yoğun bağlantı
+(dense connection)* denilmektedir. Sinir ağlarında genellikle yoğun bağlantı kullanılmaktadır. Yukarıdaki sinir
+ağında üç ayrı çıkış vardır. Biz tek bir çıkış istiyorsak bu çıkışları da başka bir nörona girdi yaparız:
+
+.. figure:: _static/dense-layer-with-output.png
+   :alt: N1, N2, N3 nöronlarının çıktılarının N4 nöronuna bağlanarak tek bir nihai çıktı ürettiği şema
+   :align: center
+   :width: 460px
+
+   N1, N2 ve N3 nöronlarının çıktıları, tek bir nihai çıktı üretmek üzere N4 nöronuna bağlanmıştır.
+
+Yoğun bağlantı yerine önceki nöronun çıktısı sonraki her nörona değil bazı nöronlara bağlanması da söz konusu
+olabilmektedir. Bu tür bağlantılara *seyrek bağlantı (sparse connection)* da denilmektedir. Seyrek bağlantı çeşitli
+amaçlarla kullanılabilmektedir. Sonraki nöronun çıktısının önceki nöronlara bağlanması da ilginç bir durumdur. Buna
+sinir ağlarında *özyinelemeli sinir ağları (recurrent neural networks (RNN))* da denilmektedir. Özyinelemeli terim
+yerine *geri beslemeli (feed backward)* terimi de kullanılabilmektedir.
+
+Model Parametre Sayısı ve Güncel LLM Modellerinin Büyüklükleri
+==============================================================
+
+Yukarıdaki 4 girişe ve 4 nörona sahip ağda eğitim sırasında konumlandırılması gereken toplam kaç ağırlık değeri ve
+bias değeri vardır? N1, N2 ve N3 nöronlarının 4'er girdisi vardır. N4 nöronunun ise 3 girdisi vardır. Bu nöronların
+hepsinin ayrıca bir bias değeri de bulunmaktadır. O halde konumlandırılması gereken toplam ağırlıkların sayısı
+(burada ağırlık demekle bias değerlerini de dahil ediyoruz) 4 * 3 + 3 + 3 + 1 = 19 biçimindedir. Bir sinir ağında
+eğitim sonucunda konumlandırılması gereken ağırlık değerlerinin sayısına (bias değerleri de bu bağlamda ağırlık
+değeri olarak ele alıyoruz) modelin *parametre sayısı* denilmektedir. Bugün kullandığımız LLM modellerindeki
+parametre sayısı modelden modele değişebilmektedir. Aşağıda bazı LLM modellerinin parametre sayılarını veriyoruz:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Model (kapalı)
+     - Toplam (tahmin)
+   * - GPT-5.x (flagship)
+     - ~1-3 trilyon
+   * - GPT-5.x mini/nano
+     - ~10-100 milyar
+   * - Claude Opus 5
+     - ~2-5 trilyon
+   * - Claude Sonnet sınıfı
+     - ~300 milyar-1 trilyon
+   * - Claude Haiku sınıfı
+     - ~20-70 milyar
+   * - Gemini 3 Pro/Ultra
+     - ~1-3 trilyon
+   * - Gemini 3 Flash/Lite
+     - ~20-100 milyar
+   * - Grok 4 / 5
+     - ~2-3 trilyon
+
+Sinir Ağı Katmanları: Girdi, Saklı ve Çıktı Katmanları
+======================================================
+
+Gelişmiş sinir ağları çok sayıda nöronun bulunduğu katmanlardan (layers) oluşmaktadır. Katman aynı düzeydeki nöron
+grubu için kullanılan bir kavramdır. Yapay sinir ağlarında katmanlar tipik olarak üçe ayrılmaktadır:
+
+1) Girdi Katmanı (Input Layer)
+2) Saklı Katmanlar (Hidden Layers)
+3) Çıktı Katmanı (Output Layer)
+
+Girdi katmanı ağa uygulanacak verileri temsil eden katmandır. Aslında girdi katmanı gerçek anlamda nöronlardan
+oluşmaz. Ancak anlatımları kolaylaştırmak için bu katmanın da nöronlardan oluştuğu varsayılmaktadır. Başka bir
+deyişle girdi katmanındaki nöronların tek bir girdisi ve tek bir çıktısı vardır. Bunların w değerleri 1, bias
+değerleri 0'dır. Aktivasyon fonksiyonları ise f(x) = x biçimindedir. Yani girdi katmanı bir şey yapmaz, girdiyi
+değiştirmeden çıktıya verir. Yukarıda da belirttiğimiz gibi girdi katmanı gerçek bir katman değildir. Girdileri
+temsil etmektedir. Girdi katmanındaki nöron sayısı tablo biçimindeki (tabular) veri kümesindeki sütunların (yani
+özelliklerin) sayısı kadar olmalıdır. Örneğin 5 tane özelliğe (feature) sahip olan bir veri kümesine ilişkin sinir
+ağının girdi katmanı şöyle ifade edilebilir:
+
+.. code-block:: text
+
+   x1 ---> O --->
+   x2 ---> O --->
+   x3 ---> O --->
+   x4 ---> O --->
+   x5 ---> O --->
+
+Buradaki O sembolleri girdi katmanındaki nöronları temsil etmektedir. Girdi katmanındaki nöronların 1 tane
+girdisinin, 1 tane de çıktısının olduğuna dikkat ediniz. Buradaki nöronlar girdiyi değiştirmediğine göre bunların w
+değerleri 1, b değerleri 0, aktivasyon fonksiyonu da f(x) = x gibi düşünülebilir.
+
+Örneğin zambakların çeşitli özelliklerini ve bunların türlerini barındıran *iris* veri kümesindeki sütunlar
+şöyledir:
+
+.. list-table::
+   :header-rows: 1
+
+   * - sepal_length
+     - sepal_width
+     - petal_length
+     - petal_width
+     - species
+   * - 5.1
+     - 3.5
+     - 1.4
+     - 0.2
+     - setosa
+   * - 4.9
+     - 3.0
+     - 1.4
+     - 0.2
+     - setosa
+   * - 4.7
+     - 3.2
+     - 1.3
+     - 0.2
+     - setosa
+   * - 4.6
+     - 3.1
+     - 1.5
+     - 0.2
+     - setosa
+   * - 5.0
+     - 3.6
+     - 1.4
+     - 0.2
+     - setosa
+   * - ...
+     - ...
+     - ...
+     - ...
+     - ...
+
+Burada species sütunu zambağın türünü belirtmektedir. Bu veri kümesinden amaç dört özelliği girilen bir zambağın
+türünün tespit edilmesidir. İşte bu veri kümesi için oluşturulacak sinir ağının girdi katmanında 4 nöron
+bulunmaktadır:
+
+.. figure:: _static/iris-input-layer.png
+   :alt: Iris veri kümesindeki dört özelliğin girdi katmanındaki dört nörona bağlanıp saklı katmana iletilmesi
+   :align: center
+   :width: 460px
+
+   Iris veri kümesinin dört özelliği (sepal_length, sepal_width, petal_length, petal_width) girdi katmanındaki
+   dört nörona (x1-x4) bağlanır ve buradan saklı katmana iletilir.
+
+Eğitim sırasında her satır girdi olarak uygulanmaktadır.
+
+Girdiler (yani girdi katmanının çıktıları) saklı katman (hidden layer) denilen katmanlardaki nöronlara bağlanırlar.
+Modelde sıfır tane, bir tane, iki tane ya da ikiden fazla saklı katman bulunabilir. Saklı katmanların sayısı ve
+saklı katmanlardaki nöronların sayısı ve bağlantı biçimleri problemin niteliğine göre değişebilmektedir. Yani saklı
+katmanlardaki nöronların girdi katmanıyla aynı sayıda olması gerekmez. Her saklı katmandaki nöron sayıları aynı
+olmak zorunda da değildir. Genel olarak sinir ağı modelinde saklı katmanların sayısı 2'den fazla ise bu tür
+modellere *derin sinir ağı (deep neural network)*, bu tür ağların bulunduğu modellere ilişkin konuya da genel
+olarak *derin öğrenme (deep learning)* denilmektedir.
+
+Çıktı katmanı bizim sonucu alacağımız katmandır. Çıktı katmanındaki nöron sayısı bizim kestirmeye çalıştığımız
+olgularla ilgilidir. Örneğin biz bir evin fiyatını kestirmeye çalışıyorsak çıktı katmanında tek bir nöron bulunur.
+Yine örneğin biz ikili sınıflandırma problemi üzerinde çalışıyorsak çıktı katmanı yine tek bir nörondan oluşabilir.
+Ancak biz evin fiyatının yanı sıra evin sağlamlığını da kestirmek istiyorsak bu durumda çıktı katmanında iki nöron
+olacaktır. Benzer biçimde çok sınıflı sınıflandırma problemlerinde genel olarak çıktı katmanlarında sınıf sayısı
+kadar nöron bulunur.
+
+Bir yapay sinir ağındaki katmanların sayısı belirtilirken bazıları girdi katmanını bu sayıya dahil ederken,
+bazıları etmemektedir. Bu nedenle katman sayılarını konuşurken yalnızca saklı katmanları belirtmek bu bakımdan iki
+anlamlılığı giderebilmektedir. Örneğin biz *modelimizde 5 katman var* dediğimizde birisi bu 5 katmanın içerisinde
+girdi katmanı dahil mi diye tereddütte kalabilir. O halde iki anlamlılığı ortadan kaldırmak için *modelimizde 3
+saklı katman var* gibi bir ifade daha uygun olacaktır.
+
+Katman ve Nöron Sayısının Model Başarısına Etkisi
+=================================================
+
+Bir yapay sinir ağı modelinde katman sayısının artırılması daha iyi bir sonucun elde edileceği anlamına gelmez.
+Benzer biçimde katmanlardaki nöron sayılarının artırılması da daha iyi bir sonucun elde edileceği anlamına
+gelmemektedir. Katmanların sayısından ziyade onların işlevleri daha önemli olmaktadır. Ağa gereksiz katman eklemek,
+katmanlardaki nöronları artırmak tam ters bir biçimde ağın kestirim başarısının düşmesine de yol açabilir. Yani
+gerekmediği halde ağa saklı katman eklemek, katmanlardaki nöron sayılarını artırmak bir fayda sağlamamakta tersine
+kestirim başarısını düşürebilmektedir. Ancak görüntü tanıma gibi, yazı anlamlandırma gibi, üretici yapay zeka
+uygulamaları gibi özel ve zor problemlerde saklı katman sayılarının artırılması gerekmektedir.
+
+Saklı Katman Sayısı İçin Pratik Öneriler
+========================================
+
+Peki bir sinir ağı modelinde kaç tane saklı katman olmalıdır? Bu sorunun matematiksel derinliği vardır. Ancak
+pratik olarak şunları söyleyebiliriz:
+
+- Sıfır tane saklı katmana sahip tek bir nörondan oluşan en basit modele *perceptron* dendiğini belirtmiştik. Bu
+  perceptron *doğrusal olarak ayrıştırılabilen (linearly separable)* sınıflandırma problemlerini ve karmaşık
+  olmayan çoklu doğrusal regresyon problemlerini çözebilmektedir. Doğrusal olarak ayrıştırılabilirlik kursumuzda
+  başka bir bölümde ele alınmaktadır.
+
+- Tek saklı katmanlı modeller aslında pek çok sınıflandırma problemini ve regresyon problemini belli bir
+  yeterlilikte çözebilmektedir. Ancak tek saklı katman yine de bu tarz bazı problemler için yetersiz kalabilmektedir.
+
+- İki saklı katman pek çok sınıflandırma problemi için ve regresyon problemi için yeterli bir modeldir. Bu nedenle
+  karmaşık olmayan problemler için ilk akla gelecek model iki saklı katmanlı modeldir.
+
+- İkiden fazla saklı katmana sahip olan modeller karmaşık ve özel problemleri çözmek için kullanılmaktadır. İki
+  saklı katmandan fazla katmana sahip olan sinir ağlarına genel olarak *derin öğrenme ağları (deep learning
+  networks)* denildiğini anımsayınız.
+
+Yukarıda da belirttiğimiz gibi *derin öğrenme (deep learning)* farklı bir yöntemi belirtmemektedir. Derin öğrenme
+özel ve karmaşık problemleri çözebilmek için ikiden fazla saklı katman içeren sinir ağı modellerini belirtmek için
+kullanılan bir terimdir.
+
+Henüz anlamlandıramasak da tek saklı katmanlı ve iki saklı katmanlı sinir ağlarının hangi tür problemleri hangi
+düzeyde çözebildiğine ilişkin aşağıda bir tablo veriyoruz:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Problem türü
+     - Tek saklı katman
+     - İki saklı katman
+   * - Sürekli, düzgün regresyon
+     - Yeterli
+     - Yeterli (gereksiz)
+   * - Köşeli ama sürekli fonksiyon (\|x\|)
+     - Yeterli
+     - Yeterli
+   * - Süreksiz (sıçramalı) fonksiyon
+     - Kaba taklit, verimsiz
+     - Verimli yaklaşım
+   * - Bağlantılı, dışbükey karar bölgesi
+     - Yeterli
+     - Yeterli
+   * - Dışbükey olmayan tek bölge
+     - Kabaca yapar
+     - Verimli
+   * - Kopuk karar bölgeleri
+     - Verimsiz
+     - Verimli
+   * - XOR ve küçük mantık
+     - Yeterli
+     - Yeterli
+   * - Az boyutlu tablo verisi
+     - Genellikle yeterli
+     - Bazen daha iyi
+   * - Orta/büyük tablo verisi
+     - Yetersiz kalabilir
+     - Genellikle yeterli
+   * - Ham görüntü / ses / metin
+     - Yetersiz
+     - Yetersiz, derin ağ
+   * - Uzun sıralı bağımlılık
+     - Yetersiz
+     - Yetersiz, derin ağ
+
+Saklı Katmanlardaki Nöron Sayısı İçin Pratik Kurallar
+=====================================================
+
+Peki katmanlardaki nöron sayıları nasıl olmalıdır? Girdi katmanındaki nöron sayısı zaten problemin içerisinde
+belirlenmiş durumdadır. Örneğin zambakların 4 özelliğinden onların türlerinin tespit edilmesi probleminde bir
+modelde girdi katmanında dört nöron bulunacaktır. Ya da örneğin bir dairenin 10 farklı özelliğinden hareketle onun
+fiyatının tahmin edilmesi probleminde girdi katmanında 10 nöron bulunacaktır. Çıktı katmanındaki nöron sayıları ise
+yine problemin içerisinde kendini belli etmektedir. İkili sınıflandırma (binary classification) problemlerinde
+çıktı katmanı tek nörondan, çoklu sınıflandırma problemlerinde (multiclass classification) çıktı katmanı sınıf
+sayısı kadar nörondan oluşur. Çok değişkenli olmayan regresyon problemlerinde çıktı katmanındaki nöron sayıları bir
+tane, çok değişkenli regresyon problemlerinde değişken sayısı kadar olmaktadır.
+
+Saklı katmanlardaki nöron sayıları için çok pratik şeyler söylemek zordur. Çünkü saklı katmanlardaki nöron sayıları
+bazı faktörlere de bağlı olarak ayarlanabilmektedir. Örneğin eğitimde kullanılacak veri miktarı, problemin
+karmaşıklığı, hyper parametrelerin durumları saklı katmanlardaki nöron sayıları üzerinde etkili olabilmektedir.
+Saklı katmanlardaki nöron sayıları için pratik bir biçimde şunlar söylenebilir:
+
+- Problem karmaşıklaştıkça saklı katmanlardaki nöron sayılarını artırmak uygun olabilmektedir.
+- Saklı katmanlarda çok az nöron bulundurmak *underfitting* yani yetersiz öğrenmeye yol açabilmektedir.
+- Saklı katmanlarda gereksiz biçimde fazla sayıda nöron bulundurmak eğitim süresini uzatabileceği gibi
+  *overfitting* durumuna da yol açabilir. Aynı zamanda modelin diskte saklanması için gereken disk alanını da
+  artırabilmektedir.
+- Eğitim veri kümesi azsa saklı katmanlardaki nöron sayıları düşürülebilir, fazlaysa yükseltilebilir.
+- Pek çok problemde saklı katmanlardaki nöron sayıları çok fazla ya da çok az olmadıktan sonra önemli olmayabilir.
+- Saklı katmanlardaki nöron sayısı girdi katmanındaki nöron sayısından az olmamalıdır.
+
+Çeşitli kaynaklar saklı katmanlardaki nöronların sayıları için üstünkörü şu pratik tavsiyelerde bulunmaktadır:
+
+- Saklı katmanlardaki nöronların sayıları girdi katmanındaki nöronların sayılarının 2/3'ü ile çıktı katmanındaki
+  nöronların sayısının toplamı kadar olabilir. Örneğin girdi katmanındaki nöron sayısı 5, çıktı katmanındaki 1
+  olsun. Bu durumda saklı katmandaki nöron sayısı 4 ya da 5 olabilir.
+
+- Saklı katmandaki nöronların sayısı girdi katmanındaki nöron sayısının iki katından fazla olmamalıdır.
+
+Bu konudaki literatürün özetini aşağıda bir tablo halinde veriyoruz:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Kural
+     - Mantığı
+   * - N_h, N_i ile N_o arasında olmalı
+     - Saklı katman girişi çıkışa doğru *süzer*
+   * - N_h ~ (2/3)*N_i + N_o
+     - Girişten biraz küçük bir ara temsil
+   * - N_h < 2*N_i
+     - Aşırı uyuma karşı kaba bir üst sınır
+   * - N_h ~ sqrt(N_i*N_o)
+     - Geometrik piramit kuralı (Masters, 1993)
+   * - N_h ~ N_s / (α*(N_i + N_o)), α = 2..10
+     - Parametre sayısını örnek sayısına bağlar
+
+Burada N_h: saklı katmandaki nöronların sayısını, N_i: girdi katmanındaki nöronların sayısını, N_o: çıktı
+katmanındaki nöronların sayısını, N_s ise eğitimde kullanılacak örneklerin sayısını belirtmektedir. α
+uygulamacının belirleyeceği bir değeri temsil etmektedir.
+
+Burada son satırdaki pratik kurala dikkat ediniz. Diğer satırlardan farklı olarak bu son satırda eğitimde
+kullanılacak örnek sayısı da hesaba katılmıştır. Örneğin bu formüle göre girdi katmanında 10 nöron olan, çıktı
+katmanında 1 nöron olan, örnek sayısının da 1000 olduğu çeşitli α değerleri için ara katmanlardaki nöron sayısı
+şöyle olacaktır:
+
+.. list-table::
+   :header-rows: 1
+
+   * - alpha
+     - N_h
+   * - 2
+     - 45
+   * - 3
+     - 30
+   * - 4
+     - 23
+   * - 5
+     - 18
+   * - 6
+     - 15
+   * - 7
+     - 13
+   * - 8
+     - 11
+   * - 9
+     - 10
+   * - 10
+     - 9
+
+Burada α değeri küçültüldükçe nöron sayılarının arttığı görülmektedir. Bu değerler için tablonun ilk dört
+satırındaki nöron değerleri de şöyledir:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Kural
+     - N_h
+   * - N_h, N_i ile N_o arasında olmalı
+     - 1..10
+   * - N_h ~ (2/3)*N_i + N_o
+     - 8 (7.67)
+   * - N_h < 2*N_i
+     - <= 19
+   * - N_h ~ sqrt(N_i*N_o)
+     - 3 (3.16)
+
+Ancak yukarıda da belirttiğimiz gibi çok abartılı olmadığı sürece ve yeterli eğitim verisinin bulunduğu durumda
+saklı katmanlardaki nöron sayılarının kestirim üzerindeki etkisi önemli bir boyutta olmamaktadır.
+
+Özetle eğer saklı katmanlardaki nöron sayısını bir formüle dayandırmak istiyorsanız tablodaki son formülü
+kullanabilirsiniz:
+
+.. code-block:: text
+
+   N_h ~ N_s / (α*(N_i + N_o)), α = 2..10
+
+Ancak bu formülde örnek sayısı arttıkça nöron sayısı artmaktadır. Siz belli bir üst sınır da uygulayabilirsiniz.
+
+Katmanlardaki Nöron Dağılım Biçimleri
+=====================================
+
+Birden fazla saklı katman kullanıldığında, katmanlardaki nöron sayıları aynı olmak zorunda değildir.
+Katmanlardaki nöron sayılarının nasıl değişeceği de bir tasarım kararıdır. Yaygın dört biçim şunlardır:
+
+.. figure:: _static/network-shapes.png
+   :alt: Eşit, huni, ters huni ve elmas biçimindeki katman nöron sayısı dağılımlarını gösteren çubuk grafikler
+   :align: center
+   :width: 640px
+
+   Katmanlardaki nöron sayısı için dört yaygın tasarım biçimi: eşit genişlik, huni (piramit), ters huni ve elmas.
+
+Eşit genişlik: En basit tasarımdır. Bengio (2012), kendi deneylerinde tüm katmanları aynı genişlikte tutmanın
+genellikle azalan ya da artan genişlikler kadar ya da onlardan daha iyi sonuç verdiğini bildirmiştir.
+
+Huni (piramit): Her katman bir öncekinin yarısıdır. En yaygın alışkanlıktır. Arkasındaki sezgi, ağın ham girdiden
+başlayarak giderek daha soyut ve daha kompakt temsiller kurmasıdır.
+
+Ters huni: Huninin tersine nöron sayıları sonraki katmanlarda artırılır. MLP'de seyrek kullanılır.
+
+Elmas: Önce nöron sayıları artar, sonra azalır. Girdiyi önce daha yüksek boyutlu bir uzaya taşıyıp orada doğrusal
+olmayan işlem yapmak, sonra sıkıştırmak fikrine dayanır. Transformer'lardaki ileri beslemeli bloğun (d → 4d → d)
+yapısı buna benzemektedir.
+
+Biz genellikle tipik problemlerde iki saklı katman ve katmanlarda da 16, 32, 64, 100, 128 gibi sayılarda nöron
+kullanacağız. Ancak ileride özel mimarilerde bu durumu farklılaştıracağız.
+
+Yapay Sinir Ağı Kütüphaneleri: TensorFlow, Keras ve PyTorch
+===========================================================
+
+Yapay sinir ağlarında çalışmak için *alçak seviyeli* ve *yüksek seviyeli* kütüphaneler ve framework'ler
+bulunmaktadır. Aşağı seviyeli iki önemli framework şunlardır: TensorFlow ve PyTorch. Yüksek seviyeli kütüphane
+olarak en fazla Keras tercih edilmektedir. Keras eskiden bağımsız bir kütüphaneydi ve kendi içinde TensorFlow,
+Theano, Microsoft Cognitive Toolkit, PlaidML gibi kütüphaneleri *arkayüz (backend)* olarak kullanabiliyordu. Ancak
+daha sonraları Keras, TensorFlow 2.0 ile birlikte TensorFlow bünyesine katılmıştır. TensorFlow 2.0 ile birlikte
+``tf.keras`` TensorFlow'un resmi yüksek seviyeli kütüphanesi haline gelmiştir. (2023'te yayımlanan Keras 3 ile
+Keras yeniden bağımsız ve çoklu arkayüze (backend) sahip bir kütüphane haline geldi. TensorFlow, JAX ve PyTorch
+üzerinde çalışabilmektedir. TensorFlow 2.16'dan itibaren ``tf.keras`` da Keras 3'ü kullanmaktadır.)
+
+TensorFlow şöyle yüklenebilir:
+
+.. code-block:: bash
+
+   pip install tensorflow
+
+TensorFlow çok thread'li ve paralel işlem yapan bir kütüphanedir. Paralel işlemler sırasında grafik kartının
+olanaklarını da kullanmaktadır. GPU desteği resmi olarak NVIDIA kartlar için sağlanmaktadır. TensorFlow'un NVIDIA
+GPU'yu kullanabilmesi için NVIDIA sürücüsü, CUDA Toolkit ve cuDNN kütüphanesinin bulunması gerekir. Bunlar yoksa
+TensorFlow yalnızca CPU ile çalışır; GPU'suz eğitim süreleri büyük ağlarda on kata kadar uzayabilmektedir.
+
+TensorFlow 2.10'dan sonraki sürümler Windows üzerinde doğrudan GPU desteği vermemektedir. Linux'ta yalnızca NVIDIA
+sürücüsünün kurulması yeterlidir. Windows'ta GPU desteği için Linux ortamının kurulması (örneğin WSL2)
+gerekebilmektedir. ARM tabanlı Apple işlemcilerinin kullanıldığı bilgisayarlarda GPU hızlandırması
+tensorflow-metal eklentisiyle sağlanmaktadır.
+
+PyTorch aşağıdaki gibi yüklenebilir:
+
+.. code-block:: bash
+
+   pip install torch
+
+Ancak PyTorch'ta bazı paketlerin ayrıca kurulması gerekmektedir. Örneğin torchvision ve torchaudio paketleriyle
+birlikte yüklemeyi şöyle yapabilirsiniz:
+
+.. code-block:: bash
+
+   pip install torch torchvision torchaudio
+
+PyTorch'un GPU kullanması daha sorunsuzdur. Aşağıdaki tabloda PyTorch'un desteklediği GPU donanımları
+listelenmiştir:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Backend
+     - Platform
+     - Device
+   * - CUDA (NVIDIA)
+     - Linux, Windows
+     - ``'cuda'``
+   * - ROCm (AMD)
+     - Linux, Windows (\*)
+     - ``'cuda'`` (HIP)
+   * - MPS (Apple)
+     - macOS
+     - ``'mps'``
+   * - XPU (Intel)
+     - Linux, Windows
+     - ``'xpu'``
+   * - CPU
+     - Hepsi
+     - ``'cpu'``
+
+Veri Kümesinin Eğitim ve Test Olarak Ayrılması: Diyabet Veri Kümesi Örneği
+==========================================================================
+
+Bir veri kümesini CSV dosyasından okuduktan sonra onu Keras'ın kullanımına hazırlamak için bazı işlemlerin
+yapılması gerekir. Yapılması gereken ilk işlem veri kümesinin *dataset_x* ve *dataset_y* biçiminde iki parçaya
+ayrılmasıdır. Çünkü ağın eğitilmesi sırasında girdilerle çıktıların ayrıştırılması gerekmektedir. Burada
+*dataset_x* girdileri *dataset_y* ise kestirilecek çıktıları belirtmektedir.
+
+Eğitim bittikten sonra genellikle ağın kestirimine hangi ölçüde güvenileceğini belirleyebilmek için bir test
+işlemi yapılır. Test işleminin eğitimde kullanılmamış olan bir test veri kümesi ile yapılması gerekir. (Örneğin bir
+sınavda yalnızca sınıfta çözülen sorular sorulursa test işleminin gücü düşecektir.) O halde bizim ana veri kümesini
+*eğitim veri kümesi* ve *test veri kümesi* biçiminde iki kısma ayırmamız gerekir. Oranlar çeşitli koşullara göre
+değişebilirse de tipik olarak %80'lik verinin eğitim için %20'lik verinin test için kullanılması tercih
+edilmektedir.
+
+Eğitim ve test veri kümesini manuel olarak ayırabiliriz. Ancak ayırma işleminden önce veri kümesini satırsal
+bakımdan karıştırmak uygun olur. Çünkü bazı veri kümeleri CSV dosyasına karışık bir biçimde değil yanlı bir
+biçimde kodlanmış olabilmektedir. Örneğin bazı veri kümeleri bazı alanlara göre sıraya dizilmiş bir biçimde
+bulunabilmektedir. Biz onun baştaki belli kısmını eğitim, sondaki belli kısmını test veri kümesi olarak
+kullanırsak eğitim ve test veri kümeleri yanlı hale gelebilmektedir.
+
+Biz programlarımızda genellikle bir veri kümesinin tamamı için *dataset* ismini, onun girdi kısmı için
+*dataset_x* ismini, çıktı kısmı için *dataset_y* ismini kullanacağız. Veri kümesini eğitim ve test olarak
+ayırdığımızda da isimleri şu biçimde vereceğiz: *training_dataset_x*, *training_dataset_y*, *test_dataset_x*,
+*test_dataset_y*.
+
+Aşağıda bir kişinin çeşitli biyomedikal bilgilerinden hareketle onun şeker hastası olup olmadığını anlamaya
+yönelik bir veri kümesinin manuel ayrıştırılması örneği verilmiştir. Veri kümesini
+`Kaggle üzerindeki bu bağlantıdan <https://www.kaggle.com/datasets/uciml/pima-indians-diabetes-database>`_
+indirebilirsiniz.
+
+Veri kümesinin görünümü şöyledir:
+
+.. code-block:: text
+
+   Pregnancies,Glucose,BloodPressure,SkinThickness,Insulin,BMI,DiabetesPedigreeFunction,Age,Outcome
+   6,148,72,35,0,33.6,0.627,50,1
+   1,85,66,29,0,26.6,0.351,31,0
+   8,183,64,0,0,23.3,0.672,32,1
+   1,89,66,23,94,28.1,0.167,21,0
+   0,137,40,35,168,43.1,2.288,33,1
+   5,116,74,0,0,25.6,0.201,30,0
+
+Bu veri kümesinde bazı sütunlar eksik veri içermektedir. Bu eksik veriler NaN biçiminde değil 0 biçiminde
+kodlanmıştır. Biz bu eksik verileri ortalama değerle doldurabiliriz. Eksik veri içeren sütunlar şunlardır:
+
+- Glucose
+- BloodPressure
+- SkinThickness
+- Insulin
+- BMI
+
+.. code-block:: python
+
+   TRAINING_RATIO = 0.80
+
+
+   import pandas as pd
+
+
+   df = pd.read_csv('diabetes.csv')
+
+
+   from sklearn.impute import SimpleImputer
+
+
+   si = SimpleImputer(strategy='mean', missing_values=0)
+
+
+   impute_features = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+   df[impute_features] = si.fit_transform(df[impute_features])
+
+
+   dataset = df.to_numpy()
+
+
+   import numpy as np
+
+
+   np.random.shuffle(dataset)
+
+
+   dataset_x = dataset[:, :-1]
+   dataset_y = dataset[:, -1]
+
+
+   training_len = int(np.round(len(dataset_x) * TRAINING_RATIO))
+
+
+   training_dataset_x = dataset_x[:training_len]
+   test_dataset_x = dataset_x[training_len:]
+
+
+   training_dataset_y = dataset_y[:training_len]
+   test_dataset_y = dataset_y[training_len:]
+
+.. _keras-ile-model-olusturma:
+
+===================================================================
+train_test_split Fonksiyonu ve Keras ile Sinir Ağı Modeli Oluşturma
+===================================================================
+
+train_test_split Fonksiyonu ile Veri Kümesinin Ayrılması
+========================================================
+
+Veri kümesini eğitim ve test olarak ayırma işlemi için ``sklearn.model_selection`` modülündeki
+``train_test_split`` isimli fonksiyon sıkça kullanılmaktadır. Biz de programlarımızda çoğu zaman bu fonksiyonu
+kullanacağız. Fonksiyon NumPy dizilerini ya da Pandas DataFrame ve Series nesnelerini ayırabilmektedir. Fonksiyon
+bizden ``dataset_x`` ve ``dataset_y`` değerlerini ayrı ayrı ister. ``test_size`` ya da ``train_size`` parametreleri
+0 ile 1 arasında test ya da eğitim verilerinin oranını belirlemek için kullanılmaktadır. ``train_test_split``
+fonksiyonu bize 4'lü bir liste vermektedir. Listenin elemanları sırasıyla şunlardır: *training_dataset_x*,
+*test_dataset_x*, *training_dataset_y*, *test_dataset_y*. Örneğin:
+
+.. code-block:: python
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+Aslında fonksiyonun ``train_size`` ve ``test_size`` parametreleri float yerine int olarak da girilebilir. Bu
+parametreler için int türden değer verilirse bu int değer eğitim ve test veri kümesinin sayısını belirtmektedir.
+Ancak genellikle uygulamacılar bu parametreler için oransal değerler vermeyi tercih etmektedir.
+
+``train_test_split`` fonksiyonu veri kümesini bölmeden önce karıştırma işlemini de yapmaktadır. Fonksiyonun
+``shuffle`` parametresi ``False`` yapılırsa fonksiyon karıştırma yapmadan bölme işlemini yapar.
+
+.. code-block:: python
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+Burada fonksiyona ``dataset_x`` ve ``dataset_y`` girdi olarak verilmiştir. Fonksiyon bunları bölerek dörtlü bir
+listeye geri dönmüştür.
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('diabetes.csv')
+
+   from sklearn.impute import SimpleImputer
+
+   si = SimpleImputer(strategy='mean', missing_values=0)
+
+   impute_features = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+   df[impute_features] = si.fit_transform(df[impute_features])
+
+   dataset = df.to_numpy()
+
+   dataset_x = dataset[:, :-1]
+   dataset_y = dataset[:, -1]
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+train_test_split Fonksiyonunun DataFrame ve Series Nesneleriyle Kullanımı
+=========================================================================
+
+``train_test_split`` fonksiyonu ile biz doğrudan Pandas DataFrame ve Series nesneleri üzerinde de bölme işlemini
+yapabiliriz. Bu durumda fonksiyon bize dörtlü listeyi DataFrame ve Series nesneleri biçiminde verecektir. Aşağıda
+bu biçimde bölmeye bir örnek verilmiştir.
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('diabetes.csv')
+
+   dataset_x = df.iloc[:, :-1]
+   dataset_y = df.iloc[:, -1]
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+train_test_split Fonksiyonuna Birden Fazla Veri Kümesi Verilmesi
+================================================================
+
+Aslında ``train_test_split`` fonksiyonuna parametre olarak bir ya da birden fazla veri kümesi girilebilmektedir.
+Fonksiyon bunların hepsini karşılıklı olarak aynı satırlardan eğitim ve test veri kümesi biçiminde ikiye
+ayırmaktadır. Biz fonksiyona k tane parametre girdiğimizde fonksiyon bize k * 2 elemanlık bir liste vermektedir.
+Örneğin:
+
+.. code-block:: python
+
+   splitted_datasets = train_test_split(dataset_x, dataset_y, dataset_z, test_size=0.2)
+
+Burada ``splitted_datasets`` listesi toplam 6 elemana sahip olacaktır. Bu 6 elemanın ilk ikisi ``dataset_x``'in
+bölünmüş halini, sonraki ikisi ``dataset_y``'nin bölünmüş halini, sonraki ikisi ise ``dataset_z``'nin bölünmüş
+halini içerecektir. Biz ``train_test_split`` fonksiyonuna tek bir veri kümesini de verebiliriz. Bu durumda
+fonksiyon bunu da eğitim ve test olmak üzere iki parçaya ayıracaktır. Örneğin:
+
+.. code-block:: python
+
+   training_df, test_df = train_test_split(df, test_size=0.2)
+
+Burada fonksiyon iki elemanlı bir listeye geri dönmüştür. Biz de onu açarak iki değişkene atamış olduk.
+
+Keras'ta Sinir Ağı Oluşturma Adımları
+=====================================
+
+Keras'ta bir sinir ağı oluşturmanın çeşitli adımları vardır. Burada sırasıyla bu adımlardan ve adımlarla ilgili
+bazı olgulardan bahsedeceğiz.
+
+1) Model Nesnesinin Oluşturulması
+---------------------------------
+
+İşlemlere başlarken öncelikle bir model nesnesi oluşturulmalıdır. ``tensorflow.keras`` modülü içerisinde çeşitli
+model sınıfları bulunmaktadır. En çok kullanılan model sınıfı ``Sequential`` isimli sınıftır. Keras'ta tüm model
+sınıfları ``Model`` isimli sınıftan türetilmiştir. ``Sequential`` modelde ağa her eklenen katman sona eklenir.
+Böylece ağ katmanların sırasıyla eklenmesi yoluyla oluşturulur. ``Sequential`` nesnesi yaratılırken ``name``
+parametresiyle modele bir isim de verilebilir. Örneğin:
+
+.. code-block:: python
+
+   from tensorflow.keras import Sequential
+
+   model = Sequential(name='Test Model')
+
+Aslında ``Sequential`` nesnesi yaratılırken katmanlar belirlendiyse ``layers`` parametresiyle bu katmanlar da
+verilebilmektedir. Ancak sınıfın tipik kullanımında katmanlar daha sonra izleyen maddelerde ele alınacağı gibi
+sırasıyla eklenmektedir.
+
+2) Katman Nesnelerinin Oluşturulup Modele Eklenmesi
+---------------------------------------------------
+
+Model nesnesinin yaratılmasından sonra katman nesnelerinin oluşturulup model nesnesine eklenmesi gerekir. Keras'ta
+farklı gereksinimler için farklı katman sınıfları bulundurulmuştur. En çok kullanılan katman sınıfı
+``tensorflow.keras.layers`` modülündeki ``Dense`` sınıfıdır. Dense bir katman modele eklendiğinde *önceki
+katmandaki tüm nöronların çıktıları eklenen katmandaki nöronların hepsine girdi* yapılmaktadır. Bu durumda örneğin
+önceki katmanda k tane nöron varsa biz de modele n tane nörondan oluşan bir Dense katman ekliyorsak bu durumda
+modele k * n + n tane yeni parametre (yani tahmin edilmesi gereken parametre) eklemiş oluruz. Burada k * n tane
+ayarlanması gereken w (ağırlık) değerleri ve n tane de ayarlanması gereken bias değerleri söz konusudur. Bir
+nörondaki w (ağırlık) değerlerinin o nörona giren nöron sayısı kadar olduğunu ve bias değerlerinin her nöron için
+bir tane olduğunu anımsayınız. ``Dense`` sınıfının ``__init__`` metodunun parametrik yapısı şöyledir:
+
+.. code-block:: python
+
+   tf.keras.layers.Dense(
+       units,
+       activation=None,
+       use_bias=True,
+       kernel_initializer='glorot_uniform',
+       bias_initializer='zeros',
+       kernel_regularizer=None,
+       bias_regularizer=None,
+       activity_regularizer=None,
+       kernel_constraint=None,
+       bias_constraint=None,
+       lora_rank=None,
+       **kwargs
+   )
+
+Metodun ilk parametresi eklenecek katmandaki nöron sayısını belirtir. İkinci parametre olan ``activation``
+parametresi o katmandaki tüm nöronların aktivasyon fonksiyonlarının ne olacağını belirtmektedir. Bu parametreye
+aktivasyon fonksiyonları birer yazı biçiminde isimsel olarak girilebilir. Ya da ``tensorflow.keras.activations``
+modülündeki fonksiyonlar olarak girilebilir. Örneğin:
+
+.. code-block:: python
+
+   from tensorflow.keras.layers import Dense
+
+   layer = Dense(64, activation='relu')
+
+Aktivasyon fonksiyonu isimsel olarak değil fonksiyon olarak da girilebilirdi:
+
+.. code-block:: python
+
+   from tensorflow.keras.activations import relu
+
+   layer = Dense(64, activation=relu)
+
+Dense fonksiyonun ``use_bias`` parametresi default durumda ``True`` biçimdedir. Bu parametre, katmandaki
+nöronlarda *bias* değerinin kullanılıp kullanılmayacağını belirtmektedir. Metodun ``kernel_initializer``
+parametresi katmandaki nöronlarda kullanılan w parametrelerinin ilk değerlerinin nasıl alınacağını belirtmektedir.
+Bu parametrenin default değeri *glorot_uniform* biçimindedir. Metodun ``bias_initializer`` parametresi ise
+katmandaki nöronların *bias* değerlerinin başlangıçta nasıl alınacağını belirtmektedir. Bu parametrenin default
+değeri de *zero* biçimdedir. Yani bias değerleri başlangıçta 0 durumundadır. ``Dense`` sınıfının ``__init__``
+metodunun diğer parametreleri hakkında bu aşamada bilgi vermeyeceğiz.
+
+3) Girdi Katmanının Belirtilmesi
+--------------------------------
+
+Keras'ta ``Sequential`` modelde girdi katmanı programcı tarafından yaratılacağı gibi ilk saklı katman yaratılırken
+girdi katmanındaki nöron sayısı ``input_dim`` parametresiyle ya da ``input_shape`` parametresiyle de
+belirtilmektedir. ``input_dim`` tek boyutlu girdiler için ``input_shape`` ise çok boyutlu girdiler için
+kullanılmaktadır. Örneğin:
+
+.. code-block:: python
+
+   dense_layer = Dense(100, activation='relu', input_dim=8)
+
+Tabii ``input_dim`` ya da ``input_shape`` parametrelerini yalnızca ilk saklı katmanda kullanabiliriz. Genel olarak
+ağın girdi katmanında ``dataset_x``'teki sütun sayısı kadar nöron olacağına göre ilk katmandaki ``input_dim``
+parametresini aşağıdaki gibi de girebiliriz:
+
+.. code-block:: python
+
+   layer = Dense(100, activation='relu', input_dim=training_dataset_x.shape[1])
+
+Belli bir süreden sonra artık girdi katmanının ilk katmanda belirtilmesi *deprecated* yapılmıştır. Artık Keras
+açıkça girdi katmanının ``Input`` sınıfı türünden bir nesne biçiminde modele eklenmesini istemektedir.
+
+Girdi katmanını ``Input`` isimli katman sınıfıyla oluştururken bu ``Input`` sınıfının ``__init__`` metodunun
+birinci parametresi bir demet biçiminde (yani shape olarak) girilmelidir. Örneğin:
+
+.. code-block:: python
+
+   input_layer = Input((8, ))
+
+Burada 8 nöronluk bir girdi katmanı oluşturulmuştur. Yukarıda da belirttiğimiz gibi eskiden ilk saklı katmanda
+girdi katmanı belirtiliyordu. Ancak TensorFlow kütüphanesinin yeni versiyonlarında ilk saklı katmanda girdi
+katmanının belirtilmesi artık *deprecated* yapılmıştır ve uyarıya (warning) yol açmaktadır. Biz de kursumuzda
+girdi katmanını artık ``Input`` nesnesi ile oluşturacağız. ``Input`` sınıfının ``__init__`` metodunun parametrik
+yapısı şöyledir:
+
+.. code-block:: python
+
+   tf.keras.Input(
+       shape=None,
+       batch_size=None,
+       dtype=None,
+       sparse=None,
+       batch_shape=None,
+       name=None,
+       tensor=None
+   )
+
+Her katmana istersek ``name`` parametresi ile bir isim de verebiliriz. Bu isimler model özeti alınırken ya da
+katmanlara erişilirken kullanılabilmektedir. Örneğin:
+
+.. code-block:: python
+
+   input_layer = Input((10, ), name='Input')
+   dense_layer = Dense(64, activation='relu', name='Dense-1')
+
+4) Katmanların Modele Eklenmesi
+-------------------------------
+
+Oluşturulan katman nesnesinin model nesnesine eklenmesi için ``Sequential`` sınıfının ``add`` metodu
+kullanılmaktadır. Örneğin:
+
+.. code-block:: python
+
+   input_layer = Input((10, ), name='Input')
+   dense_layer = Dense(64, activation='relu', name='Dense-1')
+
+   model.add(input_layer)
+   model.add(dense_layer)
+
+Programcılar genellikle katman nesnesinin yaratılması ve eklenmesini tek satırda aşağıdaki gibi yaparlar:
+
+.. code-block:: python
+
+   model.add(Input((10, ), name='Input'))
+   model.add(Dense(64, activation='relu', name='Dense-1'))
+
+Şimdi modelden tek çıkış elde etmek için modele 1 nöronluk bir çıktı katmanı da ekleyelim:
+
+.. code-block:: python
+
+   model = Sequential(name='Test Model')
+   model.add(Input((10, ), name='Input'))
+   model.add(Dense(64, activation='relu', name='Dense-1'))
+   model.add(Dense(1, activation='linear', name='Output'))
+
+Burada artık 10 girdi nöronundan oluşan, tek saklı katmana sahip, çıktı katmanında tek nöron olan bir model
+oluşturmuş olduk. Bu modeli şekilsel olarak şöyle gösterebiliriz:
+
+.. figure:: _static/model-architecture.png
+   :alt: Input (10 nöron), Dense-1 (64 nöron, relu, 704 parametre) ve Output (1 nöron, linear, 65 parametre) katmanları
+   :align: center
+   :width: 560px
+
+   Üç katmanlı örnek modelin mimarisi: Input katmanı 10 nöron, Dense-1 katmanı 64 nöron (relu, 704 parametre),
+   Output katmanı 1 nöron (linear, 65 parametre) içermektedir.
+
+Buradaki parametre sayılarına dikkat ediniz. Girdi katmanında 10 nöron vardır. Ancak girdi katmanı parametre
+içermez. Saklı katmanda 64 nöron vardır. Bu 64 nöron girdi katmanındaki 10 nöron ile *dense* bağlanmıştır. Her
+nöronda ayrıca bir de *bias* değeri bulunmaktadır. Bu durumda saklı katmandaki toplam parametrelerin sayısı
+10 * 64 + 64 = 704'tür. Çıktı katmanında 1 nöron vardır. Saklı katmanın 64 nöronu bu nöronun girdisini
+oluşturacaktır. Bu nöronun bias değeri de olduğuna göre çıktı katmanındaki parametre sayısı 64 * 1 + 1 = 65
+olacaktır. İşte eğitim sonucunda 704 + 65 = 769 tane parametre konumlandırılmış olacaktır.
+
+5) Model Özeti: summary() Metodu
+--------------------------------
+
+Modele katmanlar eklendikten sonra bir özet bilgi yazdırılabilir. Bu işlem ``Sequential`` sınıfının ``summary``
+isimli metoduyla yapılmaktadır. Örneğin:
+
+.. code-block:: python
+
+   model.summary()
+
+Yukarıdaki model için oluşan çıktı şöyledir:
+
+.. code-block:: text
+
+   Model: "Test-Model"
+   ┌─────────────────────────────────┬────────────────────────┬───────────────┐
+   │ Layer (type)                    │ Output Shape           │       Param # │
+   ├─────────────────────────────────┼────────────────────────┼───────────────┤
+   │ Dense-1 (Dense)                 │ (None, 64)             │           704 │
+   ├─────────────────────────────────┼────────────────────────┼───────────────┤
+   │ Output (Dense)                  │ (None, 1)              │            65 │
+   └─────────────────────────────────┴────────────────────────┴───────────────┘
+   Total params: 769 (3.00 KB)
+   Trainable params: 769 (3.00 KB)
+   Non-trainable params: 0 (0.00 B)
+
+Şimdi aşağıdaki modeli inceleyiniz:
+
+.. code-block:: python
+
+   model = Sequential(name='Test Model')
+
+   model.add(Input((8, )))
+   model.add(Dense(16, activation='relu', name='Hidden-1'))
+   model.add(Dense(16, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='sigmoid', name='Output'))
+   model.summary()
+
+Bu modelde bir girdi katmanı, iki saklı katman (biz bunlara ara katman da diyeceğiz) bir de çıktı katmanı vardır.
+``summary`` metodundan elde edilen çıktı şöyledir.
+
+.. code-block:: text
+
+   Model: "Test Model"
+   ┌─────────────────────────────────┬────────────────────────┬───────────────┐
+   │ Layer (type)                    │ Output Shape           │       Param # │
+   ├─────────────────────────────────┼────────────────────────┼───────────────┤
+   │ Hidden-1 (Dense)                │ (None, 16)             │           144 │
+   ├─────────────────────────────────┼────────────────────────┼───────────────┤
+   │ Hidden-2 (Dense)                │ (None, 16)             │           272 │
+   ├─────────────────────────────────┼────────────────────────┼───────────────┤
+   │ Output (Dense)                  │ (None, 1)              │            17 │
+   └─────────────────────────────────┴────────────────────────┴───────────────┘
+   Total params: 433 (1.69 KB)
+   Trainable params: 433 (1.69 KB)
+   Non-trainable params: 0 (0.00 B)
+
+Burada ağımızdaki girdi katmanında 8 nöron olduğuna göre ve ilk saklı katmanda da 16 nöron olduğuna göre ilk saklı
+katmanda 8 * 16 tane *w* değeri vardır. Öte yandan her nöronun bir tane bias değeri de olduğuna göre ilk
+katmandaki ayarlanması gereken parametrelerin (trainable parameters) sayısı 8 * 16 + 16 = 144 tanedir. İkinci
+saklı katmana 16 nöron *dense* biçimde bağlanmıştır. O halde ikinci saklı katmandaki ayarlanması gereken
+parametreler toplamda 16 * 16 + 16 = 272 tanedir. Modelimizin çıktı katmanında 1 nöron vardır. Önceki katmanın 16
+çıkışı olduğuna göre bu 16 çıkış çıktı katmanındaki nöronla *dense* bağlanacaktır. Böylece çıktı katmanında
+16 * 1 + 1 = 17 ayarlanması gereken parametre olacaktır.
+
+ReLU Aktivasyon Fonksiyonu
+==========================
+
+Saklı katmanlarda en çok kullanılan aktivasyon fonksiyonu *ReLU (Rectifier Linear Unit)* isimli fonksiyondur. Bu
+fonksiyon negatif değerleri 0'a dönüştürür, 0 ve pozitif değerleri olduğu gibi bırakır. ReLU fonksiyonunu
+matematiksel olarak şöyle ifade edebiliriz:
+
+.. code-block:: text
+
+   ReLU(x) = max(0, x)
+
+             ⎧ x , x > 0
+   ReLU(x) = ⎨
+             ⎩ 0 , x ≤ 0
+
+Eskiden ara katmanlarda tanh (hiperbolik tanjant fonksiyonu) ve sigmoid fonksiyonları çokça kullanılırdı. Ancak
+ReLU fonksiyonu hem performansından dolayı hem de basitliğinden dolayı artık ara katmanların temel aktivasyon
+fonksiyonu haline gelmiştir. Özel bir durum yoksa (bazen söz konusu olabilmektedir) ara katmanlarda olarak ReLU
+fonksiyonunu tercih edebilirsiniz. Burada bir noktaya dikkatinizi çekmek istiyoruz: ``Dense`` sınıfında eğer
+``activation`` parametresi için argüman girilmezse varsayılan aktivasyon fonksiyonu ReLU değil, özdeş fonksiyon
+(birim fonksiyon) olmaktadır. ReLU fonksiyonunun grafiği aşağıdaki gibidir:
+
+.. figure:: _static/relu-function.png
+   :alt: ReLU(x) = max(0, x) fonksiyonunun grafiği; x negatifken 0, pozitifken x doğrusunu izler
+   :align: center
+   :width: 420px
+
+   ReLU fonksiyonunun grafiği: x negatif olduğunda çıktı 0'dır, x pozitif olduğunda çıktı x'in kendisidir.
+
+ReLU fonksiyonunun kullanılma gerekçeleri 2010 yılından itibaren çeşitli makalelerde ele alınmıştır:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Yıl
+     - Yazarlar
+     - Yayın
+     - Katkı
+   * - 2010
+     - Nair, Hinton
+     - ICML
+     - ReLU terimini ortaya koydu
+   * - 2011
+     - Glorot, Bordes, Bengio
+     - AISTATS
+     - Ön eğitimsiz derin ağ eğitimi
+   * - 2012
+     - Krizhevsky ve ark.
+     - NeurIPS
+     - AlexNet ile pratikte yaygınlaştı
+   * - 2013
+     - Maas, Hannun, Ng
+     - ICML WS
+     - Leaky ReLU önerisi
+   * - 2015
+     - He ve ark.
+     - ICCV
+     - PReLU ve He başlatma
+
+Çıktı Katmanında Kullanılan Aktivasyon Fonksiyonları
+====================================================
+
+Çıktı katmanındaki aktivasyon fonksiyonu problemin türüne göre tipik olarak üç biçimden biri olmaktadır:
+
+1) Sigmoid fonksiyonu
+2) Özdeş (Linear) fonksiyon
+3) Softmax fonksiyonu
+
+- Sigmoid fonksiyonunu biz *lojistik regresyonu* ele alırken görmüştük. Bu fonksiyon x değerlerini [0, 1]
+  aralığına hapsediyordu. İkili sınıflandırma problemlerinde tipik olarak çıktı katmanında tek nöron bulundurulur.
+  Bu tek nöronun aktivasyon fonksiyonu sigmoid olur. Böylece ağdan [0, 1] arasında bir olasılık değeri elde edilir.
+  Bu değer 0.5'ten küçükse bir sınıf, 0.5'ten büyükse diğer sınıf kestirilir.
+
+- Regresyon problemleri söz konusu olduğunda tipik olarak yine çıktı katmanında tek bir nöron bulunur. Bu nöronun
+  aktivasyon fonksiyonu *özdeş fonksiyon (linear function)* olur. Böylece ağın çıktısından pozitif de negatif de
+  olabilen gerçek sayı değeri elde edilir.
+
+- Çok sınıflı sınıflandırma problemlerinde tipik olarak çıktı katmanında sınıf sayısı kadar nöron bulundurulur. Bu
+  nöronların çıktılarının toplamı 1 olacak biçimde ayarlama yapılır. İşte bu çok sınıf belirten problemlerdeki
+  çıktı katmanında kullanılan bu aktivasyon fonksiyonuna *softmax* denilmektedir.
+
+Aşağıdaki örnekte *diabetes* veri kümesi üzerinde ikili sınıflandırma problemi için bir sinir ağı oluşturulmuştur.
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('diabetes.csv')
+
+   from sklearn.impute import SimpleImputer
+
+   si = SimpleImputer(strategy='mean', missing_values=0)
+
+   impute_features = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+   df[impute_features] = si.fit_transform(df[impute_features])
+
+   dataset = df.to_numpy()
+
+   dataset_x = dataset[:, :-1]
+   dataset_y = dataset[:, -1]
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = \
+           train_test_split(dataset_x, dataset_y, test_size=0.2)
+
+   from tensorflow.keras import Sequential
+   from tensorflow.keras.layers import Input, Dense
+
+   model = Sequential(name='Diabetes')
+
+   model.add(Input((training_dataset_x.shape[1],)))
+   model.add(Dense(16, activation='relu', name='Hidden-1'))
+   model.add(Dense(16, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='sigmoid', name='Output'))
+   model.summary()
+
+.. _model-derleme-ve-egitim:
+
+=========================================================
+Keras'ta Modelin Derlenmesi (compile) ve Eğitilmesi (fit)
+=========================================================
+
+4) Modelin Derlenmesi: compile Metodu
+=====================================
+
+Keras'ta modeli oluşturulduktan sonra modelin derlenmesi (compile edilmesi) gerekir. Buradaki *derleme* makine
+diline dönüştürme anlamında bir terim değildir. Burada *derleme* eğitim için bazı belirlemelerin yapılması
+anlamına gelmektedir. Bu işlem ``Sequential`` sınıfının ``compile`` isimli metoduyla yapılmaktadır. ``compile``
+metodunun parametrik yapısı şöyledir:
+
+.. code-block:: python
+
+   compile(
+       optimizer='rmsprop',
+       loss=None,
+       loss_weights=None,
+       metrics=None,
+       weighted_metrics=None,
+       run_eagerly=False,
+       steps_per_execution=1,
+       jit_compile='auto',
+       auto_scale_loss=True
+   )
+
+``compile`` metodunun en önemli iki parametresi ``loss`` ve ``optimizer`` parametreleridir. Eğitim sırasında ağın
+ürettiği değerlerin gerçek değerlere yaklaştırılması için w ve bias değerlerinin nasıl güncelleneceğine ilişkin
+algoritmalara *optimizasyon algoritmaları* denilmektedir. Matematiksel optimizasyon işlemlerinde belli bir
+fonksiyonun minimize edilmesi istenir. İşte minimize edilecek bu fonksiyona da *kayıp fonksiyonu (loss function)*
+denilmektedir. Başka bir deyişle optimizasyon algoritması kayıp fonksiyonun değerini minimize edecek biçimde işlem
+yapan algoritmadır. Yani optimizasyon algoritması kayıp fonksiyonunu minimize etmek için yapılan işlemleri temsil
+etmektedir. Kayıp fonksiyonu çok değişkenli bir fonksiyondur. Bu biçimdeki fonksiyonların kapalı çözümlerle minimum
+noktalarının bulunması mümkün değildir. Bu optimizasyon işlemi bir döngü içerisinde nümerik yöntemlerle
+yapılmaktadır. Döngüde sürekli olarak ağdaki nöronların *w* ve *bias* değerleri güncellenir. Böylece gerçek
+değerlere yakın çıktı üretmeye başlar.
+
+Kayıp Fonksiyonları
+-------------------
+
+Kayıp fonksiyonları ağın ürettiği değerlerle gerçek değerler arasındaki farklılığı temsil eden fonksiyonlardır.
+Kayıp fonksiyonları genel olarak iki girdi alıp bir çıktı vermektedir. Kayıp fonksiyonunun girdileri gerçek
+değerler ile ağın ürettiği değerlerdir. Çıktısı ise aradaki farklılığı belirten bir değerdir. Eğitim sırasında
+gitgide kayıp fonksiyonunun değerinin düşmesini bekleriz. Tabii kayıp fonksiyonunun değerinin düşmesi aslında ağın
+gerçek değerlere daha yakın değerler üretmesi anlamına gelmektedir. Kayıp fonksiyonları çıktının biçimine yani
+problemin türüne bağlı olarak seçilmektedir. Örneğin ikili sınıflandırma problemleri için *binary-cross-entropy*,
+çoklu sınıflandırma problemleri için *categorical-cross-entropy*, regresyon problemleri için *mean-squared-error*
+isimli kayıp fonksiyonları tercih edilmektedir. Aşağıda Keras'ta hazır bulunan kayıp fonksiyonlarının bir listesini
+veriyoruz:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Sınıf (keras.losses)
+     - String adı
+     - Alternatif adlar
+     - Problem türü
+   * - MeanSquaredError
+     - ``'mean_squared_error'``
+     - ``'mse'``, ``'MSE'``
+     - Regresyon
+   * - MeanAbsoluteError
+     - ``'mean_absolute_error'``
+     - ``'mae'``, ``'MAE'``
+     - Regresyon (outlier dayanıklı)
+   * - MeanAbsolutePercentageError
+     - ``'mean_absolute_percentage_error'``
+     - ``'mape'``, ``'MAPE'``
+     - Regresyon (yüzde hata)
+   * - MeanSquaredLogarithmicError
+     - ``'mean_squared_logarithmic_error'``
+     - ``'msle'``, ``'MSLE'``
+     - Regresyon (geniş aralık)
+   * - Huber
+     - ``'huber'``
+     - -
+     - Regresyon (MSE+MAE karma)
+   * - LogCosh
+     - ``'log_cosh'``
+     - -
+     - Regresyon (yumuşak Huber)
+   * - Poisson
+     - ``'poisson'``
+     - -
+     - Sayım (count) regresyonu
+   * - BinaryCrossentropy
+     - ``'binary_crossentropy'``
+     - ``'bce'``, ``'BCE'``
+     - İkili ve çok etiketli sınıf.
+   * - BinaryFocalCrossentropy
+     - ``'binary_focal_crossentropy'``
+     - -
+     - Dengesiz ikili sınıflandırma
+   * - CategoricalCrossentropy
+     - ``'categorical_crossentropy'``
+     - -
+     - Çok sınıflı sınıflandırma
+   * - SparseCategoricalCrossentropy
+     - ``'sparse_categorical_crossentropy'``
+     - -
+     - Çok sınıflı sınıflandırma
+   * - CategoricalFocalCrossentropy
+     - ``'categorical_focal_crossentropy'``
+     - -
+     - Dengesiz çok sınıflı sınıf.
+   * - KLDivergence
+     - ``'kl_divergence'``
+     - ``'kld'``, ``'KLD'``
+     - Dağılım eşleme (distillation)
+   * - Hinge
+     - ``'hinge'``
+     - -
+     - İkili sınıf. (SVM tarzı)
+   * - SquaredHinge
+     - ``'squared_hinge'``
+     - -
+     - İkili sınıf. (SVM tarzı)
+   * - CategoricalHinge
+     - ``'categorical_hinge'``
+     - -
+     - Çok sınıflı sınıf. (SVM tarzı)
+   * - CosineSimilarity
+     - ``'cosine_similarity'``
+     - -
+     - Embedding / benzerlik öğrenme
+   * - Dice
+     - ``'dice'``
+     - -
+     - Görüntü segmentasyonu
+   * - CTC
+     - ``'ctc'``
+     - -
+     - Dizi hizalama (OCR, konuşma)
+
+Kayıp fonksiyonu ``compile`` metoduna yine isimsel olarak ya da ``tensorflow.keras.losses`` modülündeki sınıflar
+türünden sınıf nesneleri biçiminde ya da doğrudan fonksiyon olarak girilebilmektedir. Kayıp fonksiyonları kısa ya
+da uzun isim olarak yazısal biçimde kullanılabilmektedir. Yazısal girişte isimleri tam olarak yukarıdaki tabloda
+belirtildiği biçimde girmelisiniz. Aslında kayıp fonksiyonları için sınıfların yanı sıra fonksiyonlar da
+bulunmaktadır. Bu fonksiyonların isimleri de doğrudan girilebilir. Fonksiyon isimleri yukarıdaki tablodaki uzun ve
+kısa fonksiyon isimleriyle aynıdır. Bu sınıflar ve fonksiyonlar ``tensorflow.keras.losses`` modülünde
+bulunmaktadır. Örneğin:
+
+.. code-block:: python
+
+   model.compile(loss='binary_crossentropy', ....)
+
+Optimizasyon Algoritmaları
+--------------------------
+
+Optimizasyon algoritmaları aslında genel yapı olarak birbirlerine benzemektedir. Pek çok problemde bu
+algoritmaların çoğu benzer performansı göstermektedir. En çok kullanılan optimizasyon algoritmaları *rmsprop*,
+*adam* ve *sgd* algoritmalarıdır. Bu algoritmalar *gradient descent* denilen genel optimizasyon yöntemini farklı
+biçimlerde uygulamaktadır. Optimizasyon algoritmaları kursumuzun ilerleyen bölümlerinde ele alınacaktır.
+
+``compile`` metodunda optimizasyon algoritması bir yazı olarak ya da ``tensorflow.keras.optimizers`` modülündeki
+sınıflar türünden bir sınıf nesnesi olarak girilebilmektedir. Örneğin:
+
+.. code-block:: python
+
+   model.compile(optimizer='rmsprop', ...)
+
+Örneğin:
+
+.. code-block:: python
+
+   from tensorflow.keras.optimizers import RMSprop
+
+   rmsprop = RMSprop()
+
+   model.compile(optimizer=rmsprop, ...)
+
+Tabii ``optimizer`` parametresinin bir sınıf nesnesi olarak girilmesi daha ayrıntılı belirlemelerin yapılmasına
+olanak sağlamaktadır. Optimizasyon işlemlerinde bazı parametrik değerler vardır. Bunlara makine öğrenmesinde *üst
+düzey parametreler (hyper parameters)* denilmektedir. İşte optimizasyon algoritması bir sınıf nesnesi biçiminde
+verilirse bu sınıfın ``__init__`` metodunda bu üst düzey parametreler istenildiği gibi ayarlanabilmektedir. Eğer
+optimizasyon algoritması yazısal biçimde verilirse bu üst düzey parametreler default değerlerle kullanılmaktadır.
+``optimizer`` parametresinin default değeri *rmsprop* biçimindedir. Yani biz bu parametre için değer girmezsek
+default optimizasyon algoritması *rmsprop* olarak alınacaktır. Aşağıda Keras'ta hazır bulunan optimizer
+algoritmalarının bir listesini veriyoruz:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Sınıf (keras.optimizers)
+     - String adı
+     - Özellik
+     - Tipik kullanım alanı
+   * - SGD
+     - ``'sgd'``
+     - Sabit LR, momentum/nesterov
+     - CNN (ResNet), iyi genelleme
+   * - RMSprop
+     - ``'rmsprop'``
+     - Gradyan karesi hareketli ort.
+     - RNN / LSTM, RL
+   * - Adam
+     - ``'adam'``
+     - Momentum + RMSprop
+     - Genel amaçlı varsayılan
+   * - AdamW
+     - ``'adamw'``
+     - Adam + ayrık weight decay
+     - Transformer, LLM fine-tune
+   * - Adamax
+     - ``'adamax'``
+     - Adam, sonsuz norm (L∞)
+     - Embedding, seyrek gradyan
+   * - Nadam
+     - ``'nadam'``
+     - Adam + Nesterov momentum
+     - Daha hızlı yakınsama
+   * - Adagrad
+     - ``'adagrad'``
+     - Parametre başına birikimli LR
+     - Seyrek özellik (NLP, öneri)
+   * - Adadelta
+     - ``'adadelta'``
+     - Adagrad, LR azalması sınırlı
+     - LR ayarı istenmeyen durum
+   * - Ftrl
+     - ``'ftrl'``
+     - L1/L2 düzenlemeli, seyrek
+     - Geniş lineer model, CTR
+   * - Lion
+     - ``'lion'``
+     - Yalnızca işaret (sign) günc.
+     - Büyük model, az bellek
+   * - Adafactor
+     - ``'adafactor'``
+     - Faktörize 2. moment
+     - Büyük Transformer (T5)
+   * - Lamb
+     - ``'lamb'``
+     - Katman bazlı uyarlamalı Adam
+     - Çok büyük batch (BERT)
+   * - LossScaleOptimizer
+     - -
+     - Başka optimizer sarmalayıcı
+     - Mixed precision (float16)
+
+Peki biz hangi optimizasyon algoritmasını seçmeliyiz? Aslında bu algoritmaların hepsi kayıp fonksiyonunu minimize
+etmek için döngü içerisinde adım adım ilerlemektedir. Dolayısıyla çoğu durumda bunlardan hangisinin seçileceği
+önemli farklılık yaratmamaktadır. Örneğin *sgd*, *rmsprop* ve *adam* algoritmalarından herhangi birini
+seçebilirsiniz. Bunlar arasındaki farklılıklar daha çok hedefe yakınsama hızı üzerinde etkili olmaktadır.
+
+Metrik Fonksiyonlar
+-------------------
+
+``compile`` metodunun üçüncü önemli parametresi *metrics* isimli parametredir. Makine öğrenmesinde kestirimin
+başarısını tespit etmek için kullanılan fonksiyonlara *metric* denilmektedir. ``metrics`` parametresi bir liste ya
+da demet olarak girilir. Bu parametre daha sonra açıklanacak olan *sınama (validation)* işlemi için kullanılacak
+metrik fonksiyonları belirtmektedir. Sınamada her zaman zaten bizim kayıp fonksiyonu olarak belirttiğimiz fonksiyon
+kullanılmaktadır. ``metrics`` parametresinde ilave fonksiyonlar da girilebilmektedir. Örneğin ikili sınıflandırma
+problemleri için tipik olarak *binary_accuracy* denilen metrik fonksiyon, çoklu sınıflandırma için
+*categorical_accuracy* denilen metrik fonksiyon ve regresyon problemleri için de *mean_absolute_error* isimli
+metrik fonksiyon sıklıkla kullanılmaktadır.
+
+Aşağıda metrik fonksiyonların listesini bir tablo halinde veriyoruz:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Sınıf (keras.metrics)
+     - String adı
+     - Alternatif adlar
+     - Problem türü
+   * - Accuracy
+     - ``'accuracy'``
+     - ``'acc'`` (compile)
+     - Genel (tam eşleşme oranı)
+   * - BinaryAccuracy
+     - ``'binary_accuracy'``
+     - -
+     - İkili sınıflandırma
+   * - CategoricalAccuracy
+     - ``'categorical_accuracy'``
+     - -
+     - Çok sınıflı (one-hot)
+   * - SparseCategoricalAccuracy
+     - ``'sparse_categorical_accuracy'``
+     - -
+     - Çok sınıflı (tamsayı etiket)
+   * - TopKCategoricalAccuracy
+     - ``'top_k_categorical_accuracy'``
+     - -
+     - Çok sınıflı (one-hot), top-k
+   * - SparseTopKCategoricalAccuracy
+     - ``'sparse_top_k_categorical_accuracy'``
+     - -
+     - Çok sınıflı (tamsayı), top-k
+   * - Precision
+     - ``'precision'``
+     - -
+     - İkili / çok etiketli sınıf.
+   * - Recall
+     - ``'recall'``
+     - -
+     - İkili / çok etiketli sınıf.
+   * - F1Score
+     - ``'f1_score'``
+     - -
+     - Sınıflandırma (dengesiz veri)
+   * - FBetaScore
+     - ``'f_beta_score'``
+     - -
+     - Sınıflandırma (P/R ağırlıklı)
+   * - AUC
+     - ``'auc'``
+     - -
+     - İkili sınıf. (ROC / PR eğrisi)
+   * - TruePositives
+     - ``'true_positives'``
+     - -
+     - İkili sınıf. (confusion matrix)
+   * - TrueNegatives
+     - ``'true_negatives'``
+     - -
+     - İkili sınıf. (confusion matrix)
+   * - FalsePositives
+     - ``'false_positives'``
+     - -
+     - İkili sınıf. (confusion matrix)
+   * - FalseNegatives
+     - ``'false_negatives'``
+     - -
+     - İkili sınıf. (confusion matrix)
+   * - PrecisionAtRecall
+     - (argüman şart)
+     - -
+     - İkili sınıf. (eşik analizi)
+   * - RecallAtPrecision
+     - (argüman şart)
+     - -
+     - İkili sınıf. (eşik analizi)
+   * - SensitivityAtSpecificity
+     - (argüman şart)
+     - -
+     - İkili sınıf. (tıbbi test vb.)
+   * - SpecificityAtSensitivity
+     - (argüman şart)
+     - -
+     - İkili sınıf. (tıbbi test vb.)
+   * - BinaryCrossentropy
+     - ``'binary_crossentropy'``
+     - ``'bce'``, ``'BCE'``
+     - İkili sınıflandırma
+   * - CategoricalCrossentropy
+     - ``'categorical_crossentropy'``
+     - -
+     - Çok sınıflı (one-hot)
+   * - SparseCategoricalCrossentropy
+     - ``'sparse_categorical_crossentropy'``
+     - -
+     - Çok sınıflı (tamsayı etiket)
+   * - KLDivergence
+     - ``'kl_divergence'``
+     - -
+     - Dağılım karşılaştırma
+   * - Hinge
+     - ``'hinge'``
+     - -
+     - İkili sınıf. (SVM tarzı)
+   * - SquaredHinge
+     - ``'squared_hinge'``
+     - -
+     - İkili sınıf. (SVM tarzı)
+   * - CategoricalHinge
+     - ``'categorical_hinge'``
+     - -
+     - Çok sınıflı (SVM tarzı)
+   * - MeanSquaredError
+     - ``'mean_squared_error'``
+     - ``'mse'``, ``'MSE'``
+     - Regresyon
+   * - RootMeanSquaredError
+     - ``'root_mean_squared_error'``
+     - -
+     - Regresyon (hedefle aynı birim)
+   * - MeanAbsoluteError
+     - ``'mean_absolute_error'``
+     - ``'mae'``, ``'MAE'``
+     - Regresyon
+   * - MeanAbsolutePercentageError
+     - ``'mean_absolute_percentage_error'``
+     - ``'mape'``, ``'MAPE'``
+     - Regresyon (yüzde hata)
+   * - MeanSquaredLogarithmicError
+     - ``'mean_squared_logarithmic_error'``
+     - ``'msle'``, ``'MSLE'``
+     - Regresyon (geniş aralık)
+   * - LogCoshError
+     - ``'log_cosh_error'``
+     - -
+     - Regresyon
+   * - R2Score
+     - ``'r2_score'``
+     - -
+     - Regresyon (açıklanan varyans)
+   * - PearsonCorrelation
+     - ``'pearson_correlation'``
+     - -
+     - Regresyon (doğrusal ilişki)
+   * - ConcordanceCorrelation
+     - ``'concordance_correlation'``
+     - -
+     - Regresyon (uyum)
+   * - Poisson
+     - ``'poisson'``
+     - -
+     - Sayım (count) regresyonu
+   * - CosineSimilarity
+     - ``'cosine_similarity'``
+     - -
+     - Embedding / benzerlik
+   * - BinaryIoU
+     - ``'binary_io_u'``
+     - -
+     - İkili segmentasyon
+   * - IoU
+     - (argüman şart)
+     - -
+     - Segmentasyon (seçili sınıflar)
+   * - MeanIoU
+     - (argüman şart)
+     - -
+     - Çok sınıflı segmentasyon
+   * - OneHotIoU
+     - (argüman şart)
+     - -
+     - Segmentasyon (one-hot)
+   * - OneHotMeanIoU
+     - (argüman şart)
+     - -
+     - Segmentasyon (one-hot)
+
+Metrik fonksiyonlar hem sınıf nesnesi biçiminde, hem fonksiyon biçiminde hem de yazısal biçimde girilebilmektedir.
+Genellikle Keras programcıları metrik fonksiyonları isimsel olarak girmektedir. Örneğin ikili sınıflandırma
+problemi için biz eğitim sırasında *loss* değerinin yanı sıra *binary_accuracy* değerini de elde etmek isteyelim.
+Bu durumda ``compile`` metodunu şöyle çağırabiliriz:
+
+.. code-block:: python
+
+   model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['binary_accuracy'])
+
+5) Modelin Eğitilmesi: fit Metodu
+=================================
+
+Modelin derlenmesinden sonra artık gerçekten eğitim aşamasına geçilir. Eğitim süreci ``Sequential`` sınıfının
+``fit`` metoduyla yapılmaktadır. ``fit`` metodunun parametrik yapısı şöyledir:
+
+.. code-block:: python
+
+   fit(
+       x=None,
+       y=None,
+       batch_size=None,
+       epochs=1,
+       verbose='auto',
+       callbacks=None,
+       validation_split=0.0,
+       validation_data=None,
+       shuffle=True,
+       class_weight=None,
+       sample_weight=None,
+       initial_epoch=0,
+       steps_per_epoch=None,
+       validation_steps=None,
+       validation_batch_size=None,
+       validation_freq=1
+   )
+
+``fit`` metodunun en önemli parametresi ilk iki parametre olan ``x`` ve ``y`` veri kümeleridir. Biz burada
+``training_dataset_x`` ve ``training_dataset_y`` verilerini ``fit`` metodunun ilk iki parametresine geçirmeliyiz.
+``fit`` metodunun diğer önemli bir parametresi ``batch_size`` isimli parametredir. Eğitim işlemi aslında satır
+satır değil batch batch yapılmaktadır. Batch bir grup satıra denilmektedir. Yani ağa bir grup satır girdi olarak
+verilir. Ağdan bir grup çıktı elde edilir. Bu bir grup çıktı ile bu çıktıların gerçek değerleri kayıp fonksiyonuna
+sokulur ve optimizasyon algoritması çalıştırılarak *w* ve *bias* değerleri güncellenir. Yani optimizasyon
+algoritması her batch işlemden sonra devreye sokulmaktadır. Batch büyüklüğü ``fit`` metodunda ``batch_size``
+parametresiyle belirtilmektedir. Bu değer girilmezse ``batch_size`` varsayılan durumda 32 olarak alınmaktadır. 32
+değeri pek çok uygulama için uygun bir değerdir. Optimizasyon işleminin satır satır yapılması yerine batch batch
+yapılmasının iki önemli nedeni vardır: Birincisi işlem miktarının azaltılması, dolayısıyla eğitim süresinin
+kısaltılmasıdır. İkincisi ise *overfitting* denilen olumsuz durum için bir önlem oluşturmasıdır. Overfitting
+hakkında ileride açıklama yapacağız.
+
+``fit`` metodunun diğer önemli bir parametresi de *epochs* isimli parametredir. Eğitim veri kümesinin eğitim
+sırasında yeniden eğitimde kullanılmasına *epoch* işlemi denilmektedir. Örneğin elimizde 1000 satırlık bir eğitim
+veri kümesi olsun. ``batch_size`` parametresinin de 20 olduğunu varsayalım. Bu durumda bu eğitim veri kümesi
+1000 / 20 = 50 batch işleminde bitecektir. Yani model parametreleri 50 kere ayarlanacaktır. Pek çok durumda eğitim
+veri kümesinin bir kez işleme sokulması model parametrelerinin iyi bir biçimde konumlandırılması için yetersiz
+kalmaktadır. İşte eğitim veri kümesinin birden fazla kez (yani ``fit`` metodundaki ``epochs`` sayısı kadar)
+yeniden eğitimde kullanılması yoluna gidilmektedir. Peki ``epochs`` değeri ne olmalıdır? Epoch sayısı uygulamacı
+tarafından belirlenmektedir. Az sayıda epoch uygulamak model parametrelerini yeterince iyi konumlandıramayabilir.
+Çok fazla sayıda epoch uygulamak yanlış şeylerin öğrenilmesine yol açabilmektedir. Bu olguya *overfitting*
+denilmektedir. Ayrıca çok fazla epoch eğitim zamanını da uzatmaktadır. Uygulamacı epoch'lar sırasında modelin
+davranışına bakabilir ve uygun epoch sayısında işlemi kesebilir. Eğitim sırasında Keras bizim belirlediğimiz
+fonksiyonları çağırabilmektedir. Buna Keras'ın *callback* mekanizması denilmektedir. Uygulamacı bu yolla model
+belli bir duruma geldiğinde eğitim işlemini kesebilir. Ya da uygulamacı eğer eğitim çok uzamayacaksa yüksek bir
+epoch ile eğitimini yapabilir. İşlemler bitince epoch'lardaki performansa bakabilir. Olması gereken epoch değerini
+kestirebilir. Sonra modeli yeniden bu sayıda epoch ile eğitir.
+
+``fit`` metodunun ``shuffle`` parametresi her epoch'tan sonra eğitim veri kümesinin karıştırılıp
+karıştırılmayacağını belirtmektedir. Bu parametre default olarak ``True`` biçimdedir. Yani her epoch'tan önce (ilk
+epoch dahil olmak üzere) eğitim veri kümesi karıştırılmaktadır. Epoch'lar arasında eğitim veri kümesinin
+karıştırılmaması eğitim sürecini olumsuz etkileyebilmektedir. Aşağıdaki tabloda verinin durumuna göre
+karıştırmamanın yarattığı dezavantajlar belirtilmektedir:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Durum
+     - Etki
+   * - Sıralı veri (etikete göre)
+     - Ciddi sorun: salınım, kötü yakınsama
+   * - Bir kez karıştırılmış, sabit sıra
+     - Genelde çalışır, biraz daha kötü
+   * - Her epoch yeniden karıştırma
+     - Önerilen yöntem (random reshuffling)
+   * - Zaman serisi / stateful RNN
+     - Örnek içi sıra korunmalı
+
+Bazı veri kümelerinde veriler arasında öncelik-sonralık ilişkisi bulunabilmektedir. Bu tür veri kümelerine *zaman
+serisi (time series)* denilmektedir. Zaman serilerine ilişkin veri kümelerinin karıştırılmaması gerekir.
+
+.. _sinama-ve-degerlendirme:
+
+============================================================
+Keras'ta Sınama (Validation) İşlemi ve Modelin Test Edilmesi
+============================================================
+
+Sınama (Validation) İşlemi
+==========================
+
+Modelin ``fit`` metodu ile eğitilmesi sırasında *sınama (validation)* denilen önemli bir süreç daha devreye
+girmektedir. Sınama işlemi test işlemine benzemektedir. Ancak test işlemi tüm model eğitildikten sonra yapılırken
+sınama işlemi her epoch'tan sonra modelin eğitim sürecinde yapılmaktadır. Başka bir deyişle sınama işlemi model
+eğitilirken yapılan test işlemidir. Epoch'lar sırasında modelin performansı hakkında bilgi edinebilmek için sınama
+işlemi yapılmaktadır. Sınamanın yapılması için ``fit`` metodunun ``validation_split`` parametresinin 0 ile 1
+arasında oransal bir değer olarak girilmesi gerekir. Bu oransal değer eğitim veri kümesinin yüzde kaçının sınama
+için kullanılacağını belirtmektedir. Örneğin ``validation_split=0.2`` ise bu durum eğitim veri kümesinin
+%20'sinin sınama için kullanılacağını belirtmektedir. ``fit`` metodu işin başında eğitim veri kümesini eğitimde
+kullanılacak kısım ile sınamada kullanılacak kısım biçiminde ikiye ayırmaktadır. Sonra her epoch'ta yalnızca
+eğitimde kullanılacak kümeyi karıştırmaktadır. Sınama işlemi aynı kümeyle her epoch sonrasında karıştırılmadan
+yapılmaktadır. ``fit`` metodunda ayrıca bir de ``validation_data`` isimli bir parametre vardır. Bu parametre
+sınama verilerini girmek için kullanılmaktadır. Bazen programcı sınama verilerinin eğitim veri kümesinden elde
+edilmesini istemez. Onu ayrıca ``fit`` metoduna vermek isteyebilir. Tabii ``validation_data`` parametresi
+girildiyse artık ``validation_split`` parametresinin bir anlamı yoktur. Bu parametre girilse bile artık fonksiyon
+tarafından dikkate alınmaz. Örneğin:
+
+.. code-block:: python
+
+   hist = model.fit(training_dataset_x, training_dataset_y, batch_size=32, epochs=100, validation_split=0.2)
+
+``validation_split`` parametresinin default değerinin 0 olduğuna dikkat ediniz. ``validation_split`` değerinin 0
+olması epoch'lar sonrasında sınama işleminin yapılmayacağı anlamına gelmektedir.
+
+``fit`` metodu ``History`` denilen bir sınıf nesnesi geri döndürmektedir. Bu nesnenin içerisinde her epoch'taki
+loss ve metrik değerler bulunmaktadır. Bu nesnenin nasıl kullanılacağını izleyen paragraflarda ele alacağız.
+
+Eğitim Sırasında Yazdırılan Değerler
+====================================
+
+Peki modelin ``fit`` metodunda her epoch'tan sonra sınama işleminde hangi ölçümler ekrana yazdırılacaktır ve bize
+verilecektir? İşte ``compile`` metodunda belirtilen ve ismine metrik fonksiyonlar denilen fonksiyonlar her epoch
+işlemi sonucunda ekrana yazdırılmaktadır ve uygulamacıya *history nesnesi* biçiminde verilmektedir. Her epoch
+sonucunda ``fit`` metodu şu değerleri yazdırmaktadır:
+
+- Epoch sonrasında eğitim veri kümesinin kendisi için elde edilen loss değerlerinin ortalaması.
+- Epoch sonrasında eğitim veri kümesinin kendisi için elde edilen metrik değerlerin ortalaması
+- Epoch sonrasında sınama için kullanılan sınama verilerinden elde edilen loss değerlerinin ortalaması
+- Epoch sonrasında sınama için kullanılan sınama verilerinden elde edilen metrik değerlerin ortalaması
+
+Loss değerleri ve metrik değerler her batch için yeniden hesaplanıp onların ortalaması alınmaktadır. Örneğin bir
+epoch 50 batch olsun. Her batch girdi yapılıp ondan elde edilen loss değerleri biriktirilip onların ortalaması
+epoch bittiğinde kullanılmakta ve uygulamacıya verilmektedir. Buradaki ortalama aslında ağırlıklı ortalamadır.
+Çünkü son batch'te daha az örnek kalabilmektedir. (Örneğin ``batch_size`` = 32 olsun. Veri kümesindeki veri
+miktarı 32'ye tam bölünmüyorsa son epoch 32'den küçük veri içerecektir.) Metrik değerler için Keras sayaçlar tutup
+her epoch'ta bu sayaçları artırıp en sonunda örnek sayısına bölerek ortalama hesaplamaktadır. Bu süreçte hem
+eğitimde kullanılan veriler için hem de sınama veri kümesi için loss ve metrik değerler hesaplanmaktadır.
+
+val\_ Önekli Değerler ve Örnek Çıktı
+====================================
+
+Eğitim veri kümesindeki değerler ile sınama veri kümesinden elde edilen değerler birbirine karışmasın diye ``fit``
+metodu sınama verilerinden elde edilen değerlerin başına *val_* öneki getirmektedir. Örneğin biz ikili
+sınıflandırma problemi üzerinde çalışıyor olalım ve metrik fonksiyon olarak *binary_accuracy* kullanmış olalım.
+``fit`` metodu her epoch sonrasında şu değerleri ekrana yazdıracaktır:
+
+.. code-block:: text
+
+   loss (eğitim veri kümesinden elde edilen ortalama loss değeri)
+   binary_accuracy (eğitim veri kümesinden elde edilen ortalama metrik değer)
+   val_loss (sınama veri kümesinden elde edilen ortalama loss değeri)
+   val_binary_accuracy (sınama veri kümesinden elde edilen ortalama metrik değer)
+
+Tabii ``compile`` metodunda birden fazla metrik değer de belirtilmiş olabilir. Bu durumda ``fit`` tüm bu metrik
+değerlerin ortalamasını ekrana yazdıracaktır. ``fit`` tarafından ekrana yazdırılan örnek bir çıktı şöyle olabilir:
+
+.. code-block:: text
+
+   ....
+   Epoch 91/100
+   16/16 [==============================] - 0s 3ms/step - loss: 0.5536 - binary_accuracy: 0.7230 - val_loss: 0.5520 -
+   val_binary_accuracy: 0.7480
+   Epoch 92/100
+   16/16 [==============================] - 0s 3ms/step - loss: 0.5392 - binary_accuracy: 0.7251 - val_loss: 0.5588 -
+   val_binary_accuracy: 0.7805
+   Epoch 93/100
+   16/16 [==============================] - 0s 3ms/step - loss: 0.5539 - binary_accuracy: 0.7088 - val_loss: 0.5666 -
+   val_binary_accuracy: 0.8049
+   ...
+
+Burada ``loss`` değeri epoch sonrasında eğitim verilerinden elde edilen ortalama loss değerini, ``val_loss``
+değeri epoch sonrasında sınama verilerinden elde edilen ortalama loss değerini, ``binary_accuracy`` epoch
+sonrasında eğitim verilerinden elde edilen ortalama isabet yüzdesini ve ``val_binary_accuracy`` ise epoch
+sonrasında sınama verilerinden elde edilen ortalama isabet yüzdesini belirtmektedir.
+
+Eğitim sırasında eğitim veri kümesindeki başarının sınama veri kümesinde görülmemesi eğitimin kötü bir yöne
+gittiğine işaret etmektedir. Örneğin ikili sınıflandırma probleminde epoch sonucunda eğitim veri kümesindeki
+``binary_accuracy`` değerinin %99 olduğunu ancak ``val_binary_accuracy`` değerinin %65 olduğunu düşünelim. Bunun
+anlamı ne olabilir? Bu durum aslında epoch'lar sırasında modelin bir şeyler öğrendiği ama bizim istediğimiz
+şeyleri öğrenemediği anlamına gelmektedir. Çünkü eğitim veri kümesini epoch'larla sürekli bir biçimde gözden
+geçiren model artık onu ezberlemiştir. Ancak o başarıyı eğitimden bağımsız bir veri kümesinde gösterememektedir.
+İşte bu olguya *overfitting* denilmektedir. Yanlış bir şeyin öğrenilmesi bir şeyin öğrenilememesi kadar kötü bir
+durumdur. Overfitting oluşumunun çeşitli nedenleri vardır. Ancak overfitting epoch'lar dolayısıyla oluşuyorsa
+epoch'ları uygun bir noktada kesmek gerekir.
+
+6) Modelin Test Edilmesi: evaluate Metodu
+=========================================
+
+fit işleminden sonra artık model eğitilmiştir. Onun test veri kümesiyle test edilmesi gerekir. Bu işlem
+``Sequential`` sınıfının ``evaluate`` isimli metodu ile yapılmaktadır. ``evaluate`` metodunun parametrik yapısı
+şöyledir:
+
+.. code-block:: python
+
+   evaluate(
+       x=None,
+       y=None,
+       batch_size=None,
+       verbose='auto',
+       sample_weight=None,
+       steps=None,
+       callbacks=None,
+       return_dict=False,
+       **kwargs
+   )
+
+``evaluate`` metodunun ilk iki parametresi ``test_dataset_x`` ve ``test_dataset_y`` değerlerini almaktadır. Bu
+metodun da ``batch_size`` parametresi vardır. Buradaki ``batch_size`` parametresi eğitim işlemi yapılırken
+``fit`` metodunda kullanılan ``batch_size`` parametresinden işlevsel olarak farklıdır. Model test edilirken test
+işlemi de birer birer değil batch batch yapılabilmektedir. Ancak bu batch'ler arasında herhangi bir şey
+yapılmamaktadır. (Eğitim sırasındaki batch işlemleri sonrasında ağ parametrelerinin ayarlandığını anımsayınız.
+Test işlemi sırasında böyle bir ayarlama yapılmamaktadır.) Buradaki batch değeri yalnızca işlemlerin hızlı
+yapılması üzerinde etkili olmaktadır. Yine ``batch_size`` parametresi girilmezse bu değer default 32
+alınmaktadır. ``evaluate`` metodu bir liste geri döndürmektedir. Listenin ilk elemanı test veri kümesinden elde
+edilen loss fonksiyonunun değeridir. Diğer elemanları da sırasıyla metrik olarak verilen fonksiyonların
+değerleridir. Örneğin:
+
+.. code-block:: python
+
+   eval_result = model.evaluate(test_dataset_x, test_dataset_y)
+
+Burada ``eval_result`` değişkeni yukarıdaki örneğimizde aşağıdaki görünümde iki elemanlı bir liste olacaktır:
+
+.. code-block:: text
+
+   [0.9650349617004395, 0.4678175151348114]
+
+Keras'ın 3'lü versiyonlarıyla birlikte ``evaluate`` metoduna ``return_dict`` parametresi eklenmiştir. Bu
+parametrenin default değeri ``False`` biçimdedir. Eğer bu parametre ``True`` girilirse bu durumda ``evaluate``
+metodu bir liste yerine bir sözlük geri döndürmektedir. Sözlüğün anahtarları ilgili değerin isminden, değerleri
+ise onun değerlerinden oluşmaktadır. Örneğin:
+
+.. code-block:: python
+
+   eval_result = model.evaluate(test_dataset_x, test_dataset_y, return_dict=True)
+
+Artık ``eval_result`` bir sözlüktür. Bu sözlüğün ``'loss'`` anahtarında loss değeri metrik isimlere ilişkin
+anahtarlarında ilgili metrik değerler bulunmaktadır. Örneğin:
+
+.. code-block:: text
+
+   {'binary_accuracy': 0.9650349617004395, 'loss': 0.4678175151348114}
+
+Biz de metrik değerleri isimleriyle şöyle yazdırabiliriz:
+
+.. code-block:: python
+
+   for name, value in eval_result.items():
+       print(f'{name}: {value}')
+
+Buradan aşağıdakine benzer bir çıktı elde edilecektir:
+
+.. code-block:: text
+
+   binary_accuracy: 0.9650349617004395
+   loss: 0.4678175151348114
+
+.. _predict-ve-tekrarlanabilirlik:
+
+================================================================
+Kestirim (predict) İşlemi ve Sonuçların Yeniden Üretilebilirliği
+================================================================
+
+7) Kestirim: predict Metodu
+===========================
+
+Artık model test de edilmiştir. Şimdi sıra *kestirim (prediction)* yapmaya gelmiştir. Kestirim işlemi için
+``Sequential`` sınıfının ``predict`` metodu kullanılmaktadır. Biz bu metoda girdi katmanına uygulanacak
+özelliklerin (yani satırların) değerlerini veririz, ``predict`` metodu da bize çıktı katmanındaki nöronların
+değerlerini verir. ``predict`` metoduna biz her zaman iki boyutlu bir NumPy dizisi vermeliyiz. Çünkü ``predict``
+metodu tek hamlede birden çok satır için kestirim yapabilmektedir. Biz ``predict`` metoduna bir satır verecek
+olsak bile onu iki boyutlu bir matris biçiminde vermeliyiz. Örneğin:
+
+.. code-block:: python
+
+   import numpy as np
+
+   predict_dataset = np.array([[2 ,90, 68, 12, 120, 38.2, 0.503, 28],
+                           [4, 111, 79, 47, 207, 37.1, 1.39, 56],
+                           [3, 190, 65, 25, 130, 34, 0.271, 26],
+                           [8, 176, 90, 34, 300, 50.7, 0.467, 58],
+                           [7, 106, 92, 18, 200, 35, 0.300, 48]])
+
+   predict_result = model.predict(predict_data)
+   print(predict_result)
+
+``predict`` metodu bize tahmin edilen değerleri iki boyutlu bir NumPy dizisi biçiminde vermektedir. Bunun nedeni
+aslında ağın birden fazla çıktısının (yani çıktı katmanında birden fazla nöronun) olabilmesidir. Örneğin ağın bir
+çıktısı varsa bu durumda ``predict`` metodu bize *n tane satırdan 1 tane sütundan* oluşan bir matris, ağın iki
+çıktısı varsa *n tane satırdan 2 tane sütundan* oluşan bir matris verecektir. O halde örneğin çıktı olarak tek
+nöronun bulunduğu bir ağda biz kestirim değerlerini şöyle yazdırabiliriz:
+
+.. code-block:: python
+
+   for i in range(len(predict_result)):
+       print(predict_result[i, 0])
+
+Ya da şöyle yazdırabiliriz:
+
+.. code-block:: python
+
+   for result in predict_result[:, 0]:
+       print(result)
+
+Tabii iki boyutlu diziyi NumPy'ın ``flatten`` metoduyla ya da ``ravel`` metoduyla tek boyutlu hale getirerek de
+yazdırma işlemini yapabilirdik:
+
+.. code-block:: python
+
+   for val in predict_result.flatten():
+       print(val)
+
+``predict`` metodu bize ağın çıktı değerini vermektedir. Yukarıdaki ``diabetes.csv`` örneğimizde ağın çıktı
+katmanındaki aktivasyon fonksiyonunun *sigmoid* olduğunu anımsayınız. Sigmoid fonksiyonu 0 ile 1 arasında bir
+değer vermektedir. O halde biz ağın çıktısındaki değer 0.5'ten büyükse ilgili kişinin şeker hastası olduğu (çünkü
+1'e daha yakındır), 0.5'ten küçükse o kişinin şeker hastası olmadığı (çünkü 0'a daha yakındır) sonucunu
+çıkartabiliriz. Tabii değer ne kadar 1'e yakınsa kişinin şeker hastası olma olasılığı, değer ne kadar 0'a yakınsa
+kişinin şeker hastası olmama olasılığı o kadar yüksek olacaktır. O halde sigmoid fonksiyonun çıktısının bir
+olasılık belirttiğini söyleyebiliriz. Bu durumda kişinin şeker hastası olup olmadığı ağın çıktı değerinin 0.5'ten
+büyük olup olmamasıyla kestirilebilir:
+
+.. code-block:: python
+
+   for result in predict_result[:, 0]:
+       print('Şeker hastası' if result > 0.5 else 'Şeker Hastası Değil')
+
+Aşağıdaki örnekte ``diabetes.csv`` dosyası üzerinde yukarıda belirtilen tüm adımlar uygulanmıştır.
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv('diabetes.csv')
+
+   from sklearn.impute import SimpleImputer
+
+   si = SimpleImputer(strategy='mean', missing_values=0)
+
+   impute_features = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+   df[impute_features] = si.fit_transform(df[impute_features])
+
+   dataset = df.to_numpy()
+
+   dataset_x = dataset[:, :-1]
+   dataset_y = dataset[:, -1]
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+   from tensorflow.keras import Sequential
+   from tensorflow.keras.layers import Input, Dense
+
+   model = Sequential(name='Diabetes')
+
+   model.add(Input((training_dataset_x.shape[1],)))
+   model.add(Dense(16, activation='relu', name='Hidden-1'))
+   model.add(Dense(16, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='sigmoid', name='Output'))
+   model.summary()
+
+   model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['binary_accuracy'])
+   model.fit(training_dataset_x, training_dataset_y, batch_size=32, epochs=100, validation_split=0.2)
+   eval_result = model.evaluate(test_dataset_x, test_dataset_y, batch_size=32)
+
+   for i in range(len(eval_result)):
+       print(f'{model.metrics_names[i]}: {eval_result[i]}')
+
+   import numpy as np
+
+   predict_dataset = np.array([[2 ,90, 68, 12, 120, 38.2, 0.503, 28],
+                               [4, 111, 79, 47, 207, 37.1, 1.39, 56],
+                               [3, 190, 65, 25, 130, 34, 0.271, 26],
+                               [8, 176, 90, 34, 300, 50.7, 0.467, 58],
+                               [7, 106, 92, 18, 200, 35, 0.300, 48]])
+
+   predict_result = model.predict(predict_dataset)
+   print(predict_result)
+
+   for result in predict_result[:, 0]:
+       print('Şeker hastası' if result > 0.5 else 'Şeker Hastası Değil')
+
+Saklı Katman Sayısı Üzerine Bir Hatırlatma
+==========================================
+
+Şimdi yukarıdaki adımların bazı ayrıntıları üzerinde duralım. Daha önceden de belirttiğimiz gibi pek çok problem
+iki saklı katmanla ve Dense bir bağlantı ile tatminkar biçimde çözülebilmektedir. Dolayısıyla bizim ilk aklımıza
+gelen model iki saklı katmanlı klasik modeldir. Ancak özel problemler (şekil tanıma, yazıdan anlam çıkartma,
+görüntü hakkında çıkarım yapma gibi) iki saklı katmanla tatminkar biçimde çözülememektedir. Bu durumda ikiden
+fazla saklı katman kullanılır. Bu modellere *derin öğrenme (deep learning)* modelleri de denilmektedir.
+
+Sonuçların Yeniden Üretilebilirliği (Reproducibility)
+=====================================================
+
+Yapay sinir ağı her farklı eğitimde farklı *w* ve *bias* değerlerini oluşturabilir. Bu nedenle ağın performans
+değerleri de eğitimden eğitime değişebilir. Her eğitimde ağın farklı değerlere konumlandırılmasının nedenleri
+şunlardır:
+
+1) ``train_test_split`` fonksiyonu her çalıştırıldığında aslında fonksiyon ``training_dataset`` ve
+   ``test_dataset`` veri kümelerini karıştırarak elde etmektedir.
+2) Katmanlardaki *w* değerleri (ve istersek *bias* değerleri) programın her çalıştırılmasında rastgele başlangıç
+   değerleriyle set edilmektedir.
+3) ``fit`` işleminde her epoch sonrasında veri kümesi yeniden karıştırılmaktadır.
+
+Bir rastgele sayı üretiminde üretim aynı *tohum değerden (seed)* başlatılırsa hep aynı değerler elde edilir. Bu
+duruma rassal sayı üretiminin *reproducible olması* denmektedir. Eğer tohum değer belirtilmezse NumPy ve
+TensorFlow gibi kütüphanelerde bu tohum değeri programın her çalıştırılmasında rastgele biçimde bilgisayarın
+saatinden hareketle oluşturmaktadır.
+
+O halde eğitimden hep aynı sonucun elde edilmesi için (yani eğitimin *reproducible* hale getirilmesi için)
+yukarıdaki unsurların dikkate alınması gerekir. Tipik yapılması gereken birkaç şeyi şöyle belirtebiliriz:
+
+1) scikit-learn ve diğer bazı makine öğrenmesi kütüphanelerinde aşağı seviyeli kütüphane olarak NumPy kullanıldığı
+   için NumPy'ın rassal sayı üreticisinin tohum değeri belli bir değerle set edilebilir. Örneğin:
+
+.. code-block:: python
+
+   import numpy as np
+
+   np.random.seed(12345)
+
+2) TensorFlow kütüphanesi bazı işlemlerde kendi rassal sayı üreticisini kullanmaktadır. Onun tohum değeri de
+   belli bir değerle set edilebilir. Örneğin:
+
+.. code-block:: python
+
+   from tensorflow.keras.utils import set_random_seed
+
+   set_random_seed(78901)
+
+Tabii yukarıdaki işlemler yapılsa bile rassal sayı üretimi *reproducible* hale getirilemeyebilir. Çünkü bu durum
+bu kütüphanelerin rassal sayı üretiminin hangi kütüphaneler kullanılarak yapıldığı ile ilgilidir. Yukarıdaki iki
+madde sezgisel bir çıkarımı ifade etmektedir.
+
+Peki neden ağın her eğitilmesinde aynı sonuçların elde edilmesini (yani ağın *reproducible* sonuçlar vermesini)
+isteyebiliriz? İşte bazen modellerimizde ve algoritmalarımızda yaptığımız değişiklikleri birbirleriyle
+kıyaslamak isteyebiliriz. Bu durumda kıyaslamanın hep aynı biçimde yapılmasını sağlayabilmek için rassal bir
+biçimde alınan değerlerin her çalıştırmada aynı değerler olmasını sağlamamız gerekir. Tabii aslında algoritmaları
+karşılaştırmak için bu biçimde *reproducible* rassal sayı üretimi yapmak yerine algoritmaları çokça çalıştırıp
+bir ortalama değere de bakılabilir. Bu yöntem genellikle daha iyi bir karşılaştırma olanağı sunmaktadır.
+
+O halde biz yukarıda belirttiğimiz iki ayarlamayı yaparak *diabetes* modelimizi çalıştırırsak bu durumda her
+eğitimde ve test işleminde aynı sonucu elde edebiliriz. Aşağıda buna bir örnek verilmiştir.
+
+.. code-block:: python
+
+   import pandas as pd
+   import numpy as np
+   from tensorflow.keras.utils import set_random_seed
+
+   np.random.seed(1234567)
+   set_random_seed(678901)
+
+   df = pd.read_csv('diabetes.csv')
+
+   from sklearn.impute import SimpleImputer
+
+   si = SimpleImputer(strategy='mean', missing_values=0)
+
+   impute_features = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+   df[impute_features] = si.fit_transform(df[impute_features])
+
+   dataset = df.to_numpy()
+
+   dataset_x = dataset[:, :-1]
+   dataset_y = dataset[:, -1]
+
+   from sklearn.model_selection import train_test_split
+
+   training_dataset_x, test_dataset_x, training_dataset_y, test_dataset_y = train_test_split(dataset_x, dataset_y,
+                                                                                               test_size=0.2)
+
+   from tensorflow.keras import Sequential
+   from tensorflow.keras.layers import Input, Dense
+
+   model = Sequential(name='Diabetes')
+
+   model.add(Input((training_dataset_x.shape[1],)))
+   model.add(Dense(16, activation='relu', name='Hidden-1'))
+   model.add(Dense(16, activation='relu', name='Hidden-2'))
+   model.add(Dense(1, activation='sigmoid', name='Output'))
+   model.summary()
+
+   model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['binary_accuracy'])
+   model.fit(training_dataset_x, training_dataset_y, batch_size=32, epochs=100, validation_split=0.2)
+   eval_result = model.evaluate(test_dataset_x, test_dataset_y, batch_size=32)
+
+   for i in range(len(eval_result)):
+       print(f'{model.metrics_names[i]}: {eval_result[i]}')
+
+   predict_dataset = np.array([[2 ,90, 68, 12, 120, 38.2, 0.503, 28],
+                               [4, 111, 79, 47, 207, 37.1, 1.39, 56],
+                               [3, 190, 65, 25, 130, 34, 0.271, 26],
+                               [8, 176, 90, 34, 300, 50.7, 0.467, 58],
+                               [7, 106, 92, 18, 200, 35, 0.300, 48]])
+
+   predict_result = model.predict(predict_dataset)
+   print(predict_result)
+
+   for result in predict_result[:, 0]:
+       print('Şeker hastası' if result > 0.5 else 'Şeker Hastası Değil')
+
+.. _aktivasyon-ve-kayip-fonksiyonlari:
+
+======================================================
+Aktivasyon Fonksiyonları ve Kayıp (Loss) Fonksiyonları
+======================================================
+
+Giriş
+=====
+
+Şimdi de dikkatimizi katmanlardaki aktivasyon fonksiyonlarına yöneltelim. Katmanlardaki aktivasyon fonksiyonları
+ne olmalıdır? Girdi katmanı gerçek bir katman olmadığına göre orada bir aktivasyon fonksiyonu yoktur. Saklı
+katmanlardaki aktivasyon fonksiyonları için çeşitli seçenekler bulunmaktadır. Biz de bu bölümde belli başlı
+aktivasyon fonksiyonlarını daha ayrıntılı olarak ele alacağız.
+
+ReLU (Rectified Linear Unit) Fonksiyonu
+=======================================
+
+Özellikle son yıllarda saklı katmanlarda en fazla tercih edilen aktivasyon fonksiyonu *relu (rectified linear
+unit)* denilen aktivasyon fonksiyonudur. Bu fonksiyona İngilizce *rectifier* da denilmektedir. Relu fonksiyonu
+şöyledir:
+
+.. code-block:: text
+
+   x >= 0  ise y = x
+   x < 0   ise y = 0
+
+Yani relu fonksiyonu x değeri 0'dan büyük ise (ya da eşit ise) aynı değeri veren, x değeri 0'dan küçük ise 0
+değerini veren fonksiyondur. relu fonksiyonunu basit bir biçimde aşağıdaki gibi yazabiliriz:
+
+.. code-block:: python
+
+   def relu(x):
+     return np.maximum(x, 0)
+
+NumPy kütüphanesinin ``maximum`` fonksiyonunun birinci parametresi bir NumPy dizisi ya da Python listesi
+biçiminde girilirse fonksiyon bu dizinin ya da listenin her elemanı ile maximum işlemi yapmaktadır. Örneğin:
+
+.. code-block:: text
+
+   >>> import numpy as np
+   >>> x = [10, -4, 5, 8, -2]
+   >>> y = np.maximum(x, 3)
+   >>> y
+   array([10,  3,  5,  8,  3])
+
+Relu fonksiyonun grafiği aşağıdaki gibi çizilebilir.
+
+.. code-block:: python
+
+   import numpy as np
+   import matplotlib.pyplot as plt
+
+   def relu(x):
+         return np.maximum(x, 0)
+
+   x = np.linspace(-10, 10, 1000)
+   y = relu(x)
+
+   plt.title('Relu Function', fontsize=14, fontweight='bold', pad=20)
+   axis = plt.gca()
+   axis.spines['left'].set_position('center')
+   axis.spines['bottom'].set_position('center')
+   axis.spines['top'].set_color(None)
+   axis.spines['right'].set_color(None)
+   axis.set_ylim(-10, 10)
+   plt.plot(x, y, color='red')
+   plt.show()
+
+Programın çıktısı aşağıdaki gibidir:
+
+.. figure:: _static/relu-function.png
+   :alt: ReLU fonksiyonunun grafiği; x negatifken 0, pozitifken x doğrusunu izleyen kırmızı eğri
+   :align: center
+   :width: 420px
+
+   ReLU fonksiyonunun grafiği.
+
+Aktivasyon fonksiyonları katman nesnelerine isimsel olarak girilebileceği gibi ``tensorflow.keras.activations``
+modülündeki fonksiyonlar biçiminde de girilebilmektedir. Örneğin:
+
+.. code-block:: python
+
+   from tensorflow.keras.activations import relu
+   ...
+   model.add(Dense(16, activation=relu, name='Hidden'))
+
+Bu modüldeki fonksiyonlar Keras kütüphanesi TensorFlow kütüphanesi kullanılarak yazıldığı için çıktı olarak Tensor
+nesneleri vermektedir. Biz relu grafiğini çizdirirken fonksiyonu kendimiz yazmak yerine TensorFlow içerisindeki
+fonksiyonu doğrudan da kullanabiliriz. Tensor nesnelerinin NumPy dizilerine dönüştürülmesi için Tensor sınıfının
+``numpy`` metodu kullanılabilir. Örneğin:
+
+.. code-block:: python
+
+   from tensorflow.keras.activations import relu
+
+   x = np.linspace(-10, 10, 1000)
+   y = relu(x).numpy()
+
+Aşağıdaki örnekte relu fonksiyonun grafiği TensorFlow'daki relu fonksiyonu yardımıyla çizdirilmiştir.
+
+.. code-block:: python
+
+   import numpy as np
+   import matplotlib.pyplot as plt
+
+   def relu(x):
+         return np.maximum(x, 0)
+
+   x = np.linspace(-10, 10, 1000)
+
+   # y = relu(x)
+
+   from tensorflow.keras.activations import relu
+   y = relu(x).numpy()
+
+   plt.title('Relu Function', fontsize=14, fontweight='bold', pad=20)
+   axis = plt.gca()
+   axis.spines['left'].set_position('center')
+   axis.spines['bottom'].set_position('center')
+   axis.spines['top'].set_color(None)
+   axis.spines['right'].set_color(None)
+   axis.set_ylim(-10, 10)
+   plt.plot(x, y, color='red')
+   plt.show()
+
+Programın çıktısı yukarıdaki grafik ile aynıdır, çünkü TensorFlow'un ``relu`` fonksiyonu matematiksel olarak
+NumPy ile yazılan ``relu`` fonksiyonuyla eşdeğerdir.
+
+Sigmoid (Lojistik) Fonksiyonu
+=============================
+
+İkili sınıflandırma problemlerinde çıktı katmanında en fazla kullanılan aktivasyon fonksiyonu *sigmoid* denilen
+fonksiyondur. Yukarıdaki *diabetes* örneğinde biz çıktı katmanında sigmoid fonksiyonunu kullanmıştık. Gerçekten de
+ikili sınıflandırma problemlerinde ağın çıktı katmanında tek bir nöron bulunur ve bu nöronun da aktivasyon
+fonksiyonu *sigmoid* olur.
+
+Peki sigmoid nasıl bir fonksiyondur? Bu fonksiyona *lojistik (logistic)* fonksiyonu da denilmektedir.
+Fonksiyonun matematiksel ifadesi şöyledir:
+
+.. code-block:: text
+
+   y = 1 / (1 + e⁻ˣ)
+
+Burada e değeri 2.71828... biçiminde irrasyonel bir değerdir. Yukarıdaki kesrin pay ve paydası e ** x ile
+çarpılırsa fonksiyon aşağıdaki gibi de ifade edilebilir:
+
+.. code-block:: text
+
+   y = eˣ / (1 + eˣ)
+
+Fonksiyona *sigmoid* isminin verilmesinin nedeni S şekline benzemesinden dolayıdır. Sigmoid eğrisi x = 0 için 0.5
+değerini veren x pozitif yönde arttıkça 1 değerine hızla yaklaşan, x negatif yönde arttıkça 0 değerine hızla
+yaklaşan S şeklinde bir eğridir. Sigmoid fonksiyonunun (0, 1) arasında bir değer verdiğine dikkat ediniz. x değeri
+arttıkça eğri 1'e yaklaşır ancak hiçbir zaman 1 olmaz. Benzer biçimde x değeri azaldıkça eğri 0'a yaklaşır ancak
+hiçbir zaman 0 olmaz.
+
+Sigmoid fonksiyonu makine öğrenmesinde ve istatistikte belli bir gerçek değeri 0 ile 1 arasına hapsetmek için
+sıkça kullanılmaktadır. Sigmoid çıktısı aslında bir bakımdan kestirimin 1 olma olasılığını vermektedir. Tabii biz
+kestirimde bulunurken kesin bir yargı belirteceğimiz zaman eğrinin orta noktası olan 0.5 değerini referans alırız.
+Ağın ürettiği değer 0.5'ten büyükse bunu 1 gibi, 0.5'ten küçükse 0 gibi değerlendiririz.
+
+Sigmoid eğrisi aşağıdaki gibi çizilebilir.
+
+.. code-block:: python
+
+   import numpy as np
+   import matplotlib.pyplot as plt
+
+   x = np.linspace(-10, 10, 1000)
+   y = np.e ** x / (1 + np.e ** x)
+
+   plt.title('Sigmoid (Logistic) Function', fontsize=14, pad=20, fontweight='bold')
+   axis = plt.gca()
+   axis.spines['left'].set_position('center')
+   axis.spines['bottom'].set_position('center')
+   axis.spines['top'].set_color(None)
+   axis.spines['right'].set_color(None)
+
+   axis.set_ylim(-1, 1)
+
+   plt.plot(x, y)
+   plt.show()
+
+Programın çıktısı aşağıdaki gibidir:
+
+.. figure:: _static/sigmoid-function.png
+   :alt: Sigmoid fonksiyonunun S biçimindeki grafiği, 0 ile 1 arasında değer alır
+   :align: center
+   :width: 420px
+
+   Sigmoid (lojistik) fonksiyonunun grafiği.
+
+Yine benzer biçimde ``tensorflow.keras.activations`` modülü içerisinde sigmoid fonksiyonu zaten hazır biçimde
+bulunmaktadır. Tabii bu fonksiyon da bize TensorFlow'daki bir Tensor nesnesini vermektedir. Aşağıda sigmoid
+eğrisini bu hazır fonksiyonu kullanarak çizdiriyoruz.
+
+.. code-block:: python
+
+   import numpy as np
+   import matplotlib.pyplot as plt
+
+   from tensorflow.keras.activations import sigmoid
+
+   x = np.linspace(-10, 10, 1000)
+   y = sigmoid(x).numpy()
+
+   plt.title('Sigmoid (Logistic) Function', fontsize=14, fontweight='bold', pad=20)
+   axis = plt.gca()
+   axis.spines['left'].set_position('center')
+   axis.spines['bottom'].set_position('center')
+   axis.spines['top'].set_color(None)
+   axis.spines['right'].set_color(None)
+   axis.set_ylim(-1, 1)
+   plt.plot(x, y, color='red')
+   plt.show()
+
+Programın çıktısı yukarıdaki sigmoid grafiği ile aynıdır.
+
+Sigmoid Fonksiyonunun Birinci Türevi
+====================================
+
+Sigmoid fonksiyonunun birinci türevi Gauss eğrisine benzemektedir. Aşağıdaki örnekte Sigmoid fonksiyonunun
+birinci türevi alınıp eğrisi çizdirilmiştir. Ancak bu örnekte henüz görmediğimiz SymPy kütüphanesini kullandık.
+Sigmoid fonksiyonun birinci türevi şöyledir:
+
+.. code-block:: text
+
+   sigmoid'(x) = eˣ/(eˣ + 1) - e²ˣ/(eˣ + 1)²
+
+.. code-block:: python
+
+   import sympy
+   from sympy import init_printing
+
+   init_printing()
+
+   x = sympy.Symbol('x')
+   fx = sympy.E ** x / (1 + sympy.E ** x)
+   dx = sympy.diff(fx, x)
+
+   print(dx)
+
+   import numpy as np
+
+   np.linspace(-10, 10, 1000)
+   pdx = sympy.lambdify(x, dx)
+
+   x = np.linspace(-10, 10, 1000)
+   y = pdx(x)
+
+   import matplotlib.pyplot as plt
+
+   plt.title('First Derivative of Sigmoid Function', fontsize=14, pad=20, fontweight='bold')
+   axis = plt.gca()
+   axis.spines['left'].set_position('center')
+   axis.spines['bottom'].set_position('center')
+   axis.spines['top'].set_color(None)
+   axis.spines['right'].set_color(None)
+
+   axis.set_ylim(-0.4, 0.4)
+
+   plt.plot(x, y)
+   plt.show()
+
+Programın çıktısı aşağıdaki gibidir:
+
+.. figure:: _static/sigmoid-derivative.png
+   :alt: Sigmoid fonksiyonunun birinci türevinin Gauss eğrisine benzeyen grafiği
+   :align: center
+   :width: 420px
+
+   Sigmoid fonksiyonunun birinci türevinin grafiği (Gauss eğrisine benzer).
+
+Hiperbolik Tanjant (tanh) Fonksiyonu
+====================================
+
+Diğer çok kullanılan bir aktivasyon fonksiyonu da *hiperbolik tanjant* fonksiyonudur. Bu fonksiyona kısaca *tanh*
+fonksiyonu da denilmektedir. Fonksiyonun matematiksel ifadesi şöyledir:
+
+.. code-block:: text
+
+   f(x) = (e²ˣ - 1) / (e²ˣ + 1)
+
+Fonksiyonun sigmoid fonksiyonuna benzediğine ancak üstel ifadenin x yerine 2 * x olduğuna dikkat ediniz. Tanh
+fonksiyonu adeta sigmoid fonksiyonunun (-1, +1) arası değer veren biçimi gibidir. Fonksiyon yine S şekli
+biçimindedir. Ancak dönüş noktası x = 0'dadır.
+
+Tanh fonksiyonu saklı katmanlarda da bazen çıktı katmanlarında da kullanılabilmektedir. Eskiden bu fonksiyon
+saklı katmanlarda çok yoğun kullanılıyordu. Ancak artık saklı katmanlarda daha çok relu fonksiyonu tercih
+edilmektedir. Fakat tanh fonksiyonunun daha iyi sonuç verdiği modeller de söz konusu olmaktadır.
+
+tanh fonksiyonu Keras'ta ``tensorflow.keras.activations`` modülünde ``tanh`` ismiyle de bulunmaktadır.
+
+Fonksiyonun grafiğini aşağıdaki gibi çizdirebiliriz.
+
+.. code-block:: python
+
+   import numpy as np
+   import matplotlib.pyplot as plt
+
+   x = np.linspace(-10, 10, 1000)
+   y = (np.e ** (2 * x) - 1) / (np.e ** (2 * x) + 1)
+
+   plt.title('Hiperbolik Tanjant (tanh) Fonksiyonunun Grafiği', fontsize=14, pad=20, fontweight='bold')
+   axis = plt.gca()
+   axis.spines['left'].set_position('center')
+   axis.spines['bottom'].set_position('center')
+   axis.spines['top'].set_color(None)
+   axis.spines['right'].set_color(None)
+
+   axis.set_ylim(-1, 1)
+
+   plt.plot(x, y)
+   plt.show()
+
+Programın çıktısı aşağıdaki gibidir:
+
+.. figure:: _static/tanh-function.png
+   :alt: Tanh fonksiyonunun -1 ile 1 arasında değer alan S biçimindeki grafiği
+   :align: center
+   :width: 420px
+
+   Hiperbolik tanjant (tanh) fonksiyonunun grafiği.
+
+Softmax Fonksiyonu
+==================
+
+Diğer çok karşılaşılan bir aktivasyon fonksiyonu da *softmax* isimli fonksiyondur. Softmax fonksiyonu çok sınıflı
+sınıflandırma problemlerinde çıktı katmanlarında kullanılmaktadır. Bu aktivasyon fonksiyonu Keras'ta *softmax*
+ismiyle bulunmaktadır. Örneğin bir resmin *elma*, *armut*, *kayısı*, *şeftali*, *karpuz* resimlerinden hangisi
+olduğunu anlamak için kullanılan sınıflandırma modeli çok sınıflı bir sınıflandırma modelidir. Buna istatistikte
+*çok sınıflı lojistik regresyon (multinomial logistic regression)* da denilmektedir. Bu tür problemlerde sinir
+ağında sınıf sayısı kadar nöron bulundurulur. Örneğin yukarıdaki *elma*, *armut*, *kayısı*, *şeftali*, *karpuz*
+resim sınıflandırma probleminde ağın çıktısında 5 nöron bulunacaktır.
+
+Ağın çıktı katmanındaki tüm nöronların aktivasyon fonksiyonları *softmax* yapılırsa tüm çıktı katmanındaki
+nöronların çıktı değerlerinin toplamı her zaman 1 olur. Böylece çıktı katmanındaki nöronların çıktı değerleri
+ilgili sınıfın olasılığını belirtir hale gelir. Biz de toplamı 1 olan çıktıların en yüksek değerine bakarız ve
+sınıflandırmanın o sınıfı kestirdiğini kabul ederiz. Örneğin yukarıdaki *elma*, *armut*, *kayısı*, *şeftali*,
+*karpuz* sınıflandırma probleminde ağın çıktı katmanındaki nöronların çıktı değerlerinin şöyle olduğunu
+varsayalım:
+
+.. code-block:: text
+
+   Elma Nöronunun Çıktısı ---> 0.2
+   Armut Nöronunun Çıktısı ---> 0.2
+   Kayısı Nöronunun Çıktısı ---> 0.3
+   Şeftali Nöronunun Çıktısı ---> 0.2
+   Karpuz Nöronunun Çıktısı ---> 0.1
+
+Burada en büyük çıktı 0.3 olan kayısı nöronuna ilişkindir. O halde biz bu kestirimin *kayısı* olduğuna karar
+veririz. Softmax fonksiyonu bir grup değer için o grup değerlere bağlı olarak şöyle hesaplanmaktadır:
+
+.. code-block:: text
+
+   softmax(x) = eˣ / Σ(eˣ)
+
+Burada gruptaki değerler x vektörüyle temsil edilmektedir. Fonksiyonda değerlerin e tabanına göre kuvvetleri x
+değerlerinin e tabanına göre kuvvetlerinin toplamına bölünmüştür. Bu işlemden yine gruptaki eleman sayısı kadar
+değer elde edilecektir. Tabii bu değerlerin toplamı da 1 olacaktır. Örneğin elimizde aşağıdaki gibi x değerleri
+olsun:
+
+.. code-block:: python
+
+   x = np.array([3, 6, 4, 1, 7])
+
+Şimdi bu x değerlerinin softmax değerlerini elde edelim:
+
+.. code-block:: text
+
+   >>> import numpy as np
+   >>> x = np.array([3, 6, 4, 1, 7])
+   >>> x
+   array([3, 6, 4, 1, 7])
+   >>> sm = np.e ** x / np.sum(np.e ** x)
+   >>> sm
+   array([0.0127328 , 0.25574518, 0.03461135, 0.0017232 , 0.69518747])
+   >>> np.sum(sm)
+   1.0
+
+softmax fonksiyonu Keras'ta ``tensorflow.keras.activations`` modülünde ``softmax`` ismiyle de bulunmaktadır.
+Ancak bu fonksiyonu kullanırken girdinin TensorFlow'daki bir Tensor nesnesi biçiminde ve iki boyutlu olarak
+verilmiş olması gerekmektedir. TensorFlow kütüphanesindeki aktivasyon fonksiyonları dışarıdan değil TensorFlow
+içerisinden kullanılsın diye tasarlanmıştır. Bu nedenle softmax gibi bazı fonksiyonlarda biz NumPy dizisi
+verememekteyiz. Ayrıca TensorFlow'daki bu aktivasyon fonksiyonları birden fazla değer üzerinde de bir Tensor
+olarak işlem yapabilmektedir. (softmax fonksiyonunda aslında bir değer bir grup değerden oluştuğu için girdi
+olarak da bizden iki boyutlu bir Tensor istenmektedir.) Örneğin:
+
+.. code-block:: text
+
+   >>> import numpy as np
+   >>> import tensorflow as tf
+   >>> from tensorflow.keras.activations import softmax
+   >>> x = np.array([[1, 2, 3, 4, 5]], dtype=np.float64)
+   >>> t = tf.convert_to_tensor(x)
+   >>> result = softmax(t)
+   >>> result
+   <tf.Tensor: shape=(1, 5), dtype=float64, numpy=array([[0.01165623, 0.03168492, 0.08612854, 0.23412166, 0.63640865]])>
+
+Keras aslında çıktı katmanlarındaki tüm softmax aktivasyon fonksiyonlarının bir grup oluşturduğunu varsayar.
+Sonra girdilerle ağırlık değerlerini çarpıp bias değeriyle toplayarak yukarıdaki gibi bir x vektörü elde eder.
+Sonra da yukarıdaki işlemi uygular. Başka bir deyişle çıktı katmanındaki softmax aktivasyon fonksiyonuna sahip
+olan nöronlar bir grup olarak değerlendirilmektedir.
+
+Linear (Özdeş) Fonksiyonu
+=========================
+
+Diğer çok kullanılan aktivasyon fonksiyonlarından biri de *linear* aktivasyon fonksiyonudur. Aslında bu fonksiyon
+y = x ya da f(x) = x fonksiyonudur. Yani *linear* fonksiyonu girdi ile aynı değeri üretmektedir. Başka bir
+deyişle bir şey yapmayan bir fonksiyondur. Peki böyle bir aktivasyon fonksiyonunun ne anlamı olabilir? Bu
+aktivasyon fonksiyonu regresyon problemlerinin çıktı katmanında kullanılmaktadır. Regresyon problemleri çıktı
+olarak bir sınıf bilgisi değil gerçek bir değer bulmaya çalışan problemlerdir. Örneğin bir evin fiyatının
+kestirilmesi, bir otomobilin mil başına yaktığı yakıt miktarının kestirilmesi gibi problemler regresyon
+problemleridir.
+
+linear aktivasyon fonksiyonu Keras'ta *linear* ismiyle kullanılmaktadır. Her ne kadar bir şey yapmıyorsa da bu
+aktivasyon fonksiyonu aynı zamanda ``tensorflow.keras.activations`` modülünde ``linear`` isimli bir fonksiyon
+biçiminde de bulunmaktadır. Örneğin:
+
+.. code-block:: text
+
+   >>> from tensorflow.keras.activations import linear
+   >>> x = [1, 2, 3, 4, 5]
+   >>> x = np.array([1, 2, 3, 4, 5], dtype=np.float64)
+   >>> result = linear(x)
+   >>> result
+   array([1., 2., 3., 4., 5.])
+
+linear fonksiyonunun grafiğini -bariz olmasına karşın- aşağıda veriyoruz.
+
+.. code-block:: python
+
+   import numpy as np
+   import matplotlib.pyplot as plt
+
+   def linear(x):
+         return x
+
+   x = np.linspace(-10, 10, 1000)
+   y = linear(x)
+
+   """
+   from tensorflow.keras.activations import linear
+
+   y = linear(x).numpy()
+   """
+
+   plt.title('Linear Function', fontsize=14, fontweight='bold', pad=20)
+   axis = plt.gca()
+   axis.spines['left'].set_position('center')
+   axis.spines['bottom'].set_position('center')
+   axis.spines['top'].set_color(None)
+   axis.spines['right'].set_color(None)
+   axis.set_ylim(-10, 10)
+   plt.plot(x, y, color='red')
+   plt.show()
+
+Programın çıktısı aşağıdaki gibidir:
+
+.. figure:: _static/linear-function.png
+   :alt: Linear (özdeş) fonksiyonunun y = x doğrusu biçimindeki grafiği
+   :align: center
+   :width: 420px
+
+   Linear (özdeş) fonksiyonunun grafiği.
+
+Kayıp (Loss) Fonksiyonlarına Giriş
+==================================
+
+Biz yukarıda çok karşılaşılan temel aktivasyon fonksiyonlarını ele aldık. Aslında yukarıda ele aldığımızdan daha
+fazla aktivasyon fonksiyonu vardır. Şimdi de optimizasyon algoritmasının minimize etmeye çalıştığı *loss*
+fonksiyonları üzerinde duracağız.
+
+loss fonksiyonları gerçek değerlerle ağın tahmin ettiği değerleri girdi olarak alıp bu farklılığı bir sayısal
+değerle ifade eden fonksiyonlardır. Optimizasyon algoritmaları bu loss fonksiyonlarının değerini düşürmeye
+çalışmaktadır. Gerçek değerlerle ağın ürettiği değerlerin arasındaki farkın minimize edilmesi aslında ağın gerçek
+değerlere yakın değerler üretmesi anlamına gelmektedir.
+
+Anımsanacağı gibi *w* ve *bias* değerleri *optimizer* denilen algoritma tarafından her batch işleminde
+güncellenmekteydi. Yukarıda da belirttiğimiz gibi optimizer algoritması aslında *loss* denilen bir fonksiyonu
+minimize etmeye çalışmaktadır. Başka bir deyişle *loss* fonksiyonu aslında *w* ve *bias* değerlerinin
+güncellenmesi için bir amaç fonksiyonu görevini görmektedir. Değişik problemler için değişik loss fonksiyonları
+bulunmaktadır. Programcı model sınıfının ``compile`` metodunda ``loss`` parametresiyle loss fonksiyonu isimsel
+biçimde girebilir. Ya da isterse ``tensorflow.keras.losses`` modülündeki sınıflar ve fonksiyonlar yoluyla
+girebilir. (Loss fonksiyonları için TensorFlow hem callable sınıflar hem de fonksiyonlar bulundurmuştur.)
+
+Eğitim batch batch yapıldığı için loss fonksiyonları tek bir satırın çıktısından değil n tane satırın çıktısından
+hesaplanmaktadır. Yani bir batch işleminin gerçek sonucu ile ağdan o batch için elde edilecek kestirim
+sonuçlarına dayanılarak loss değerleri hesaplanmaktadır. Örneğin ``batch_size`` = 32 olduğu durumda aslında Keras
+ağa 32'lik bir giriş uygulayıp 32'lik bir çıktı elde eder. Bu 32 çıktı değeri gerçek 32 değerle loss fonksiyonuna
+sokulur.
+
+Mean Squared Error (MSE)
+========================
+
+Regresyon problemleri için en yaygın kullanılan loss fonksiyonu *Mean Squared Error (MSE)* denilen fonksiyondur.
+Bu fonksiyona Türkçe *Ortalama Karesel Hata* diyebiliriz. MSE fonksiyonu çıktı olarak gerçek değerlerden
+kestirilen değerlerin farkının karelerinin ortalamasını vermektedir. Fonksiyonun sembolik gösterimi şöyledir:
+
+.. code-block:: text
+
+   MSE = mean((y - ŷ)²)
+
+Burada y gerçek değerleri, y_hat ise kestirilen değerleri belirtmektedir. Örneğin:
+
+.. code-block:: text
+
+   >>> y = np.array([1, 2, 3, 4, 5])
+   >>> y_hat = np.array([1.1, 1.9, 3.2, 3.8, 5.02])
+   >>> np.mean((y - y_hat) ** 2)
+   0.020080000000000032
+
+Aynı işlemi ``tensorflow.keras.losses`` modülündeki ``mse`` (ya da ``mean_squared_error``) fonksiyonuyla da
+aşağıdaki gibi yapabilirdik:
+
+.. code-block:: text
+
+   >>> from tensorflow.keras.losses import mse
+   >>> mse(y, y_hat)
+   <tf.Tensor: shape=(), dtype=float64, numpy=0.020080000000000032>
+
+Mean Absolute Error (MAE)
+=========================
+
+Regresyon problemleri için kullanılabilen diğer bir loss fonksiyonu da *Mean Absolute Error (MAE)* isimli
+fonksiyondur. Bu fonksiyona da Türkçe *Ortalama Mutlak Hata* diyebiliriz. Ortalama mutlak hata gerçek
+değerlerden kestirilen değerlerin farklarının mutlak değerlerinin ortalaması biçiminde hesaplanmaktadır.
+Sembolik gösterimi şöyledir:
+
+.. code-block:: text
+
+   mae = np.mean(np.abs(y - y_hat))
+
+Burada y gerçek değerleri y_hat ise ağın kestirdiği değerleri belirtmektedir. Regresyon problemleri için loss
+fonksiyonu olarak çoğu kez MSE tercih edilmektedir. Çünkü kare alma işlemi algoritmalar için daha uygun bir
+işlemdir. Aynı zamanda değerleri daha fazla farklılaştırmaktadır. MAE loss fonksiyonundan ziyade metrik değer
+olarak *insan algısına* daha yakın bir çağrışım sağlar:
+
+.. code-block:: text
+
+   >>> y = np.array([1, 2, 3, 4, 5], dtype=np.float64)
+   >>> y_hat = np.array([1.1, 1.9, 3.2, 3.8, 5.02])
+   >>> mae = np.mean(np.abs(y - y_hat))
+   >>> mae
+   0.12400000000000003
+
+Ortalama karesel hata bir metrik değer olarak bizim için iyi bir çağrışım yapmamaktadır. Halbuki ortalama mutlak
+hata bizim için anlamlı bir çağrışım yapmaktadır. Örneğin ağımızın ortalama mutlak hatası 0.124 ise gerçek değer
+ağımızın bulduğu değerden 0.124 solda ya da sağda olabilir. Yine ortalama mutlak hata ``tensorflow.keras.losses``
+modülü içerisindeki *mae* ya da *mean_absolute_error* isimli fonksiyonla da hesaplanabilmektedir. Örneğin:
+
+.. code-block:: text
+
+   >>> from tensorflow.keras.losses import mae
+   >>> y = np.array([1, 2, 3, 4, 5], dtype=np.float64)
+   >>> y_hat = np.array([1.1, 1.9, 3.2, 3.8, 5.02])
+   >>> result = mae(y, y_hat)
+   >>> result
+   <tf.Tensor: shape=(), dtype=float64, numpy=0.12400000000000003>
+
+Mean Absolute Percentage Error (MAPE)
+=====================================
+
+Regresyon problemleri için diğer bir loss fonksiyonu da *Mean Absolute Percentage Error (MAPE)* isimli
+fonksiyondur. Fonksiyonun sembolik ifadesi şöyledir:
+
+.. code-block:: text
+
+   MAPE = 100 * mean(|y - ŷ| / y)
+
+Burada y gerçek değerleri y_hat ise ağın kestirdiği değerleri belirtmektedir. Örneğin:
+
+.. code-block:: text
+
+   >>> y = np.array([1, 2, 3, 4, 5], dtype=np.float64)
+   >>> y_hat = np.array([1.1, 1.9, 3.2, 3.8, 5.02])
+   >>> mape = 100 * np.mean(np.abs(y - y_hat) / y)
+   >>> mape
+   5.413333333333335
+
+Tabii aynı işlemi yine ``tensorflow.keras.losses`` modülündeki *mape* fonksiyonuyla da yapabiliriz:
+
+.. code-block:: text
+
+   >>> from tensorflow.keras.losses import mape
+   >>> y = np.array([1, 2, 3, 4, 5], dtype=np.float64)
+   >>> y_hat = np.array([1.1, 1.9, 3.2, 3.8, 5.02])
+   >>> result = mape(y, y_hat)
+   >>> result
+   <tf.Tensor: shape=(), dtype=float64, numpy=5.413333333333335>
+
+Mean Squared Logarithmic Error (MSLE)
+=====================================
+
+Regresyon problemleri için diğer bir loss fonksiyonu da *Mean Squared Logarithmic Error (MSLE)* isimli
+fonksiyondur. Bu fonksiyon gerçek değerlerle kestirilen değerlerin logaritmalarının farklarının karelerinin
+ortalaması biçiminde hesaplanır. Sembolik ifadesi şöyledir:
+
+.. code-block:: text
+
+   MSLE = mean((log(y) - log(ŷ))²)
+
+Bazen bu fonksiyon gerçek ve kestirilen değerlere 1 toplanarak da oluşturulabilmektedir (TensorFlow *msle*
+fonksiyonunu bu biçimde kullanmaktadır):
+
+.. code-block:: text
+
+   MSLE = mean((log(y + 1) - log(ŷ + 1))²)
+
+Örneğin:
+
+.. code-block:: text
+
+   >>> y = np.array([1, 2, 3, 4, 5], dtype=np.float64)
+   >>> y_hat = np.array([1.1, 1.9, 3.2, 3.8, 5.02])
+   >>> msle = np.mean((np.log(y + 1) - np.log(y_hat + 1)) ** 2)
+   >>> msle
+   0.0015175569737783628
+
+Aynı işlemi ``tensorflow.keras.losses`` modülündeki *msle* fonksiyonuyla da yapabiliriz:
+
+.. code-block:: text
+
+   >>> from tensorflow.keras.losses import msle
+   >>> y = np.array([1, 2, 3, 4, 5], dtype=np.float64)
+   >>> y_hat = np.array([1.1, 1.9, 3.2, 3.8, 5.02])
+   >>> result = msle(y, y_hat)
+   >>> result
+   <tf.Tensor: shape=(), dtype=float64, numpy=0.0015175569737783555>
+
+Binary Cross-Entropy (BCE)
+==========================
+
+İkili sınıflandırma problemleri için en yaygın kullanılan loss fonksiyonu *Binary Cross-Entropy (BCE)* denilen
+fonksiyondur. Bu fonksiyonun sembolik gösterimi şöyledir:
+
+.. code-block:: text
+
+   BCE = -mean(y * log(ŷ) + (1 - y) * log(1 - ŷ))
+
+Burada bir toplam teriminin olduğunu görüyorsunuz. Gerçek değerler 0 ya da 1 olduğuna göre bu toplam teriminin ya
+sol tarafı ya da sağ tarafı 0 olacaktır. Burada yapılmak istenen şey aslında isabet olasılığının logaritmalarının
+ortalamasının alınmasıdır. Örneğin gerçek y değeri 0 olsun ve ağ da sigmoid çıktısından 0.1 elde etmiş olsun. Bu
+durumda toplam ifadesinin sol tarafı 0, sağ tarafı ise log(0.9) olacaktır. Şimdi gerçek değerin 1 ancak ağın
+sigmoid çıktısından elde edilen değerin 0.9 olduğunu düşünelim. Bu kez toplamın sağ tarafı 0, sol tarafı ise
+log(0.9) olacaktır. İşte fonksiyonda bu biçimde isabet olasılıklarının logaritmalarının ortalaması bulunmaktadır.
+Örneğin:
+
+.. code-block:: text
+
+   >>> y = np.array([1, 0, 1, 1, 0])
+   >>> y_hat = np.array([0.9, 0.05, 0.095, 0.89, 0.111])
+   >>> -np.mean(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
+   0.5489448114302314
+
+Aynı işlemi ``tensorflow.keras.losses`` modülündeki ``binary_crossentropy`` isimli fonksiyonla da yapabiliriz:
+
+.. code-block:: text
+
+   >>> y_hat = np.array([0.9, 0.05, 0.095, 0.89, 0.111])
+   >>> result = binary_crossentropy(y, y_hat)
+   >>> result
+   <tf.Tensor: shape=(), dtype=float64, numpy=0.5489445126600796>
+
+Categorical Cross-Entropy (CCE)
+===============================
+
+Çok sınıflı sınıflandırma problemleri için en yaygın kullanılan loss fonksiyonu ise *Categorical Cross-Entropy
+(CCE)* isimli fonksiyondur. CCE fonksiyonu aslında BCE fonksiyonun çoklu biçimidir. Tabii CCE değerini
+hesaplayabilmek için ağın kategori sayısı kadar çıktıya sahip olması ve bu çıktıların toplamının da 1 olması
+gerekmektedir. Başka bir deyişle ağın çıktı katmanındaki nöronların aktivasyon fonksiyonları *softmax* olmalıdır.
+Ayrıca CCE çok sınıflı bir entropy hesabı yaptığına göre gerçek değerlerin one-hot-encoding biçiminde kodlanmış
+olması gerekir. (Yani örneğin ileride göreceğimiz gibi K sınıflı bir sınıflandırma problemi için biz ağa çıktı
+olarak *one-hot-encoding* kodlanmış K tane y değerini vermeliyiz.) K tane sınıf belirten bir satırın CCE değeri
+şöyle hesaplanır (tabii burada K tane *one-hot-encoding* edilmiş gerçek değer ile M tane softmax çıktı değeri söz
+konusu olmalıdır):
+
+.. code-block:: text
+
+   CCE = -∑ yₖ * log(ŷₖ)
+
+Burada yk one-hot-encoding yapılmış gerçek değerleri yk_hat ise softmax biçiminde elde edilmiş ağın çıktı
+katmanındaki değerleri temsil etmektedir.
+
